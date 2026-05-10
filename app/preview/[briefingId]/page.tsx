@@ -1,20 +1,32 @@
 import Link from 'next/link';
-import { Phone, ShoppingBag, Calendar, Briefcase, FileText, CheckCircle2, Sparkles, Clock } from 'lucide-react';
+import { ShoppingBag, Wrench, Image, Building2, Phone, CheckCircle2, Sparkles, Clock } from 'lucide-react';
 import { getBriefingById } from '@/lib/supabase/client';
-import { segments, palettes, quizModules } from '@/lib/quiz-data';
+import { palettes, quizModules } from '@/lib/quiz-data';
+
+const SEGMENT_LABELS: Record<string, string> = {
+  restaurante: 'Restaurante', loja: 'Loja', clinica: 'Clínica',
+  servicos: 'Prestação de Serviços', educacao: 'Portfólio', outro: 'Negócio',
+};
 
 const MODULE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>> = {
-  whatsapp: Phone,
-  catalogo: ShoppingBag,
-  agendamento: Calendar,
-  portfolio: Briefcase,
-  blog: FileText,
+  servicos: ShoppingBag,
+  sobre: Building2,
+  contato: Phone,
+  galeria: Image,
+  depoimentos: CheckCircle2,
+  faq: Wrench,
 };
 
 const PALETTE_STYLES: Record<string, { primary: string; accent: string; light: string }> = {
   'azul-editorial': { primary: '#004ac6', accent: '#2563eb', light: '#dbe6ff' },
   'verde-servico':  { primary: '#0f766e', accent: '#14b8a6', light: '#ccfbf1' },
   'vinho-premium':  { primary: '#7f1d1d', accent: '#be123c', light: '#ffe4e6' },
+  minimal:          { primary: '#6b7280', accent: '#9ca3af', light: '#f3f4f6' },
+  vibrant:          { primary: '#004ac6', accent: '#eab308', light: '#fef9c3' },
+  corporate:        { primary: '#002855', accent: '#004ac6', light: '#dbe1ff' },
+  nature:           { primary: '#059669', accent: '#f97316', light: '#d1fae5' },
+  tech:             { primary: '#111827', accent: '#06b6d4', light: '#ecfeff' },
+  elegant:          { primary: '#2b1b17', accent: '#b58e58', light: '#f5f1ed' },
 };
 
 export default async function PreviewPage({ params }: { params: Promise<{ briefingId: string }> }) {
@@ -36,13 +48,13 @@ export default async function PreviewPage({ params }: { params: Promise<{ briefi
   const paletteId = briefing.palette ?? 'azul-editorial';
   const colors = PALETTE_STYLES[paletteId] ?? PALETTE_STYLES['azul-editorial'];
   const paletteInfo = palettes.find((p) => p.id === paletteId);
-  const segmentInfo = segments.find((s) => s.id === briefing.segment);
+  const segmentLabel = SEGMENT_LABELS[briefing.segment ?? ''] ?? 'Negócio';
   const selectedMods = (briefing.selected_modules ?? []) as string[];
   const moduleInfos = quizModules.filter((m) => selectedMods.includes(m.id));
 
   const businessName = briefing.domain
     ? briefing.domain.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
-    : segmentInfo?.name ?? 'Seu Negócio';
+    : segmentLabel;
 
   const isPending = briefing.payment_status !== 'approved';
 
@@ -80,7 +92,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ briefi
           className="rounded-2xl px-4 py-2 text-label-md font-semibold"
           style={{ background: 'rgba(255,255,255,0.15)' }}
         >
-          {segmentInfo?.icon} {segmentInfo?.name}
+          {segmentLabel}
         </div>
         <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight">
           {businessName}
@@ -88,7 +100,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ briefi
         <p className="max-w-lg text-lg opacity-80">
           Site profissional criado pela SitePronto · em construção
         </p>
-        {selectedMods.includes('whatsapp') && (
+        {selectedMods.includes('contato') && (
           <button
             className="flex items-center gap-2 rounded-2xl px-6 py-3 text-label-md font-semibold"
             style={{ background: '#25d366', color: '#fff' }}

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { CheckCircle2, ExternalLink, Sparkles } from 'lucide-react';
 import { getBriefingById } from '@/lib/supabase/client';
-import { segments } from '@/lib/quiz-data';
 import ThemeToggle from '@/components/ThemeToggle';
 import Countdown from './Countdown';
 import EmailSender from './EmailSender';
@@ -15,7 +14,11 @@ export default async function ObrigadoPage({ params }: { params: Promise<{ brief
     ? new Date(new Date(briefing.created_at).getTime() + 24 * 3600 * 1000).toISOString()
     : new Date(Date.now() + 24 * 3600 * 1000).toISOString();
 
-  const segmentLabel = segments.find((s) => s.id === briefing?.segment)?.name ?? 'seu negócio';
+  const SEGMENT_LABELS: Record<string, string> = {
+    restaurante: 'Restaurante', loja: 'Loja', clinica: 'Clínica',
+    servicos: 'Prestação de Serviços', educacao: 'Portfólio', outro: 'Negócio',
+  };
+  const segmentLabel = SEGMENT_LABELS[briefing?.segment ?? ''] ?? 'seu negócio';
 
   return (
     <main className="relative min-h-screen pb-20 pt-6">
