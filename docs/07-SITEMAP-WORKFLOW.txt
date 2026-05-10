@@ -1,0 +1,64 @@
+================================================================
+SITEPRONTO — SITEMAP E WORKFLOW
+================================================================
+ROTAS PUBLICAS (IMPLEMENTADAS)
+------------------------------
+/                 Landing page
+/quiz             Etapa 1 (segmento/objetivo/materiais)
+/quiz/etapa-2     Etapa 2 (logo/paleta/modulos)
+/quiz/etapa-3     Etapa 3 (dominio + CTA checkout -> MP)
+/success          Pos-pagamento aprovado (MP back_url)
+/failure          Pos-pagamento rejeitado/cancelado (MP back_url)
+
+ROTAS PUBLICAS (PENDENTES)
+---------------------------
+/preview/[uuid]   Preview sandbox (readonly)
+/obrigado         Confirmacao + contador 24h (substituir /success)
+/termos           Termos de Compra/Devolucao
+/privacidade      Politica LGPD
+
+ROTAS API
+---------
+/api/checkout     POST -> cria preference MP
+/api/webhook/mp   POST -> valida assinatura, atualiza DB, dispara fila
+
+ROTAS USUARIO/REVENDEDOR
+------------------------
+/?ref=[slug]      Atribuicao cookie 30 dias
+/afiliado/cadastro  Checkout ativacao R$ 30
+/afiliado/dashboard Metricas + comissoes
+/afiliado/saque     Solicitacao Pix
+
+ROTAS ADMIN
+-----------
+/admin                  Redirect -> /admin/briefings (requer ADMIN_PASSWORD cookie)
+/admin/briefings        Lista briefings pagos + status pagamento + botao "Editar site"
+/admin/editor/[id]      Editor Craft.js: canvas drag-and-drop + toolbox + properties panel
+/admin/clientes         Gestao sites (aprovar/suspender) [futuro Fase 7]
+/admin/afiliados        Gestao revendedores (saldo/saque) [futuro Fase 7]
+/admin/templates        Upload/versionamento templates [futuro Fase 7]
+
+FLUXO EDICAO DE SITE (ADMIN)
+-----------------------------
+1. Cliente solicita edicao (WhatsApp/email)
+2. Admin acessa /admin/briefings -> clica "Editar site" no briefing do cliente
+3. /admin/editor/[id] carrega: template base (do segmento) + editor_content salvo
+4. Admin edita via drag-and-drop (Craft.js canvas)
+5. "Salvar" -> POST /api/admin/save-editor -> editor_content JSONB -> Supabase
+6. "Publicar" -> dispara job deploy [futuro: BullMQ -> Gemini -> sub-dominio]
+
+FLUXO PRINCIPAL (ATUAL)
+-----------------------
+1. /quiz -> /quiz/etapa-2 -> /quiz/etapa-3 (estado via quiz-context + auto-save)
+2. /quiz/etapa-3 CTA "Publicar" -> POST /api/checkout
+3. /api/checkout -> insertBriefing (Supabase) + createPaymentPreference (MP)
+4. redirect para MP init_point
+5. MP confirma -> back_url /success ou /failure
+6. MP notifica -> POST /api/webhook/mp -> valida HMAC -> updatePaymentStatus
+
+FLUXO COMPLETO (FUTURO)
+------------------------
+1-5. Igual ao atual
+6. /api/webhook/mp -> status approved -> dispara fila BullMQ
+7. Fila -> Gemini gera copy -> renderiza template -> deploy sub-dominio
+8. Email Resend -> link do site + suporte

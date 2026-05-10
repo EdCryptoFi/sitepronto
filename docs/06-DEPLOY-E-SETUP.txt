@@ -1,0 +1,47 @@
+================================================================
+SITEPRONTO — DEPLOY E SETUP
+================================================================
+(VARIAVEIS DE AMBIENTE NA VERCEL — ATUALIZADO)
+-----------------------------------------------
+GOOGLE_AI_API_KEY             (APENAS Production)
+GOOGLE_AI_PROJECT_ID          (All envs)
+GOOGLE_AI_MODEL               (All envs)
+GOOGLE_AI_MAX_TOKENS          (All envs)
+
+NEXT_PUBLIC_SUPABASE_URL      (All envs)
+NEXT_PUBLIC_SUPABASE_ANON_KEY (All envs)
+SUPABASE_SERVICE_ROLE_KEY     (APENAS Production)
+
+MP_ACCESS_TOKEN               (APENAS Production)
+MP_PUBLIC_KEY                 (All envs)
+MP_APP_ID                     (All envs)
+MP_WEBHOOK_SECRET             (APENAS Production)
+MP_MODE                       (All envs)
+
+RESEND_API_KEY                (All envs)
+RESEND_DOMAIN                 (All envs)
+
+HOTJAR_ID                     (Production, Preview)
+AB_TEST_PRICE_VARIANT         (All envs)
+NEXT_PUBLIC_FEATURE_FUNNEL    (All envs)
+
+BACKUP_S3_BUCKET              (APENAS Production)
+BACKUP_S3_REGION              (All envs)
+BACKUP_S3_ACCESS_KEY          (APENAS Production)
+BACKUP_S3_SECRET_KEY          (APENAS Production)
+
+NEXT_PUBLIC_LOCALE            (All envs)
+
+(PROBLEMAS CONHECIDOS — ADICIONADO)
+-----------------------------------
+PROBLEMA: "429 Too Many Requests" Gemini
+SOLUCAO: Cache por siteId + retry exponencial + fallback template.
+
+PROBLEMA: Hotjar bloqueado por AdBlock/CSP
+SOLUCAO: Injetar condicionalmente. Fallback console em dev.
+
+PROBLEMA: Webhook MP nao chega
+SOLUCAO: Validar notification_url publico (https) + assinatura.
+
+PROBLEMA: RLS Supabase bloqueia insert
+SOLUCAO: Verificar policy auth.uid() = owner_id ou usar server client.

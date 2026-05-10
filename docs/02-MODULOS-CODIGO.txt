@@ -1,0 +1,67 @@
+================================================================
+SITEPRONTO — MODULOS DE CODIGO
+================================================================
+
+IMPLEMENTADO (existe no repo)
+-------------------------------
+app/layout.tsx                     # Root layout + ThemeProvider + QuizProvider
+app/page.tsx                       # Landing page (/)
+app/globals.css                    # Design tokens + component primitives
+app/quiz/page.tsx                  # Quiz Etapa 1 — segmento, objetivo, materiais
+app/quiz/etapa-2/page.tsx          # Quiz Etapa 2 — logo, paleta, modulos
+app/quiz/etapa-3/page.tsx          # Quiz Etapa 3 — dominio, checkout -> MP
+app/api/checkout/route.ts          # POST: cria briefing (Supabase) + preference MP
+app/api/webhook/mp/route.ts        # POST: valida HMAC, atualiza status pagamento
+app/success/page.tsx               # Pos-pagamento aprovado
+app/failure/page.tsx               # Pos-pagamento rejeitado/cancelado
+components/ThemeToggle.tsx         # Botao dark/light mode
+components/quiz/QuizLabel.tsx      # Label editorial compartilhada entre etapas
+components/quiz/TemplateSelector.tsx # Seletor de template (auto-sugerido + troca manual)
+lib/theme-context.tsx              # Context + ThemeScript (anti-FOUC)
+lib/quiz-context.tsx               # Estado global + reducer + auto-save localStorage
+lib/quiz-data.ts                   # Constantes + SEGMENT_TO_TEMPLATE (segmento -> template id)
+lib/mercadopago.ts                 # Wrapper createPaymentPreference
+lib/supabase/client.ts             # Browser SDK + insertBriefing + updatePaymentStatus
+
+STUBS FUTUROS (pendentes)
+--------------------------
+app/preview/[uuid]/page.tsx
+app/obrigado/page.tsx              # Substituir /success com contador 24h + Resend
+app/termos/page.tsx
+app/privacidade/page.tsx
+app/admin/page.tsx                 # Redirect -> /admin/briefings (protecao ADMIN_PASSWORD)
+app/admin/briefings/page.tsx       # Lista briefings pagos (Supabase query)
+app/admin/editor/[id]/page.tsx     # Editor Craft.js drag-and-drop por briefing
+middleware.ts                      # Protege /admin/* com ADMIN_PASSWORD via cookie
+lib/craftjs/components.tsx         # Componentes editaveis: Hero, TextBlock, ImageBlock, ContactForm
+lib/craftjs/resolver.ts            # Mapa de componentes para Craft.js deserializar JSON
+app/api/admin/save-editor/route.ts # POST: salva editor_content JSON no Supabase
+app/afiliado/* (cadastro, dashboard, saque)
+lib/quiz-auto-save.ts              # Substituido por auto-save no quiz-context
+lib/analytics/funnel.ts
+lib/analytics/ab-test.ts
+lib/analytics/hotjar.ts
+lib/ai/gemini.ts
+lib/templates/registry.ts
+lib/templates/types.ts
+lib/templates/renderer.ts
+lib/supabase/server.ts             # Server Actions SDK
+lib/resend/client.ts
+lib/backup/cron.ts
+components/ui/Countdown24h.tsx
+components/quiz/LivePreview.tsx
+components/upload/MultiDropzone.tsx
+components/Footer.tsx
+components/BrandingCredit.tsx
+
+RESUMO DE DEPENDENCIAS
+-----------------------
+lib/quiz-context.tsx <-> app/quiz/** (estado compartilhado entre rotas)
+lib/quiz-data.ts <-> app/quiz/** + components/quiz/* (constantes)
+lib/mercadopago.ts <-> app/api/checkout/route.ts (cria preference)
+lib/supabase/client.ts <-> app/api/checkout/route.ts + app/api/webhook/mp/route.ts
+lib/ai/gemini.ts <-> 04-CONFIGS.txt (GOOGLE_AI_API_KEY) [futuro]
+lib/templates/registry.ts <-> 10-TEMPLATES-LIBRARY.txt [futuro]
+lib/analytics/* <-> app/layout.tsx (injecao condicional) [futuro]
+lib/resend/client.ts <-> app/api/webhook/mp/route.ts (email pos-pagamento) [futuro]
+lib/backup/cron.ts <-> Vercel Cron / GitHub Actions (diario) [futuro]

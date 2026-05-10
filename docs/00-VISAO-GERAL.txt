@@ -1,0 +1,98 @@
+================================================================
+SITEPRONTO — VISAO GERAL DO PROJETO
+================================================================
+PRODUTO
+-------
+Plataforma SaaS que permite criar sites profissionais
+automatizados respondendo 3 perguntas. Foco em MEIs, pequenos
+negocios e profissionais liberais no Brasil.
+Pagamento unico R$ 300 ou 3x R$ 125,00 via Mercado Pago Checkout Pro.
+Inclui sistema de revenda: R$ 30 cadastro -> R$ 50,00 de comissao
+por venda confirmada.
+Autenticacao opcional pos-pagamento (quiz/checkout sem login).
+
+PUBLICO-ALVO
+------------
+1. Cliente final — MEIs, pequenos negocios, profissionais
+liberais que precisam de um site profissional sem
+mensalidade nem complicacao tecnica.
+2. Revendedor/afiliado — pessoa que paga R$ 30 para ter um link
+exclusivo de indicacao e recebe R$ 50,00 por venda.
+
+PROPOSTA DE VALOR
+-----------------
+- "Seu negocio merece um Endereco profissional."
+- Sem mensalidade. Pagamento unico.
+- Publicamos em ate 24h (contador visual regressivo).
+- Certificado HTTPS incluso.
+- Funciona no celular e no Google.
+- Idioma nativo PT-BR. Conformidade LGPD e Termos nao reembolsaveis.
+- Teste A/B de preco ativo (R$ 297 vs R$ 300).
+
+STACK TECNICA
+-------------
+- Framework:    Next.js 14.1.0 (App Router)
+- Linguagem:    TypeScript 5
+- Estilo:       Tailwind CSS 3.3 + CSS variables customizadas
+- Icones:       lucide-react 0.344
+- Hospedagem:   Vercel (deploy automatico via git push)
+- Repo:         github.com/EdCryptoFi/sitepronto
+- Editor Visual: Craft.js (admin drag-and-drop, estado JSON -> Supabase)
+Pendentes de integracao:
+- Backend:      Supabase (auth, database, storage, RLS)
+- Pagamentos:   Mercado Pago Checkout Pro (checkout + webhook + Pix)
+- Fila:         Upstash Redis + BullMQ (deploy assincrono)
+- IA:           Google Gemini 1.5 Flash Free Tier (geracao de textos)
+- Email:        Resend (transacional)
+- Analytics:    Hotjar (heatmap), Funnel interno, A/B Test preco
+
+DESIGN SYSTEM
+-------------
+Nome:   "Digital Architect"
+Filosofia: "Atmospheric Clarity" — camadas tonais profundas,
+espaco em branco, glassmorphism sofisticado.
+Principios:
+- NO-LINE RULE — nunca usar border 1px solid para separar
+secoes ou cards. Hierarquia via tonal shifts.
+- ROUNDED-XL — 12px padrao, 24px para elementos flutuantes.
+- NO PURE BLACK — texto usa #191c1e (on-surface).
+- NO SYSTEM ALERTS — usar surface tonal com tertiary orange.
+- BRANDING OBRIGATORIO — footer "Criado com SitePronto" (12px).
+- TEMPLATE COMPLIANCE — heranca 100% de tokens, zero hardcoded.
+Paleta principal:
+- Primary:         #004ac6 (azul marca)
+- Primary Hover:   #2563eb (gradient 135deg)
+- Tertiary:        #b54e00 (laranja — RESERVADO para "Publicar"
+e "Vender")
+- Surface base:    #f7f9fb
+- On-surface:      #191c1e
+Transicoes: 200ms cubic-bezier(0.4, 0, 0.2, 1)
+Fonte: Inter (via Google Fonts)
+
+STATUS ATUAL (Abril 2026)
+-------------------------
+IMPLEMENTADO
+[X] Landing Page completa (/) com design Digital Architect
+[X] Quiz 3 etapas (rotas /quiz, /quiz/etapa-2, /quiz/etapa-3)
+[X] Dark Mode com persistencia e script anti-FOUC
+[X] Deploy Vercel conectado ao GitHub
+[X] API checkout /api/checkout (cria briefing + preferencia MP)
+[X] Webhook /api/webhook/mp (valida HMAC + atualiza status)
+[X] Estado global quiz-context (auto-save localStorage)
+[X] Supabase client com fallback desenvolvimento
+[X] Paginas /success e /failure pos-pagamento
+PENDENTE
+[ ] Preview Sandbox — /preview/[uuid] nao-interativa
+[ ] Checkbox obrigatorio Termos/LGPD antes de checkout
+[ ] Pagina /obrigado com contador 24h + email Resend
+[ ] Backend Supabase (schema completo + RLS + Storage)
+[ ] Fila de deploy assincrono (Upstash/BullMQ)
+[ ] Programa de revenda (dashboard afiliados)
+[ ] Admin Dashboard (analytics, faturamento, gestao)
+[ ] Biblioteca de Templates (4 MVPs config-driven)
+[ ] A/B Test + Hotjar + SEO
+
+URLs
+----
+Producao:   https://sitepronto-delta.vercel.app
+Repo:       https://github.com/EdCryptoFi/sitepronto

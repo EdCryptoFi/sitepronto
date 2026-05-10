@@ -1,0 +1,119 @@
+================================================================
+SITEPRONTO — ESTRUTURA DE PASTAS
+================================================================
+ESTRUTURA FINAL (apos limpeza)
+------------------------------
+sitepronto/
+|
+|-- app/                        # Next.js App Router
+|   |-- layout.tsx              # Root layout + <head> + ThemeProvider
+|   |-- page.tsx                # Landing page (/)
+|   |-- globals.css             # Design tokens + component primitives
+|   |
+|   |-- quiz/
+|   |   |-- page.tsx            # Quiz etapa 1 (/quiz)
+|   |   |-- etapa-2/
+|   |   |   `-- page.tsx        # Upload logo + paleta + modulos + templates
+|   |   `-- etapa-3/
+|   |       `-- page.tsx        # Dominio + cardapio/portfolio + horario
+|   |
+|   |-- preview/
+|   |   `-- [uuid]/
+|   |       `-- page.tsx        # Preview sandbox (readonly)
+|   |
+|   |-- api/
+|   |   |-- checkout/
+|   |   |   `-- route.ts        # Cria preference_id MP
+|   |   `-- webhook/
+|   |       `-- mp/
+|   |           `-- route.ts    # Recebe notificacao MP
+|   |
+|   |-- afiliado/
+|   |   |-- cadastro/page.tsx   # Checkout ativacao R$ 30
+|   |   |-- dashboard/page.tsx  # Metricas revenda
+|   |   `-- saque/page.tsx      # Solicitacao Pix
+|   |
+|   |-- admin/
+|   |   |-- page.tsx            # Dashboard principal
+|   |   |-- clientes/page.tsx   # Gestao de sites
+|   |   |-- afiliados/page.tsx  # Gestao de revendedores
+|   |   `-- templates/page.tsx  # Upload/versionamento
+|   |
+|   |-- success/page.tsx         # Pos-pagamento aprovado (MP back_url)
+|   |-- failure/page.tsx         # Pos-pagamento rejeitado (MP back_url)
+|   |-- obrigado/page.tsx        # [futuro] Substituir success com contador 24h
+|   |-- termos/page.tsx          # [futuro]
+|   `-- privacidade/page.tsx     # [futuro]
+|
+|-- components/
+|   |-- ThemeToggle.tsx         # Botao dark/light mode
+|   |-- ui/                     # [futuro]
+|   |   `-- Countdown24h.tsx
+|   |-- quiz/
+|   |   |-- QuizLabel.tsx       # Label editorial compartilhada
+|   |   |-- TemplateSelector.tsx# [futuro] Grid de templates
+|   |   `-- LivePreview.tsx     # [futuro] Preview reativo
+|   `-- upload/
+|       `-- MultiDropzone.tsx   # [futuro] Drag-and-drop
+|
+|-- lib/
+|   |-- theme-context.tsx       # Context + ThemeScript (anti-FOUC)
+|   |-- quiz-context.tsx        # Estado global + reducer + auto-save
+|   |-- quiz-data.ts            # Constantes compartilhadas do quiz
+|   |-- analytics/              # [futuro]
+|   |   |-- funnel.ts
+|   |   |-- ab-test.ts
+|   |   `-- hotjar.ts
+|   |-- ai/
+|   |   `-- gemini.ts           # [futuro]
+|   |-- templates/              # [futuro]
+|   |   |-- registry.ts
+|   |   |-- types.ts
+|   |   `-- renderer.ts
+|   |-- mercadopago.ts          # Wrapper createPaymentPreference
+|   |-- supabase/
+|   |   |-- client.ts           # Browser SDK + insertBriefing + updatePaymentStatus
+|   |   `-- server.ts           # [futuro] Server Actions SDK
+|   |-- resend/
+|   |   `-- client.ts           # [futuro]
+|   `-- backup/
+|       `-- cron.ts             # [futuro]
+|
+|-- templates/                  # Biblioteca de templates
+|   |-- registry.ts             # Mapeia ID -> Config/Component
+|   |-- types.ts                # Definicao schema config.json
+|   |-- minimal/
+|   |   |-- config.json         # Layout, cores base, modulos
+|   |   `-- preview.png         # Thumbnail selecao quiz
+|   |-- restaurant/
+|   |   |-- config.json
+|   |   `-- preview.png
+|   |-- portfolio/
+|   |   |-- config.json
+|   |   `-- preview.png
+|   `-- store/
+|       |-- config.json
+|       `-- preview.png
+|
+|-- public/                     # Assets estaticos
+|
+|-- docs/                       # Documentacao tecnica
+|   |-- 00-VISAO-GERAL.txt
+|   |-- 01-ESTRUTURA-PASTAS.txt
+|   |-- 02-MODULOS-CODIGO.txt
+|   |-- 03-DESIGN-SYSTEM.txt
+|   |-- 04-CONFIGS.txt
+|   |-- 05-ROADMAP.txt
+|   |-- 06-DEPLOY-E-SETUP.txt
+|   |-- 07-SITEMAP-WORKFLOW.txt
+|   |-- 08-SUPABASE-SETUP.txt
+|   |-- 09-ADMIN-DASHBOARD.txt
+|   |-- 10-TEMPLATES-LIBRARY.txt
+|   `-- 11-LEGAL-LGPD.txt
+|
+|-- .gitignore
+|-- package.json
+|-- tsconfig.json
+|-- tailwind.config.js
+|-- postcss.config.js
+`-- next.config.mjs

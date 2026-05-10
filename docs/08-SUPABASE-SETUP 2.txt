@@ -1,0 +1,111 @@
+================================================================
+SITEPRONTO — CONFIGURACAO SUPABASE
+================================================================
+
+PASSO 1: SQL SCHEMA
+-------------------
+Rodar no Supabase Dashboard -> SQL Editor
+
+-- ============================================================
+-- TABELA PRINCIPAL MVP: briefings
+-- ============================================================
+CREATE TABLE IF NOT EXISTS briefings (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  segment           TEXT,                        -- ex: restaurante, loja
+  goal              TEXT,                        -- ex: whatsapp, vender
+  has_materials     TEXT,                        -- complete | partial | none
+  logo_name         TEXT,
+  palette           TEXT,                        -- ex: azul-editorial
+  template          TEXT,                        -- restaurant | farmacy | store | portfolio
+  selected_modules  TEXT[],                      -- ex: {whatsapp, catalogo}
+  domain_choice     TEXT,                        -- new | later
+  domain            TEXT,
+  content_notes     TEXT,
+  payment_status    TEXT DEFAULT 'pending',      -- pending | approved | rejected
+  editor_content    JSONB DEFAULT NULL,          -- estado serializado Craft.js (admin editor)
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_briefings_payment_status
+  ON briefings (payment_status);
+
+CREATE INDEX IF NOT EXISTS idx_briefings_editor_content
+  ON briefings ((editor_content IS NOT NULL));
+
+-- ============================================================
+-- SE A TABELA JA EXISTE: adicionar colunas que faltam
+-- ============================================================
+ALTER TABLE briefings ADD COLUMN IF NOT EXISTS template TEXT;
+ALTER TABLE briefings ADD COLUMN IF NOT EXISTS editor_content JSONB DEFAULT NULL;
+
+-- ============================================================
+-- TABELAS FUTURAS (Fase 4+)
+-- ============================================================
+-- sites: slug, owner_id, template, status, published_url
+-- afiliados, comissoes: fase 6
+
+CAMPOS DA TABELA briefings
+---------------------------
+- id               UUID PK (gerado automaticamente)
+- segment          tipo de negocio (restaurante, clinica, loja, etc.)
+- goal             objetivo (whatsapp, vender, agendar, portfolio)
+- has_materials    status dos materiais (complete, partial, none)
+- logo_name        nome do arquivo do logo (sem base64 — armazenado so no contexto)
+- palette          id da paleta escolhida (azul-editorial, verde-servico, vinho-premium)
+- template         id do template (restaurant, farmacy, store, portfolio)
+- selected_modules array de modulos escolhidos (whatsapp, catalogo, agendamento, etc.)
+- domain_choice    new (dominio novo) ou later (escolher depois)
+- domain           nome do dominio desejado
+- content_notes    observacoes adicionais do cliente
+- payment_status   status do pagamento (pending | approved | rejected)
+- editor_content   JSON do estado Craft.js (salvo via /api/admin/save-editor)
+- created_at       timestamp de criacao
+- updated_at       timestamp da ultima atualizacao
+
+USADA POR
+---------
+- lib/supabase/client.ts: insertBriefing() + updatePaymentStatus()
+- app/api/admin/save-editor/route.ts: salva editor_content
+- app/admin/briefings/page.tsx: listagem admin
+- app/admin/editor/[id]/page.tsx: carrega briefing para o editor
+
+PASSO 2: ROW LEVEL SECURITY (RLS)
+---------------------------------
+Por padrao, desabilitar RLS para briefings no MVP (acesso via service role).
+Quando ativar auth de cliente (Fase 4):
+- briefings: dono ve/insere os proprios. Admin ve todos.
+- sites: dono ve/insere/atualiza os proprios. Admin ve todos.
+- afiliados: dono ve/atualiza o proprio.
+- comissoes: afiliado ve as proprias comissoes.
+
+PASSO 3: STORAGE BUCKETS
+------------------------
+- assets: privado. Upload por pasta do dono. Leitura publica condicional.
+- templates: publico leitura. Admin write.
+- backups: privado. Service role only.
+
+PASSO 4: VARIAVEIS DE AMBIENTE
+-------------------------------
+Adicionar no .env.local e nas variaveis do projeto na Vercel:
+
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxx...
+
+Obter em: Supabase Dashboard -> Project Settings -> API
+
+PASSO 5: AUTH CONFIG (Fase 4)
+------------------------------
+- Email provider ativo. Confirmations desativadas (MVP).
+- Redirect URLs: /auth/callback (vercel + localhost).
+- Auth opcional pos-pagamento via magic link/senha simples.
+
+PASSO 6: ADMIN AUTH (ja implementado)
+--------------------------------------
+Nao usa Supabase Auth para o admin. Usa variaveis de ambiente:
+
+ADMIN_PASSWORD=<senha-do-admin>
+ADMIN_SESSION_TOKEN=<token-aleatorio-32-bytes>
+
+Fluxo: POST /api/admin/auth -> verifica ADMIN_PASSWORD -> seta cookie
+httpOnly admin_session com ADMIN_SESSION_TOKEN -> middleware.ts valida.

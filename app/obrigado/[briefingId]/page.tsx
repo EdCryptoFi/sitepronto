@@ -1,0 +1,104 @@
+import Link from 'next/link';
+import { CheckCircle2, ExternalLink, Sparkles } from 'lucide-react';
+import { getBriefingById } from '@/lib/supabase/client';
+import { segments } from '@/lib/quiz-data';
+import ThemeToggle from '@/components/ThemeToggle';
+import Countdown from './Countdown';
+import EmailSender from './EmailSender';
+
+export default async function ObrigadoPage({ params }: { params: Promise<{ briefingId: string }> }) {
+  const { briefingId } = await params;
+
+  const briefing = await getBriefingById(briefingId);
+
+  const deliveryTarget = briefing?.created_at
+    ? new Date(new Date(briefing.created_at).getTime() + 24 * 3600 * 1000).toISOString()
+    : new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+
+  const segmentLabel = segments.find((s) => s.id === briefing?.segment)?.name ?? 'seu negócio';
+
+  return (
+    <main className="relative min-h-screen pb-20 pt-6">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-80 opacity-50"
+        style={{
+          background: 'radial-gradient(60% 100% at 50% 0%, rgba(0, 74, 198, 0.08), transparent 70%)',
+        }}
+      />
+
+      <EmailSender briefingId={briefingId} />
+
+      {/* Header */}
+      <div className="relative mx-auto flex max-w-3xl items-center justify-between px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-primary text-on-primary">
+            <Sparkles size={16} />
+          </span>
+          <span className="text-title-lg font-bold tracking-tight">
+            SitePronto<span className="text-primary">.</span>
+          </span>
+        </Link>
+        <ThemeToggle />
+      </div>
+
+      <section className="relative mx-auto mt-16 max-w-2xl px-6 text-center">
+        {/* Ícone de sucesso */}
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-primary shadow-architectural-lg">
+          <CheckCircle2 size={40} className="text-on-primary" />
+        </div>
+
+        <h1 className="text-headline-lg font-bold">
+          Pagamento confirmado!
+        </h1>
+        <p className="mt-3 text-body-lg text-on-surface-variant">
+          Estamos montando o site de <strong className="text-on-surface">{segmentLabel}</strong> com
+          o visual que você escolheu. Tudo pronto em até 24 horas.
+        </p>
+
+        {/* Countdown */}
+        <div className="mt-8 flex justify-center">
+          <div className="rounded-2xl border border-outline-variant bg-surface-low px-6 py-4">
+            <Countdown targetIso={deliveryTarget} />
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div className="mt-10 grid grid-cols-1 gap-4 text-left sm:grid-cols-3">
+          {[
+            { step: '1', title: 'Análise', desc: 'Revisamos as informações do seu briefing.' },
+            { step: '2', title: 'Montagem', desc: 'Construímos o site com o template e visual escolhidos.' },
+            { step: '3', title: 'Entrega', desc: 'Você recebe o link para revisar e aprovar.' },
+          ].map((item) => (
+            <div key={item.step} className="card flex flex-col gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-primary text-label-md font-bold text-on-primary">
+                {item.step}
+              </div>
+              <div>
+                <p className="text-label-md font-semibold">{item.title}</p>
+                <p className="mt-1 text-label-sm text-on-surface-variant">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA prévia */}
+        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            href={`/preview/${briefingId}`}
+            className="btn-accent"
+          >
+            Ver prévia do meu site <ExternalLink size={16} />
+          </Link>
+          <Link href="/" className="btn-ghost">
+            Voltar ao início
+          </Link>
+        </div>
+
+        <p className="mt-8 text-label-sm text-on-surface-variant">
+          Pedido #{briefingId.slice(0, 8).toUpperCase()} · Confirmação enviada por e-mail.
+        </p>
+      </section>
+    </main>
+  );
+}

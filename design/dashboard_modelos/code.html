@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#434654",
+                        "inverse-primary": "#b4c5ff",
+                        "on-tertiary-container": "#ffba97",
+                        "inverse-on-surface": "#f0f0fb",
+                        "on-background": "#191b23",
+                        "surface-container-high": "#e7e7f2",
+                        "outline-variant": "#c3c6d6",
+                        "on-primary-container": "#b8c8ff",
+                        "primary": "#003594",
+                        "secondary": "#0051d5",
+                        "surface-container-highest": "#e2e2ec",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-tertiary-fixed-variant": "#783100",
+                        "secondary-fixed": "#dbe1ff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e2ec",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-primary-fixed": "#00174b",
+                        "surface": "#faf8ff",
+                        "on-secondary-fixed": "#00174b",
+                        "primary-fixed": "#dbe1ff",
+                        "tertiary": "#6a2b00",
+                        "secondary-container": "#316bf3",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "outline": "#737685",
+                        "primary-container": "#004ac6",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d9d9e4",
+                        "surface-container-low": "#f3f3fd",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#1b55d0",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2e3038",
+                        "background": "#faf8ff",
+                        "surface-bright": "#faf8ff",
+                        "on-tertiary-fixed": "#341100",
+                        "on-surface": "#191b23",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#8e3c00",
+                        "surface-container": "#ededf8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "section-gap": "64px",
+                        "gutter": "16px",
+                        "container-margin": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "footer-branding": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "footer-branding": ["12px", {"lineHeight": "1.0", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-base text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-sm shadow-[0_1px_0_0_rgba(0,0,0,0.05)] flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white font-inter antialiased">SitePronto</span>
+</div>
+<div class="flex items-center gap-4 text-slate-500 dark:text-slate-400">
+<button class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95 duration-200 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95 duration-200 rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="hidden md:flex h-screen w-64 sticky top-16 left-0 bg-slate-50 dark:bg-slate-950 flex flex-col p-4 gap-2 bg-gradient-to-r from-slate-100 to-transparent dark:from-slate-900">
+<div class="mb-6 px-2">
+<h2 class="text-lg font-black text-blue-700">Admin Console</h2>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Gestão de Plataforma</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:translate-x-1 duration-200 transition-all cubic-bezier(0.4, 0, 0.2, 1) text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:translate-x-1 duration-200 transition-all cubic-bezier(0.4, 0, 0.2, 1) text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>Vendas</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 rounded-xl shadow-sm hover:translate-x-1 duration-200 transition-all cubic-bezier(0.4, 0, 0.2, 1) text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span>Templates</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:translate-x-1 duration-200 transition-all cubic-bezier(0.4, 0, 0.2, 1) text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Clientes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:translate-x-1 duration-200 transition-all cubic-bezier(0.4, 0, 0.2, 1) text-sm font-medium Inter" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Configurações</span>
+</a>
+</nav>
+<div class="mt-auto p-2">
+<button class="w-full bg-[#b54e00] text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#8e3c00] transition-all cubic-bezier(0.4, 0, 0.2, 1) active:scale-95 shadow-lg shadow-orange-900/10">
+<span class="material-symbols-outlined" data-icon="publish">publish</span>
+<span>Publicar</span>
+</button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-gutter md:p-section-gap max-w-7xl mx-auto w-full">
+<!-- Header Section -->
+<section class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
+<div class="space-y-2">
+<h1 class="font-display-lg text-display-lg text-on-background">Gestão de Modelos</h1>
+<p class="text-on-surface-variant max-w-xl">Gerencie a biblioteca de templates disponíveis para seus clientes. Ative, desative ou faça upload de novas estruturas arquitetônicas e comerciais.</p>
+</div>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold flex items-center gap-3 shadow-xl shadow-primary/20 hover:bg-gradient-to-br hover:from-blue-600 hover:to-blue-800 transition-all duration-200 active:scale-95 whitespace-nowrap">
+<span class="material-symbols-outlined" data-icon="upload">upload</span>
+                    Upload de Novo Modelo
+                </button>
+</section>
+<!-- Filters / Tonal Surface -->
+<div class="mb-8 p-4 bg-surface-container-low rounded-2xl flex flex-wrap gap-4 items-center border border-outline-variant/30">
+<div class="flex bg-white rounded-lg p-1 shadow-sm">
+<button class="px-6 py-2 bg-primary text-white rounded-md text-sm font-semibold">Todos</button>
+<button class="px-6 py-2 text-on-surface-variant text-sm font-semibold hover:bg-slate-50 rounded-md transition-colors">Arquitetura</button>
+<button class="px-6 py-2 text-on-surface-variant text-sm font-semibold hover:bg-slate-50 rounded-md transition-colors">Vendas</button>
+<button class="px-6 py-2 text-on-surface-variant text-sm font-semibold hover:bg-slate-50 rounded-md transition-colors">Portfólio</button>
+</div>
+<div class="ml-auto relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-white border-none rounded-lg text-sm focus:ring-2 focus:ring-primary shadow-sm w-64" placeholder="Buscar modelo..." type="text"/>
+</div>
+</div>
+<!-- Bento Grid Gallery -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="group relative bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-[0_30px_50px_rgba(0,0,0,0.06)] transition-all duration-300 transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A clean, professional architectural design template showcased on a digital interface. The image features modern glass buildings with blue sky reflections, using a high-key lighting aesthetic that emphasizes clarity and corporate professionalism. Minimalist UI elements overlay the architectural photograph, consistent with a premium SitePronto branding style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPMuyqsmDnQKjLm-coNYVSObRieZA8ldlNvEkSbQIR46Z-e0HJgpRW4XY2zin9O9OpfBaaDcBk0NA8-KKW7wRWt6WDsXlgHzB7XkmbUP1DnuPuMYRqTqMsHDPQZ9z3KGaX5yVPLN1X7T2I5ADrYZq0W51FLePfErU2mrWZ0FiHXgy85VKFwBoj6MzZH5FF043HILj9z47jEuF-zE-0rrsIkhGG-nebfoa15NtVNfj-HDTNomzv-ylGV0LdTqBLA319BRYmN9ShFTU5"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-[#f7f9fb] rounded-full text-[10px] font-bold uppercase tracking-wider text-blue-700 border border-blue-100">Arquitetura</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Skyscraper Pro</h3>
+<p class="text-on-surface-variant text-sm">Design focado em grandes incorporadoras.</p>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Ativo
+                            </div>
+</div>
+<div class="flex gap-2 mt-6">
+<button class="flex-1 py-2 text-sm font-bold text-primary bg-primary-fixed hover:bg-primary-fixed-dim transition-colors rounded-lg">Editar</button>
+<button class="px-3 py-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-[0_30px_50px_rgba(0,0,0,0.06)] transition-all duration-300 transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden relative">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A vibrant and conversion-focused e-commerce template design. The visual style uses a bright white background with bold blue and orange accents. It features abstract shopping carts and dynamic price tags in a professional digital art style. The atmosphere is energetic and commercial, designed for high-end retail platforms." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO_cSrKOOaEFVK3bMF358-W5i_sLRXWRxRq_CF7570pK0OCgCz5vlgS9FvVse37ljXHTALDLESa4uWTBt_2xWpNLt3sY-zlrmMbjwp2FBX168qvQE3GwTfHOnZ6WFBA57l8EXMkq1Xg2pvnzsFgKqBWEED67Hmge3zVVkStr8L83jyzQPFTvX6Ol3firXUg-OJG6Ps-iKGUdDOmud9lj9PV4EqxUc9S_e1_hGTdL3adNsKJxHAXQiU2ZPJc-lepYrk6XVBi3t10VN3"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-[#fff2e8] rounded-full text-[10px] font-bold uppercase tracking-wider text-[#b54e00] border border-[#ffdbcb]">Vendas</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">FastCommerce</h3>
+<p class="text-on-surface-variant text-sm">Otimizado para conversão e checkout rápido.</p>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Ativo
+                            </div>
+</div>
+<div class="flex gap-2 mt-6">
+<button class="flex-1 py-2 text-sm font-bold text-primary bg-primary-fixed hover:bg-primary-fixed-dim transition-colors rounded-lg">Editar</button>
+<button class="px-3 py-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 (Inactive) -->
+<div class="group relative bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-[0_30px_50px_rgba(0,0,0,0.06)] transition-all duration-300 transform hover:-translate-y-1">
+<div class="h-48 overflow-hidden relative grayscale">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A minimalist portfolio template design for creative agencies. The aesthetic is clean and spacious, featuring large typography and artistic black-and-white photography of collaborative workspaces. The mood is sophisticated and intellectual, using subtle shadows and high-end architectural layout principles." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLfHmW6eNsyBJVukq8nZXuBxBj_yGyEOjKN2aqE2XoZiMzvQPuTCos-6_YF-YGm4E3u26PlpMjchjxwdITDt0eI8zxUYnZuFb4ifoxj6yq4_-v2Un8uOlItnfobBvEHPRi9aJyHYZOv0_gE4GSawkSlzTtRDu6VyV3JnSbFa-SY5wpbXIisOunASRxC9IXoQotCFNrSj8XYAF9Y3ccbUBRBeZLJhZRAUAMUhipfQjlpkP_iXfzWU3-ZWrcq5ikF9vTv_f6xKByWXRn"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold uppercase tracking-wider text-on-surface-variant border border-outline-variant">Portfólio</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Minimal Agency</h3>
+<p class="text-on-surface-variant text-sm">Layout limpo para portfólios criativos.</p>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                Inativo
+                            </div>
+</div>
+<div class="flex gap-2 mt-6">
+<button class="flex-1 py-2 text-sm font-bold text-primary bg-primary-fixed hover:bg-primary-fixed-dim transition-colors rounded-lg">Ativar</button>
+<button class="px-3 py-2 text-outline-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Upload Placeholder Card -->
+<div class="group border-2 border-dashed border-outline-variant rounded-[24px] flex flex-col items-center justify-center p-12 text-center hover:bg-surface-container-low hover:border-primary transition-all duration-300 cursor-pointer h-full">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-200 mb-4">
+<span class="material-symbols-outlined text-3xl" data-icon="add_circle">add_circle</span>
+</div>
+<h4 class="font-bold text-on-background mb-2">Novo Modelo</h4>
+<p class="text-sm text-on-surface-variant">Arraste seu arquivo .zip ou clique para selecionar um template do seu computador.</p>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full py-8 mt-auto flex flex-col items-center justify-center bg-transparent">
+<p class="text-[12px] font-normal Inter opacity-60 text-slate-900 dark:text-white">Criado com SitePronto</p>
+<div class="flex gap-6 mt-2">
+<a class="text-slate-500 hover:opacity-100 text-[12px]" href="#">Privacidade</a>
+<a class="text-slate-500 hover:opacity-100 text-[12px]" href="#">Termos</a>
+<a class="text-slate-500 hover:opacity-100 text-[12px]" href="#">Suporte</a>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,44 @@
+================================================================
+SITEPRONTO — ARQUIVOS DE CONFIGURACAO
+================================================================
+(VARIAVEIS DE AMBIENTE — ATUALIZADO)
+================================================================
+
+# Google Gemini Free Tier
+GOOGLE_AI_API_KEY=                      [OBTER NO GOOGLE AI STUDIO]
+GOOGLE_AI_PROJECT_ID=                   [ID DO PROJETO GCP]
+GOOGLE_AI_MODEL=gemini-1.5-flash
+GOOGLE_AI_MAX_TOKENS=500
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=               [OBTER EM PROJECT SETTINGS > API]
+NEXT_PUBLIC_SUPABASE_ANON_KEY=          [OBTER EM PROJECT SETTINGS > API]
+SUPABASE_SERVICE_ROLE_KEY=              [OBTER EM PROJECT SETTINGS > API]
+
+# Mercado Pago Checkout Pro
+MP_ACCESS_TOKEN=                        [OBTER EM CREDENTIALS > ACCESS TOKEN]
+MP_PUBLIC_KEY=                          [OBTER EM CREDENTIALS > PUBLIC KEY]
+MP_APP_ID=                              [ID DA APLICACAO MP]
+MP_WEBHOOK_SECRET=                      [GERAR NO DASHBOARD MP]
+MP_MODE=production
+
+# Resend (Email transacional)
+RESEND_API_KEY=                         [OBTER EM API KEYS]
+RESEND_DOMAIN=onboarding@resend.dev     # Sandbox teste
+
+# Analytics & Experimentacao
+HOTJAR_ID=                              [INSERIR QUANDO CRIAR]
+AB_TEST_PRICE_VARIANT=auto              # auto | force_a | force_b
+NEXT_PUBLIC_FEATURE_FUNNEL=true
+
+# Backup & Storage Externo
+BACKUP_S3_BUCKET=
+BACKUP_S3_REGION=
+BACKUP_S3_ACCESS_KEY=
+BACKUP_S3_SECRET_KEY=
+
+# Internacionalizacao
+NEXT_PUBLIC_LOCALE=pt-BR
+NEXT_PUBLIC_FALLBACK_LOCALE=pt-BR
+
+(OUTRAS CONFIGS MANTEM SEU FORMATO ORIGINAL)

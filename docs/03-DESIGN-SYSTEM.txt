@@ -1,0 +1,48 @@
+================================================================
+SITEPRONTO — DESIGN SYSTEM "DIGITAL ARCHITECT"
+================================================================
+(Principios 1-5 mantidos. Adicionados abaixo:)
+
+6. BRANDING OBRIGATORIO
+Todo site publicado DEVE exibir no footer:
+"Criado com SitePronto" (link para landing page)
+- Tamanho minimo: 12px (label-sm)
+- Cor: --on-surface-variant com opacidade 0.6
+- Posicao: centro, padding 24px, margin-top auto
+- Remocao: bloqueada no MVP. Futuro plano premium.
+
+7. TEMPLATE COMPLIANCE
+Todo template da biblioteca DEVE:
+- Herdar 100% dos tokens CSS (--surface, --primary, --radius-*, etc)
+- Nunca usar valores hexadecimais ou pixels fixos fora do scale system
+- Respeitar a regra NO-LINE RULE e ROUNDED-XL
+- Fornecer thumbnail em PNG otimizado para o seletor do quiz
+- Manter estrutura de pastas padronizada (config.json + preview.png)
+
+IDENTIDADE / DIRECAO DE CORES (6 ESTILOS)
+-----------------------------------------
+1. Minimal: Superficie limpa, primary baixo contraste, foco tipografia
+2. Vibrant: Primary saturado, tertiary em hover, alta energia
+3. Corporate: Azul escuro profundo, cinzas estruturais, serio
+4. Nature: Tons verdes/terrosos, primary adaptado, orgânico
+5. Tech: Roxos/azuis elétricos, glassmorphism acentuado, moderno
+6. Elegant: Dourados/pretos suaves, serifas opcionais, luxo
+
+MOVIMENTO (ATUALIZADO)
+----------------------
+- Contador 24h: atualizacao via requestAnimationFrame ou interval leve.
+  Sem re-render completo do componente pai. Cor: --on-surface-variant.
+  Tamanho: label-md.
+
+CHECKLIST DE COMPLIANCE (ATUALIZADO)
+------------------------------------
+[ ] Nenhuma `border: 1px solid` de separacao.
+[ ] Preto puro (#000) nao aparece no CSS.
+[ ] --tertiary so e usado em "Publicar" ou "Vender".
+[ ] Todas as sombras usam shadow-architectural.
+[ ] Raios seguem 12/16/24.
+[ ] Transicoes usam 200ms + easing "architect".
+[ ] Dark mode testado (cada token tem contra-parte em .dark).
+[ ] Footer "Criado com SitePronto" presente e estilizado.
+[ ] Templates validam heranca de tokens (sem hardcoded).
+[ ] Checkbox LGPD bloqueia checkout se desmarcado.

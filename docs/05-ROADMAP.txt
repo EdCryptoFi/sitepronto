@@ -1,0 +1,73 @@
+================================================================
+SITEPRONTO — ROADMAP
+================================================================
+FASE 1 — MVP VISUAL (CONCLUIDA)
+-------------------------------
+[X] Landing page com design Digital Architect
+[X] Quiz Etapa 1 (segmento, objetivo, materiais)
+[X] Dark mode com anti-FOUC
+[X] Deploy Vercel via git push
+[X] Documentacao tecnica do projeto
+
+FASE 2 — COMPLETAR O QUIZ (CONCLUIDA)
+--------------------------------------
+[X] Quiz Etapa 2 — /quiz/etapa-2 (logo + paleta + modulos)
+[X] Quiz Etapa 3 — /quiz/etapa-3 (dominio + checkout -> MP)
+[X] Estado global quiz-context com auto-save localStorage
+[X] Dados constantes centralizados em lib/quiz-data.ts
+[X] Checkout integrado: POST /api/checkout -> redirect init_point
+
+FASE 3 — PREVIEW + POS-PAGAMENTO
+----------------------------------
+[X] Checkout Mercado Pago integrado (R$ 300 ou 3x R$ 125)
+[ ] Preview Sandbox — /preview/[uuid] (readonly + watermark)
+[ ] Checkbox obrigatorio Termos/LGPD antes de habilitar CTA
+[ ] Pagina /obrigado com contador visual 24h + email Resend
+
+FASE 4 — BACKEND + DEPLOY ASSINCRONO
+------------------------------------
+[ ] Supabase (schema sites/users/afiliados/comissoes + RLS + Storage)
+[ ] Fila Upstash Redis + BullMQ (job {siteId} -> gera -> deploy)
+[ ] Google Gemini Free (copy H1/descricao/sobre, cache siteId, fallback)
+[ ] Backup cron diario (Supabase + assets -> S3/Blob, retencao 30d)
+
+FASE 5 — ADMIN EDITOR (CRAFT.JS) — CONCLUIDA
+---------------------------------------------
+[X] Protecao /admin via ADMIN_PASSWORD + ADMIN_SESSION_TOKEN (middleware.ts)
+[X] /admin/login — pagina de login com senha
+[X] /admin/briefings — listagem de briefings (Supabase ou mock com aviso)
+[X] /admin/editor/[id] — editor Craft.js drag-and-drop
+    [X] Toolbox (arrastar Hero, Texto, Imagem, Formulario)
+    [X] Canvas central com drop area
+    [X] Properties panel (editar componente selecionado)
+    [X] Salvar -> POST /api/admin/save-editor -> editor_content JSONB Supabase
+    [X] Undo / Redo via Craft.js history
+[X] /api/admin/auth — login (POST, seta cookie httpOnly)
+[X] /api/admin/logout — logout (POST, limpa cookie)
+[X] /api/admin/save-editor — salva editor_content no Supabase
+[X] lib/craftjs/components.tsx — HeroSection, TextBlock, ImageBlock, ContactForm
+[ ] Coluna editor_content JSONB na tabela briefings — adicionar via Supabase Dashboard
+[ ] Publicar site — dispara job deploy (futuro: BullMQ Fase 4)
+
+FASE 6 — PROGRAMA DE REVENDA
+----------------------------
+[ ] Cadastro R$ 30 + cookie 30 dias
+[ ] Dashboard /afiliado (metricas, comissao fixa R$ 50,00)
+[ ] Saque Pix manual + historico
+
+FASE 7 — POLIMENTO E ESCALA
+---------------------------
+[ ] Analytics admin (/admin): funil, faturamento mensal, gestao clientes
+[ ] Hotjar Free (heatmap/recordacoes, respeitar LGPD)
+[ ] A/B Test preco (297 vs 300, significancia 500 sessoes)
+[ ] SEO (OG dinamica, sitemap, robots), A11y (Lighthouse >= 95)
+[ ] Testes E2E Playwright (quiz -> checkout -> webhook)
+
+DECISOES RESOLVIDAS
+-------------------
+[X] Auth: Opcional pos-pagamento. Quiz/checkout sem login.
+[X] IA: Google Gemini 1.5 Flash Free Tier (sem OpenAI).
+[X] Pagamento: Mercado Pago Checkout Pro (Pix/Cartao/Boleto).
+[X] Idioma: PT-BR unico. Termos nao reembolsaveis apos dominio.
+[X] Templates: 4 MVPs config-driven, heranca 100% tokens.
+[X] Revenda: Comissao fixa R$ 50,00.

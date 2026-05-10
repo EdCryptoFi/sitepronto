@@ -1,0 +1,157 @@
+================================================================
+SITEPRONTO — BIBLIOTECA DE TEMPLATES
+================================================================
+Referências visuais em: /models/ (restaurant*, portfolio*, store*, farmacy*)
+
+MAPEAMENTO SEGMENTO -> TEMPLATE
+---------------------------------
+restaurante  ->  restaurant
+beleza       ->  restaurant
+clinica      ->  farmacy
+loja         ->  store
+advocacia    ->  portfolio
+educacao     ->  portfolio
+servicos     ->  portfolio
+outro        ->  portfolio   (padrao fallback)
+
+Implementado em: lib/quiz-data.ts (SEGMENT_TO_TEMPLATE + TemplateId)
+
+ARQUITETURA
+-----------
+Cada template = pasta templates/[id]/ com:
+  config.json       — metadados (nome, descricao, secoes, paleta sugerida)
+  preview.png       — thumbnail usada no TemplateSelector do quiz
+  Template.tsx      — componente React renderizavel
+O admin editor (Craft.js) carrega Template.tsx como canvas base.
+O campo editor_content (JSONB) no Supabase guarda o estado Craft.js pos-edicao.
+Todos os templates herdam 100% os tokens do Design System (globals.css).
+A paleta propria de cada template e sobrescrita via CSS vars inline.
+
+================================================================
+TEMPLATE 1 — RESTAURANT
+================================================================
+Referências: models/restaurant1.jpeg, restaurant2.png, restaurant3.avif, restaurant4.avif
+Segmentos:   restaurante, beleza
+
+ESTILO VISUAL
+- Fundo escuro ou rico (foto hero de produto em tela cheia)
+- Cores quentes: laranja, vermelho, marrom, dourado
+- Tipografia bold e expressiva no hero
+- Cards de produto com preco e botao Adicionar
+- Sensacao de apetite / lifestyle quente
+
+SECOES (em ordem)
+1. Navbar          — logo + Home / Menu / Contato / Pedir agora
+2. Hero            — foto produto fullscreen + headline bold + CTA "Pedir agora"
+3. Beneficios      — 3 chips (ex: Frete gratis / Fresco todo dia / Aberto agora)
+4. Top Produtos    — grid 4 cards: imagem + nome + preco + botao Adicionar
+5. Banner promo    — percentual desconto + CTA secundario
+6. Como funciona   — 3 passos (icones + texto curto)
+7. Depoimentos     — 2-3 reviews com estrelas e nome
+8. Footer          — logo + links + redes sociais + "Criado com SitePronto"
+
+PALETA SUGERIDA
+- Primary:   #c2410c  (laranja restaurante)
+- Surface:   #1c1917  (fundo escuro quente)
+- Accent:    #fbbf24  (dourado destaques)
+
+================================================================
+TEMPLATE 2 — FARMACY
+================================================================
+Referências: models/farmacy1.avif, farmacy2.avif, farmacy3.avif, farmacy4.avif
+Segmentos:   clinica
+
+ESTILO VISUAL
+- Farmacia de venda online (nao clinica de agendamento)
+- Fundo branco/claro, limpo e profissional
+- Cores saude: verde farmacia (#16a34a) + azul confianca (#0284c7)
+- Grid organizado de categorias e produtos
+- Selos de confianca (entrega rapida, produto original, pagamento seguro)
+- Banner de promocao/desconto em destaque
+
+SECOES (em ordem)
+1. Topbar          — entrega gratis acima de R$X + frete expresso
+2. Navbar          — logo + Categorias + Busca + Carrinho + Login
+3. Banner hero     — promocao principal (ex: "Ate 50% off em vitaminas")
+4. Categorias      — grid 6-8 icones clicaveis (Vitaminas, Dermo, Bebe, etc.)
+5. Destaques       — carrossel 4 cards: imagem + nome + preco de/por + Adicionar
+6. Selos           — 4 icones: Entrega rapida / Original / Pagamento seguro / Suporte
+7. Promo secundaria — banner largura total (ex: "Combo vitamina D + C")
+8. Mais vendidos   — grid 8 produtos
+9. Footer          — logo + links categorias + CNPJ + "Criado com SitePronto"
+
+PALETA SUGERIDA
+- Primary:   #16a34a  (verde farmacia)
+- Secondary: #0284c7  (azul confianca)
+- Surface:   #f0fdf4  (fundo verde muito claro)
+- Accent:    #dc2626  (vermelho promocao)
+
+================================================================
+TEMPLATE 3 — STORE
+================================================================
+Referências: models/store.jpeg, store2.jpg, store3.webp, store4.webp
+Segmentos:   loja
+
+ESTILO VISUAL
+- Fundo branco puro, minimalista, produto em destaque
+- Tipografia limpa, sans-serif, espacamento generoso
+- Grid de produtos com hover sutil
+- Newsletter e feed social no rodape
+
+SECOES (em ordem)
+1. Navbar          — logo + categorias + busca + favoritos + carrinho
+2. Hero            — headline + imagem produto hero + CTA "Ver produtos"
+3. Beneficios      — 4 icones inline: Frete gratis / Garantia / Promocoes / Pagamento seguro
+4. Categorias      — grid 4-6 cards com imagem + nome
+5. Destaques       — grid 4 colunas: imagem + nome + preco de/por + Adicionar
+6. Banner desconto — fundo escuro + texto branco + CTA
+7. Mais vendidos   — grid 4 produtos
+8. Newsletter      — campo email + CTA
+9. Footer          — logo + links + CNPJ + "Criado com SitePronto"
+
+PALETA SUGERIDA
+- Primary:   #111827  (preto editorial)
+- Surface:   #ffffff  (branco puro)
+- Accent:    #2563eb  (azul CTA)
+- Muted:     #6b7280  (textos secundarios)
+
+================================================================
+TEMPLATE 4 — PORTFOLIO
+================================================================
+Referências: models/portfolio1.webp, portfolio2.webp, portfolio3.webp, portfolio4.webp
+Segmentos:   advocacia, educacao, servicos, outro
+
+ESTILO VISUAL
+- Tema escuro profissional (dark surface #0f172a)
+- Foto ou avatar do profissional em destaque no hero
+- Skills / competencias em barras ou chips
+- Linha do tempo de experiencia / educacao
+- Galeria de trabalhos / casos em destaque
+- Formulario de contato
+
+SECOES (em ordem)
+1. Navbar          — nome/logo + Home / Sobre / Portfolio / Contato + telefone
+2. Hero            — "Ola, sou [Nome]" + titulo profissional + foto + CTA "Contratar"
+3. Sobre           — texto intro + competencias (chips ou barras de progresso)
+4. Servicos        — grid 3-4 cards: icone + nome + descricao curta
+5. Portfolio       — grid 4-6 trabalhos: imagem + titulo + tag categoria
+6. Depoimentos     — 2-3 reviews: foto + nome + cargo + texto
+7. Experiencia     — linha do tempo vertical (educacao + carreira)
+8. Contato         — formulario (nome + email + mensagem) + dados (email, tel, endereco)
+9. Footer          — nome + links sociais + "Criado com SitePronto"
+
+PALETA SUGERIDA
+- Primary:    #f59e0b  (amarelo/dourado portfolio)
+- Surface:    #0f172a  (azul escuro profissional)
+- On-surface: #f8fafc  (texto claro)
+- Accent:     #6366f1  (indigo destaques)
+
+================================================================
+NOTAS DE IMPLEMENTACAO
+================================================================
+- TemplateSelector (components/quiz/TemplateSelector.tsx): mostra template
+  auto-sugerido (via SEGMENT_TO_TEMPLATE) com opcao de trocar
+- LivePreview (components/quiz/LivePreview.tsx): miniatura reativa mostrando
+  paleta e layout escolhidos em tempo real
+- Admin editor: Craft.js canvas carrega Template.tsx como base editavel
+- Componentes Craft.js: Hero, TextBlock, ImageBlock, ProductCard, ContactForm

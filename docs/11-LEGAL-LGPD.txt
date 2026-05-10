@@ -1,0 +1,29 @@
+================================================================
+SITEPRONTO — TERMOS, PRIVACIDADE E CONFORMIDADE (PT-BR)
+================================================================
+IDIOMA: PT-BR OBRIGATORIO. Sem alternativas.
+
+TERMOS DE COMPRA/DEVOLUCAO
+--------------------------
+1. Produto digital (site + dominio).
+2. Nao reembolsavel apos registro dominio .com.br (servico terceiro irreversivel).
+3. Janela 48h pos-aprovacao para ajustes conteudo. Sem estorno apos.
+4. Dominio registrado em nome cliente, gerenciado pela plataforma.
+5. Cancelamento livre. Inatividade 30 dias -> dominio livre.
+
+POLITICA DE PRIVACIDADE (LGPD)
+------------------------------
+1. Coleta: Nome, email, telefone, logo, quiz, dados MP (externo).
+2. Finalidade: Contrato, suporte, comprovantes, otimizacao.
+3. Base: Contrato + consentimento marketing.
+4. Retencao: Ativo + 5 anos (fiscal/legal).
+5. Direitos: Acesso, correcao, exclusao, portabilidade.
+6. Cookies: Apenas essenciais. Sem rastreamento terceiros MVP.
+7. Compartilhamento: MP + Registro.br. Nao venda dados.
+
+CHECKLIST
+---------
+[ ] Checkbox obrigatorio checkout: "Li e aceito Termos/Privacidade"
+[ ] Links footer: /termos, /privacidade
+[ ] Consentimento armazenado perfil usuario
+[ ] Roteador emails suporte configurado

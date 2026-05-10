@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SitePronto - Iniciar Criação</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#1b55d0",
+                    "on-secondary-container": "#fefcff",
+                    "secondary-container": "#316bf3",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#faf8ff",
+                    "inverse-primary": "#b4c5ff",
+                    "on-surface-variant": "#434654",
+                    "error": "#ba1a1a",
+                    "on-tertiary-container": "#ffba97",
+                    "on-primary-container": "#b8c8ff",
+                    "surface-container-highest": "#e2e2ec",
+                    "surface-container-low": "#f3f3fd",
+                    "on-error": "#ffffff",
+                    "background": "#faf8ff",
+                    "tertiary-fixed-dim": "#ffb690",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed": "#00174b",
+                    "primary-fixed": "#dbe1ff",
+                    "on-background": "#191b23",
+                    "secondary-fixed-dim": "#b4c5ff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-secondary": "#ffffff",
+                    "surface-container": "#ededf8",
+                    "on-primary-fixed": "#00174b",
+                    "secondary-fixed": "#dbe1ff",
+                    "primary-container": "#004ac6",
+                    "on-primary": "#ffffff",
+                    "outline": "#737685",
+                    "tertiary": "#6a2b00",
+                    "on-surface": "#191b23",
+                    "outline-variant": "#c3c6d6",
+                    "on-secondary-fixed-variant": "#003ea8",
+                    "inverse-on-surface": "#f0f0fb",
+                    "tertiary-fixed": "#ffdbcb",
+                    "surface-container-high": "#e7e7f2",
+                    "surface": "#faf8ff",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#8e3c00",
+                    "secondary": "#0051d5",
+                    "inverse-surface": "#2e3038",
+                    "surface-variant": "#e2e2ec",
+                    "on-tertiary-fixed": "#341100",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-fixed-variant": "#783100",
+                    "surface-dim": "#d9d9e4",
+                    "primary": "#003594"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "12px",
+                    "xl": "16px",
+                    "2xl": "24px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "64px",
+                    "gutter": "16px",
+                    "container-margin": "24px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Inter"],
+                    "body-base": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "footer-branding": ["Inter"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-base": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "footer-branding": ["12px", {"lineHeight": "1.0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f7f9fb;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .architectural-shadow {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-base text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="docked full-width top-0 sticky z-50 bg-surface/70 dark:bg-surface-dim/70 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+<nav class="flex justify-between items-center w-full px-container-margin py-4 max-w-7xl mx-auto">
+<div class="font-display-lg text-headline-md font-bold text-primary dark:text-primary-fixed">
+                SitePronto
+            </div>
+<div class="flex items-center gap-6">
+<span class="text-primary font-bold font-label-sm text-label-sm">Etapa 1 de 4</span>
+<a class="text-on-surface-variant font-medium font-label-sm text-label-sm hover:text-primary transition-all duration-200 ease-in-out scale-95 active:scale-90" href="#">
+                    Ajuda
+                </a>
+</div>
+</nav>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-container-margin py-section-gap">
+<div class="w-full max-w-4xl space-y-12">
+<!-- Hero Header -->
+<div class="text-center space-y-4">
+<h1 class="font-display-lg text-display-lg text-on-background tracking-tight max-w-3xl mx-auto">
+                    Vamos começar a dar vida ao seu negócio
+                </h1>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-xl mx-auto opacity-80">
+                    Em menos de 1 minuto, nosso arquiteto digital vai estruturar sua presença online.
+                </p>
+</div>
+<!-- Quiz Content Grid -->
+<div class="space-y-section-gap">
+<!-- Bloco 1: Nome do Negócio -->
+<section class="space-y-gutter">
+<label class="block font-headline-md text-headline-md text-center text-on-surface mb-6" for="business_name">
+                        Nome do seu Negócio
+                    </label>
+<div class="relative max-w-2xl mx-auto group">
+<input class="w-full px-8 py-6 rounded-2xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary/20 text-headline-md font-headline-md architectural-shadow transition-all duration-300 placeholder:opacity-30" id="business_name" placeholder="Ex: Arquitetura Aurora" type="text"/>
+<div class="absolute inset-x-0 -bottom-1 h-1 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm"></div>
+</div>
+</section>
+<!-- Bloco 2: Objetivo do Site -->
+<section class="space-y-gutter">
+<h2 class="font-headline-md text-headline-md text-center text-on-surface mb-8">
+                        Qual o objetivo principal do seu site?
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1 -->
+<button class="flex flex-col items-center p-8 rounded-2xl bg-surface-container-lowest architectural-shadow hover:scale-105 active:scale-95 transition-all duration-200 group text-center">
+<div class="w-16 h-16 rounded-xl bg-secondary-container/10 text-secondary-container flex items-center justify-center mb-4 group-hover:bg-secondary-container group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-4xl" data-icon="shopping_bag">shopping_bag</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">Vender Produtos</span>
+</button>
+<!-- Card 2 -->
+<button class="flex flex-col items-center p-8 rounded-2xl bg-surface-container-lowest architectural-shadow hover:scale-105 active:scale-95 transition-all duration-200 group text-center">
+<div class="w-16 h-16 rounded-xl bg-secondary-container/10 text-secondary-container flex items-center justify-center mb-4 group-hover:bg-secondary-container group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-4xl" data-icon="calendar_month">calendar_month</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">Prestação de Serviços</span>
+</button>
+<!-- Card 3 -->
+<button class="flex flex-col items-center p-8 rounded-2xl bg-surface-container-lowest architectural-shadow hover:scale-105 active:scale-95 transition-all duration-200 group text-center">
+<div class="w-16 h-16 rounded-xl bg-secondary-container/10 text-secondary-container flex items-center justify-center mb-4 group-hover:bg-secondary-container group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-4xl" data-icon="gallery_thumbnail">gallery_thumbnail</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">Portfólio Profissional</span>
+</button>
+<!-- Card 4 -->
+<button class="flex flex-col items-center p-8 rounded-2xl bg-surface-container-lowest architectural-shadow hover:scale-105 active:scale-95 transition-all duration-200 group text-center border-2 border-primary">
+<div class="w-16 h-16 rounded-xl bg-primary-container text-white flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-4xl" data-icon="corporate_fare" data-weight="fill" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-primary">Site Institucional</span>
+</button>
+</div>
+</section>
+<!-- CTA Action Area -->
+<div class="flex flex-col items-center pt-8">
+<button class="flex items-center gap-4 bg-primary-container text-on-primary px-12 py-5 rounded-xl font-headline-md text-headline-md architectural-shadow hover:bg-gradient-to-br hover:from-primary hover:to-[#2563eb] transition-all duration-300 transform active:scale-95">
+                        Continuar para Etapa 2
+                        <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<p class="mt-4 font-label-sm text-label-sm text-on-surface-variant opacity-60">
+                        Você poderá alterar essas informações depois.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 bg-transparent">
+<div class="flex flex-col items-center justify-center gap-unit w-full max-w-7xl mx-auto">
+<div class="flex gap-8 mb-4">
+<a class="font-footer-branding text-footer-branding text-on-surface opacity-60 hover:opacity-100 transition-opacity" href="#">Privacidade</a>
+<a class="font-footer-branding text-footer-branding text-on-surface opacity-60 hover:opacity-100 transition-opacity" href="#">Termos</a>
+<a class="font-footer-branding text-footer-branding text-on-surface opacity-60 hover:opacity-100 transition-opacity" href="#">Suporte</a>
+</div>
+<p class="font-footer-branding text-footer-branding opacity-60 text-[#191c1e]">
+                Criado com SitePronto
+            </p>
+</div>
+</footer>
+<!-- Atmosphere Background Decorative Elements -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
+<div class="absolute top-[-10%] right-[-5%] w-[40%] h-[60%] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] left-[-5%] w-[30%] h-[50%] rounded-full bg-secondary-container/5 blur-[100px]"></div>
+</div>
+</body></html>
