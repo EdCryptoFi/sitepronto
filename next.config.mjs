@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 
-const securityHeaders = [
+const baseHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
-  { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-XSS-Protection', value: '1; mode=block' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -14,8 +13,19 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // All routes: block framing
         source: '/(.*)',
-        headers: securityHeaders,
+        headers: [...baseHeaders, { key: 'X-Frame-Options', value: 'DENY' }],
+      },
+      {
+        // Preview routes: allow same-origin iframe (quiz etapa-4)
+        source: '/api/preview-draft/:id*',
+        headers: [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }],
+      },
+      {
+        // Admin preview route: allow same-origin iframe (admin editor)
+        source: '/api/admin/preview-site/:id*',
+        headers: [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }],
       },
     ];
   },
