@@ -60,6 +60,7 @@ export default function QuizEtapa3() {
           domainChoice: state.domainChoice,
           portfolioItems: state.portfolioItems,
           businessHours: state.businessHours,
+          whatsappNumber: state.whatsappNumber,
           email: state.email.trim(),
         }),
       });

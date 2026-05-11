@@ -154,7 +154,7 @@ function waFloat(waLink: string): string {
 }
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
-function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
+function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -261,10 +261,9 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
   <div class="container nav-inner">
     <span class="logo">${name}</span>
     <ul class="nav-links">
-      ${mods.includes('catalogo') ? '<li><a href="#catalogo">Cardápio</a></li>' : ''}
-      ${mods.includes('agendamento') ? '<li><a href="#agendamento">Horários</a></li>' : ''}
-      ${mods.includes('portfolio') ? '<li><a href="#portfolio">Portfólio</a></li>' : ''}
-      ${mods.includes('blog') ? '<li><a href="#blog">Blog</a></li>' : ''}
+      ${mods.includes('servicos') ? '<li><a href="#servicos">Cardápio</a></li>' : ''}
+      ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
+      ${mods.includes('depoimentos') ? '<li><a href="#depoimentos">Avaliações</a></li>' : ''}
       <li><a href="#contato">Contato</a></li>
     </ul>
   </div>
@@ -277,8 +276,8 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
       <h1 class="hero-title">${name}</h1>
       <p class="hero-sub">${ai?.hero_subheadline ?? 'Sabor e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.'}</p>
       <div class="hero-ctas">
-        ${mods.includes('catalogo') ? `<a href="#catalogo" class="btn-primary">Ver Cardápio</a>` : ''}
-        ${mods.includes('whatsapp') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
+        ${mods.includes('servicos') ? `<a href="#servicos" class="btn-primary">Ver Cardápio</a>` : ''}
+        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
       </div>
     </div>
   </div>
@@ -300,10 +299,12 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
   </div>
 </section>
 
-${mods.includes('catalogo') ? catalogSection(b.catalog_products, pal) : ''}
-${mods.includes('agendamento') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('portfolio') ? portfolioSection(pal) : ''}
-${mods.includes('blog') ? blogSection(pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal) : ''}
+${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
+${mods.includes('galeria') ? portfolioSection(pal) : ''}
+${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal) : ''}
 
 <section id="contato" class="cta-banner">
   <div class="container">
@@ -324,13 +325,13 @@ ${mods.includes('blog') ? blogSection(pal) : ''}
   </div>
 </footer>
 
-${mods.includes('whatsapp') ? waFloat(waLink) : ''}
+${mods.includes('contato') ? waFloat(waLink) : ''}
 </body>
 </html>`;
 }
 
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
-function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
+function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -418,9 +419,9 @@ footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
   <div class="container nav-inner">
     <span class="logo">${name}</span>
     <ul class="nav-links">
-      ${mods.includes('catalogo') ? '<li><a href="#catalogo">Serviços</a></li>' : ''}
-      ${mods.includes('agendamento') ? '<li><a href="#agendamento">Horários</a></li>' : ''}
-      ${mods.includes('portfolio') ? '<li><a href="#portfolio">Casos</a></li>' : ''}
+      ${mods.includes('servicos') ? '<li><a href="#servicos">Serviços</a></li>' : ''}
+      ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
+      ${mods.includes('depoimentos') ? '<li><a href="#depoimentos">Depoimentos</a></li>' : ''}
       <li><a href="#contato">Contato</a></li>
     </ul>
   </div>
@@ -431,8 +432,8 @@ footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
     <h1 class="hero-title">${name}</h1>
     <p class="hero-sub">${ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.'}</p>
     <div class="hero-ctas">
-      ${mods.includes('agendamento') ? `<a href="#agendamento" class="btn-primary">Agendar Consulta</a>` : ''}
-      ${mods.includes('whatsapp') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
+      ${mods.includes('contato') ? `<a href="#contato" class="btn-primary">Agendar Consulta</a>` : ''}
+      ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
     </div>
   </div>
 </section>
@@ -451,10 +452,12 @@ footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
     </div>
   </div>
 </section>
-${mods.includes('catalogo') ? catalogSection(b.catalog_products, pal) : ''}
-${mods.includes('agendamento') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('portfolio') ? portfolioSection(pal) : ''}
-${mods.includes('blog') ? blogSection(pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal) : ''}
+${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
+${mods.includes('galeria') ? portfolioSection(pal) : ''}
+${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal) : ''}
 <section id="contato" class="cta-banner">
   <div class="container">
     <h2>${ai?.cta_main ?? 'Pronto para cuidar da sua saúde?'}</h2>
@@ -465,13 +468,13 @@ ${mods.includes('blog') ? blogSection(pal) : ''}
     </a>
   </div>
 </section>
-<footer><div class="container footer-inner"><span class="footer-logo">${name}</span><span class="footer-domain">${b.domain ? `${b.domain}.com.br` : ''}</span><span class="footer-domain" style="font-size:.75rem">Feito com SitePronto</span></div></footer>
-${mods.includes('whatsapp') ? waFloat(waLink) : ''}
+<footer><div class="container footer-inner"><span class="footer-logo">${name}</span><span class="footer-domain">${b.domain ? `${b.domain}.com.br` : ''}</span><span class="footer-domain" style="font-size:.75rem">${ai?.footer_tagline ?? 'Feito com SitePronto'}</span></div></footer>
+${mods.includes('contato') ? waFloat(waLink) : ''}
 </body></html>`;
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
-function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
+function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -550,8 +553,8 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:40px 0}
   <div class="container nav-inner">
     <span class="logo">${name}<span>.</span></span>
     <ul class="nav-links">
-      ${mods.includes('catalogo') ? '<li><a href="#catalogo">Produtos</a></li>' : ''}
-      ${mods.includes('agendamento') ? '<li><a href="#agendamento">Horários</a></li>' : ''}
+      ${mods.includes('servicos') ? '<li><a href="#servicos">Produtos</a></li>' : ''}
+      ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
       <li><a href="#contato">Contato</a></li>
     </ul>
   </div>
@@ -562,8 +565,8 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:40px 0}
     <h1 class="hero-title">${name}</h1>
     <p class="hero-sub">${ai?.hero_subheadline ?? 'Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.'}</p>
     <div class="hero-ctas">
-      ${mods.includes('catalogo') ? `<a href="#catalogo" class="btn-primary">Ver Produtos</a>` : ''}
-      ${mods.includes('whatsapp') ? `<a href="${waLink}" target="_blank" class="btn-secondary">📱 Pedir pelo WhatsApp</a>` : ''}
+      ${mods.includes('servicos') ? `<a href="#servicos" class="btn-primary">Ver Produtos</a>` : ''}
+      ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-secondary">📱 Pedir pelo WhatsApp</a>` : ''}
     </div>
   </div>
 </section>
@@ -578,10 +581,12 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:40px 0}
     </div>
   </div>
 </section>
-${mods.includes('catalogo') ? catalogSection(b.catalog_products, pal) : ''}
-${mods.includes('agendamento') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('portfolio') ? portfolioSection(pal) : ''}
-${mods.includes('blog') ? blogSection(pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal) : ''}
+${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
+${mods.includes('galeria') ? portfolioSection(pal) : ''}
+${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal) : ''}
 <section id="contato" class="cta-banner">
   <div class="container">
     <h2>${ai?.cta_main ?? 'Quer fazer um pedido especial?'}</h2>
@@ -592,13 +597,13 @@ ${mods.includes('blog') ? blogSection(pal) : ''}
     </a>
   </div>
 </section>
-<footer><div class="container footer-inner"><span class="footer-logo">${name}</span><span style="font-size:.875rem;color:rgba(255,255,255,.5)">${b.domain ? `${b.domain}.com.br` : ''} · Feito com SitePronto</span></div></footer>
-${mods.includes('whatsapp') ? waFloat(waLink) : ''}
+<footer><div class="container footer-inner"><span class="footer-logo">${name}</span><span style="font-size:.875rem;color:rgba(255,255,255,.5)">${b.domain ? `${b.domain}.com.br` : ''} · ${ai?.footer_tagline ?? 'Feito com SitePronto'}</span></div></footer>
+${mods.includes('contato') ? waFloat(waLink) : ''}
 </body></html>`;
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
-function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
+function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -696,8 +701,8 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
     <span class="logo">${name}<span>.</span></span>
     <ul class="nav-links">
       <li><a href="#servicos">Serviços</a></li>
-      ${mods.includes('portfolio') ? '<li><a href="#portfolio">Portfólio</a></li>' : ''}
-      ${mods.includes('blog') ? '<li><a href="#blog">Blog</a></li>' : ''}
+      ${mods.includes('galeria') ? '<li><a href="#galeria">Portfólio</a></li>' : ''}
+      ${mods.includes('depoimentos') ? '<li><a href="#depoimentos">Depoimentos</a></li>' : ''}
       <li><a href="#contato">Contato</a></li>
     </ul>
   </div>
@@ -709,7 +714,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
     <p class="hero-sub">${ai?.hero_subheadline ?? 'Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.'}</p>
     <div class="hero-ctas">
       <a href="#contato" class="btn-primary">Fale Conosco</a>
-      ${mods.includes('portfolio') ? `<a href="#portfolio" class="btn-outline">Ver Portfólio</a>` : ''}
+      ${mods.includes('galeria') ? `<a href="#galeria" class="btn-outline">Ver Portfólio</a>` : ''}
     </div>
     <div class="stats">
       <div><div class="stat-num">+50</div><div class="stat-label">Clientes atendidos</div></div>
@@ -734,10 +739,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
     </div>
   </div>
 </section>
-${mods.includes('catalogo') ? catalogSection(b.catalog_products, pal) : ''}
-${mods.includes('agendamento') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('portfolio') ? portfolioSection(pal) : ''}
-${mods.includes('blog') ? blogSection(pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('galeria') ? portfolioSection(pal) : ''}
+${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
+${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal) : ''}
 <section id="contato" class="cta-section">
   <div class="container">
     <h2 class="cta-title">${ai?.cta_main ?? 'Pronto para começar?'}</h2>
@@ -748,23 +754,61 @@ ${mods.includes('blog') ? blogSection(pal) : ''}
     </a>
   </div>
 </section>
-<footer><div class="container footer-inner"><span class="footer-logo">${name}<span>.</span></span><span class="footer-domain">${b.domain ? `${b.domain}.com.br` : ''} · Feito com SitePronto</span></div></footer>
-${mods.includes('whatsapp') ? waFloat(waLink) : ''}
+<footer><div class="container footer-inner"><span class="footer-logo">${name}<span>.</span></span><span class="footer-domain">${b.domain ? `${b.domain}.com.br` : ''} · ${ai?.footer_tagline ?? 'Feito com SitePronto'}</span></div></footer>
+${mods.includes('contato') ? waFloat(waLink) : ''}
 </body></html>`;
+}
+
+function aboutSection(description: string, pal: Palette): string {
+  if (!description) return '';
+  return `
+  <section id="sobre" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow" style="color:${pal.primary}">Sobre nós</span>
+        <h2 class="section-title">Quem somos</h2>
+        <p class="section-sub" style="max-width:640px;margin:16px auto 0;line-height:1.8">${description}</p>
+      </div>
+    </div>
+  </section>`;
+}
+
+function faqSection(pal: Palette): string {
+  const items = [
+    { q: 'Como posso entrar em contato?', a: 'Fale conosco pelo WhatsApp ou através do formulário de contato. Respondemos rapidamente.' },
+    { q: 'Quais são os horários de atendimento?', a: 'Atendemos de segunda a sexta, das 9h às 18h. Sábados das 9h às 13h.' },
+    { q: 'Como faço para solicitar um orçamento?', a: 'Entre em contato pelo WhatsApp e retornaremos em até 24 horas com todas as informações.' },
+  ];
+  return `
+  <section id="faq" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="eyebrow" style="color:${pal.primary}">Dúvidas</span>
+        <h2 class="section-title">Perguntas frequentes</h2>
+      </div>
+      <div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
+        ${items.map(item => `
+        <div style="border-radius:16px;padding:24px;border:1px solid ${pal.primary}22;background:var(--surface,#fff)">
+          <p style="font-weight:700;margin-bottom:8px">${item.q}</p>
+          <p style="color:var(--muted,#666);font-size:.9rem;line-height:1.7">${item.a}</p>
+        </div>`).join('')}
+      </div>
+    </div>
+  </section>`;
 }
 
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
 export function generateSiteHTML(briefing: SiteBriefing): string {
   const pal = PALETTES[briefing.palette] ?? PALETTES['azul-editorial'];
-  const name = formatBusinessName(briefing.domain, briefing.segment);
+  const { businessName, description, ai } = parseAICopyFromNotes(briefing.content_notes);
+  const name = businessName || formatBusinessName(briefing.domain, briefing.segment);
   const waLink = whatsappLink(briefing.whatsapp_number);
   const tpl = briefing.template || 'portfolio';
-  const { ai } = parseAICopyFromNotes(briefing.content_notes);
 
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, ai);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, ai);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, ai);
-  return generatePortfolio(briefing, pal, name, waLink, ai);
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, ai);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, ai);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, ai);
+  return generatePortfolio(briefing, pal, name, waLink, description, ai);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {

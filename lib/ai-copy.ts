@@ -83,15 +83,19 @@ Regras obrigatórias:
   }
 }
 
-export function parseAICopyFromNotes(contentNotes: string | null): { description: string; ai: AICopy | null } {
-  if (!contentNotes) return { description: '', ai: null };
+export function parseAICopyFromNotes(contentNotes: string | null): { businessName: string; description: string; ai: AICopy | null } {
+  if (!contentNotes) return { businessName: '', description: '', ai: null };
   try {
     const parsed = JSON.parse(contentNotes);
     if (parsed && typeof parsed === 'object' && 'description' in parsed) {
-      return { description: String(parsed.description ?? ''), ai: parsed.ai ?? null };
+      return {
+        businessName: String(parsed.businessName ?? ''),
+        description: String(parsed.description ?? ''),
+        ai: parsed.ai ?? null,
+      };
     }
   } catch {
     // not JSON — treat as plain description (legacy)
   }
-  return { description: contentNotes, ai: null };
+  return { businessName: '', description: contentNotes, ai: null };
 }

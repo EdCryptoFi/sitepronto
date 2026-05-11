@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
   const businessHours = truncate(b.businessHours, 500);
   const domain = truncate(b.domain, 100);
   const logoName = truncate(b.logoName, 200);
+  const whatsappNumber = truncate(b.whatsappNumber, 20);
 
   // Generate AI copy (non-blocking fallback if Gemini fails)
   const aiCopy = await generateAICopy({
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
     modules,
   });
 
-  const contentNotes = JSON.stringify({ description: businessName ? `${businessName}\n\n${description}` : description, ai: aiCopy });
+  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
       selected_modules: modules,
       domain_choice: domainChoice,
       domain: domain || null,
+      whatsapp_number: whatsappNumber || null,
       content_notes: contentNotes,
       business_hours: businessHours || null,
       logo_name: logoName || null,
