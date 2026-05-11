@@ -1,3 +1,5 @@
+import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
+
 export type SiteBriefing = {
   id: string;
   segment: string;
@@ -152,7 +154,7 @@ function waFloat(waLink: string): string {
 }
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
-function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string): string {
+function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -273,7 +275,7 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
     <div class="hero-content">
       <div class="hero-tag">🍽️ Bem-vindo</div>
       <h1 class="hero-title">${name}</h1>
-      <p class="hero-sub">Sabor e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.</p>
+      <p class="hero-sub">${ai?.hero_subheadline ?? 'Sabor e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.'}</p>
       <div class="hero-ctas">
         ${mods.includes('catalogo') ? `<a href="#catalogo" class="btn-primary">Ver Cardápio</a>` : ''}
         ${mods.includes('whatsapp') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
@@ -289,9 +291,11 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
       <h2 class="section-title">Qualidade em cada detalhe</h2>
     </div>
     <div class="features-grid">
-      <div class="feature-card"><div class="feature-icon">🌟</div><div class="feature-title">Qualidade Premium</div><div class="feature-desc">Ingredientes selecionados e preparo artesanal em cada prato.</div></div>
-      <div class="feature-card"><div class="feature-icon">🚀</div><div class="feature-title">Atendimento Ágil</div><div class="feature-desc">Pedidos rápidos pelo WhatsApp, sem espera desnecessária.</div></div>
-      <div class="feature-card"><div class="feature-icon">❤️</div><div class="feature-title">Feito com Amor</div><div class="feature-desc">Receitas exclusivas preparadas com dedicação e carinho.</div></div>
+      ${(ai?.services ?? [
+        {icon:'🌟',name:'Qualidade Premium',description:'Ingredientes selecionados e preparo artesanal em cada prato.'},
+        {icon:'🚀',name:'Atendimento Ágil',description:'Pedidos rápidos pelo WhatsApp, sem espera desnecessária.'},
+        {icon:'❤️',name:'Feito com Amor',description:'Receitas exclusivas preparadas com dedicação e carinho.'},
+      ]).map(s=>`<div class="feature-card"><div class="feature-icon">${s.icon}</div><div class="feature-title">${s.name}</div><div class="feature-desc">${s.description}</div></div>`).join('')}
     </div>
   </div>
 </section>
@@ -303,8 +307,8 @@ ${mods.includes('blog') ? blogSection(pal) : ''}
 
 <section id="contato" class="cta-banner">
   <div class="container">
-    <h2>Fale com a gente</h2>
-    <p>Tire suas dúvidas ou faça seu pedido diretamente pelo WhatsApp.</p>
+    <h2>${ai?.cta_main ?? 'Fale com a gente'}</h2>
+    <p>${ai?.cta_sub ?? 'Tire suas dúvidas ou faça seu pedido diretamente pelo WhatsApp.'}</p>
     <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
       Falar pelo WhatsApp
@@ -316,7 +320,7 @@ ${mods.includes('blog') ? blogSection(pal) : ''}
   <div class="container footer-inner">
     <span class="footer-logo">${name}</span>
     <span class="footer-domain">${b.domain ? `${b.domain}.com.br` : 'siteprontodemo.com.br'}</span>
-    <span class="footer-domain" style="font-size:.75rem">Feito com SitePronto</span>
+    <span class="footer-domain" style="font-size:.75rem">${ai?.footer_tagline ?? 'Feito com SitePronto'}</span>
   </div>
 </footer>
 
@@ -326,7 +330,7 @@ ${mods.includes('whatsapp') ? waFloat(waLink) : ''}
 }
 
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
-function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string): string {
+function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -425,7 +429,7 @@ footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
   <div class="container">
     <div class="hero-tag">🏥 Saúde & Bem-estar</div>
     <h1 class="hero-title">${name}</h1>
-    <p class="hero-sub">Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.</p>
+    <p class="hero-sub">${ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.'}</p>
     <div class="hero-ctas">
       ${mods.includes('agendamento') ? `<a href="#agendamento" class="btn-primary">Agendar Consulta</a>` : ''}
       ${mods.includes('whatsapp') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
@@ -439,9 +443,11 @@ footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
       <h2 class="section-title">Por que escolher a ${name}?</h2>
     </div>
     <div class="features-grid">
-      <div class="feature-card"><div class="feature-icon">🩺</div><div class="feature-title">Equipe Especializada</div><div class="feature-desc">Profissionais qualificados e atualizados com as melhores práticas.</div></div>
-      <div class="feature-card"><div class="feature-icon">📅</div><div class="feature-title">Agendamento Fácil</div><div class="feature-desc">Marque sua consulta diretamente pelo WhatsApp, sem complicação.</div></div>
-      <div class="feature-card"><div class="feature-icon">💚</div><div class="feature-title">Atendimento Humano</div><div class="feature-desc">Cada paciente é único. Tratamos com atenção e cuidado individual.</div></div>
+      ${(ai?.services ?? [
+        {icon:'🩺',name:'Equipe Especializada',description:'Profissionais qualificados e atualizados com as melhores práticas.'},
+        {icon:'📅',name:'Agendamento Fácil',description:'Marque sua consulta diretamente pelo WhatsApp, sem complicação.'},
+        {icon:'💚',name:'Atendimento Humano',description:'Cada paciente é único. Tratamos com atenção e cuidado individual.'},
+      ]).map(s=>`<div class="feature-card"><div class="feature-icon">${s.icon}</div><div class="feature-title">${s.name}</div><div class="feature-desc">${s.description}</div></div>`).join('')}
     </div>
   </div>
 </section>
@@ -451,8 +457,8 @@ ${mods.includes('portfolio') ? portfolioSection(pal) : ''}
 ${mods.includes('blog') ? blogSection(pal) : ''}
 <section id="contato" class="cta-banner">
   <div class="container">
-    <h2>Pronto para cuidar da sua saúde?</h2>
-    <p>Agende agora pelo WhatsApp. Retornamos em instantes!</p>
+    <h2>${ai?.cta_main ?? 'Pronto para cuidar da sua saúde?'}</h2>
+    <p>${ai?.cta_sub ?? 'Agende agora pelo WhatsApp. Retornamos em instantes!'}</p>
     <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
       Agendar pelo WhatsApp
@@ -465,7 +471,7 @@ ${mods.includes('whatsapp') ? waFloat(waLink) : ''}
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
-function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string): string {
+function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -554,7 +560,7 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:40px 0}
   <div class="container">
     <div class="hero-tag">🛍️ Loja Online</div>
     <h1 class="hero-title">${name}</h1>
-    <p class="hero-sub">Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.</p>
+    <p class="hero-sub">${ai?.hero_subheadline ?? 'Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.'}</p>
     <div class="hero-ctas">
       ${mods.includes('catalogo') ? `<a href="#catalogo" class="btn-primary">Ver Produtos</a>` : ''}
       ${mods.includes('whatsapp') ? `<a href="${waLink}" target="_blank" class="btn-secondary">📱 Pedir pelo WhatsApp</a>` : ''}
@@ -564,9 +570,11 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:40px 0}
 <section class="section">
   <div class="container">
     <div class="features-grid">
-      <div class="feature-card"><div class="feature-icon">🚚</div><div class="feature-title">Entrega Rápida</div><div class="feature-desc">Envio ágil para todo o Brasil com rastreamento em tempo real.</div></div>
-      <div class="feature-card"><div class="feature-icon">✅</div><div class="feature-title">Qualidade Garantida</div><div class="feature-desc">Produtos selecionados com procedência e qualidade comprovada.</div></div>
-      <div class="feature-card"><div class="feature-icon">💬</div><div class="feature-title">Suporte Direto</div><div class="feature-desc">Atendimento pelo WhatsApp para dúvidas e pedidos especiais.</div></div>
+      ${(ai?.services ?? [
+        {icon:'🚚',name:'Entrega Rápida',description:'Envio ágil para todo o Brasil com rastreamento em tempo real.'},
+        {icon:'✅',name:'Qualidade Garantida',description:'Produtos selecionados com procedência e qualidade comprovada.'},
+        {icon:'💬',name:'Suporte Direto',description:'Atendimento pelo WhatsApp para dúvidas e pedidos especiais.'},
+      ]).map(s=>`<div class="feature-card"><div class="feature-icon">${s.icon}</div><div class="feature-title">${s.name}</div><div class="feature-desc">${s.description}</div></div>`).join('')}
     </div>
   </div>
 </section>
@@ -576,8 +584,8 @@ ${mods.includes('portfolio') ? portfolioSection(pal) : ''}
 ${mods.includes('blog') ? blogSection(pal) : ''}
 <section id="contato" class="cta-banner">
   <div class="container">
-    <h2>Quer fazer um pedido especial?</h2>
-    <p>Fale diretamente com a gente pelo WhatsApp.</p>
+    <h2>${ai?.cta_main ?? 'Quer fazer um pedido especial?'}</h2>
+    <p>${ai?.cta_sub ?? 'Fale diretamente com a gente pelo WhatsApp.'}</p>
     <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
       Falar pelo WhatsApp
@@ -590,7 +598,7 @@ ${mods.includes('whatsapp') ? waFloat(waLink) : ''}
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
-function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string): string {
+function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -698,7 +706,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
   <div class="container hero-inner">
     <div class="hero-tag">⚡ Especialistas</div>
     <h1 class="hero-title">${name}<span>.</span></h1>
-    <p class="hero-sub">Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.</p>
+    <p class="hero-sub">${ai?.hero_subheadline ?? 'Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.'}</p>
     <div class="hero-ctas">
       <a href="#contato" class="btn-primary">Fale Conosco</a>
       ${mods.includes('portfolio') ? `<a href="#portfolio" class="btn-outline">Ver Portfólio</a>` : ''}
@@ -718,9 +726,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
       <p class="section-sub">Soluções completas para o seu negócio crescer com estratégia.</p>
     </div>
     <div class="services-grid">
-      <div class="service-card"><div class="service-icon">🎯</div><div class="service-title">Consultoria Estratégica</div><div class="service-desc">Análise completa do seu negócio com recomendações práticas para crescimento.</div></div>
-      <div class="service-card"><div class="service-icon">📊</div><div class="service-title">Análise e Resultados</div><div class="service-desc">Métricas e relatórios detalhados para decisões baseadas em dados.</div></div>
-      <div class="service-card"><div class="service-icon">🚀</div><div class="service-title">Execução e Entrega</div><div class="service-desc">Implementação ágil com foco em resultado e prazo definido.</div></div>
+      ${(ai?.services ?? [
+        {icon:'🎯',name:'Consultoria Estratégica',description:'Análise completa do seu negócio com recomendações práticas para crescimento.'},
+        {icon:'📊',name:'Análise e Resultados',description:'Métricas e relatórios detalhados para decisões baseadas em dados.'},
+        {icon:'🚀',name:'Execução e Entrega',description:'Implementação ágil com foco em resultado e prazo definido.'},
+      ]).map(s=>`<div class="service-card"><div class="service-icon">${s.icon}</div><div class="service-title">${s.name}</div><div class="service-desc">${s.description}</div></div>`).join('')}
     </div>
   </div>
 </section>
@@ -730,8 +740,8 @@ ${mods.includes('portfolio') ? portfolioSection(pal) : ''}
 ${mods.includes('blog') ? blogSection(pal) : ''}
 <section id="contato" class="cta-section">
   <div class="container">
-    <h2 class="cta-title">Pronto para começar?</h2>
-    <p class="cta-sub">Entre em contato hoje e vamos transformar seu negócio juntos.</p>
+    <h2 class="cta-title">${ai?.cta_main ?? 'Pronto para começar?'}</h2>
+    <p class="cta-sub">${ai?.cta_sub ?? 'Entre em contato hoje e vamos transformar seu negócio juntos.'}</p>
     <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
       Falar pelo WhatsApp
@@ -749,11 +759,12 @@ export function generateSiteHTML(briefing: SiteBriefing): string {
   const name = formatBusinessName(briefing.domain, briefing.segment);
   const waLink = whatsappLink(briefing.whatsapp_number);
   const tpl = briefing.template || 'portfolio';
+  const { ai } = parseAICopyFromNotes(briefing.content_notes);
 
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink);
-  return generatePortfolio(briefing, pal, name, waLink);
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, ai);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, ai);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, ai);
+  return generatePortfolio(briefing, pal, name, waLink, ai);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {

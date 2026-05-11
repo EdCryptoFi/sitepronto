@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getIp } from '@/lib/rate-limit';
+import { generateAICopy } from '@/lib/ai-copy';
 
 const ALLOWED_OBJECTIVES = ['vender-produtos', 'servicos', 'portfolio', 'institucional'];
 const ALLOWED_PALETTES = ['minimal', 'vibrant', 'corporate', 'nature', 'tech', 'elegant'];
@@ -79,9 +80,16 @@ export async function POST(req: NextRequest) {
   const domain = truncate(b.domain, 100);
   const logoName = truncate(b.logoName, 200);
 
-  const contentNotes = businessName
-    ? `Negócio: ${businessName}\n\n${description}`
-    : description;
+  // Generate AI copy (non-blocking fallback if Gemini fails)
+  const aiCopy = await generateAICopy({
+    businessName,
+    objective,
+    description,
+    template,
+    modules,
+  });
+
+  const contentNotes = JSON.stringify({ description: businessName ? `${businessName}\n\n${description}` : description, ai: aiCopy });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
