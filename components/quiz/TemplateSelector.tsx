@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { CheckCircle2, X, Eye } from 'lucide-react';
 import { useQuiz } from '@/lib/quiz-context';
-import { SEGMENT_TO_TEMPLATE, type TemplateId } from '@/lib/quiz-data';
+import { OBJECTIVE_TO_TEMPLATE, type TemplateId, type ObjectiveId } from '@/lib/quiz-data';
 
 type TemplateMeta = {
   name: string;
@@ -352,7 +352,7 @@ export function TemplateSelector() {
   const { state, dispatch } = useQuiz();
   const [modalId, setModalId] = useState<TemplateId | null>(null);
 
-  const suggested = (SEGMENT_TO_TEMPLATE[state.segment] ?? 'portfolio') as TemplateId;
+  const suggested = (OBJECTIVE_TO_TEMPLATE[state.objective as ObjectiveId] ?? 'portfolio') as TemplateId;
   const active = ((state.template || suggested) as TemplateId);
   const isCustom = state.template !== '' && state.template !== suggested;
 
