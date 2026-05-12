@@ -20,11 +20,9 @@ export type SiteBriefing = {
 type Palette = { primary: string; accent: string; light: string; dark: string };
 
 const PALETTES: Record<string, Palette> = {
-  // Legacy IDs
   'azul-editorial': { primary: '#004ac6', accent: '#2563eb', light: '#dbe6ff', dark: '#001d4a' },
   'verde-servico':  { primary: '#0f766e', accent: '#14b8a6', light: '#ccfbf1', dark: '#042f2e' },
   'vinho-premium':  { primary: '#7f1d1d', accent: '#be123c', light: '#ffe4e6', dark: '#3b0000' },
-  // New palette IDs
   'minimal':    { primary: '#374151', accent: '#6b7280', light: '#f3f4f6', dark: '#111827' },
   'vibrant':    { primary: '#004ac6', accent: '#eab308', light: '#fef9c3', dark: '#001d4a' },
   'corporate':  { primary: '#002855', accent: '#004ac6', light: '#dbe1ff', dark: '#001029' },
@@ -32,6 +30,8 @@ const PALETTES: Record<string, Palette> = {
   'tech':       { primary: '#111827', accent: '#06b6d4', light: '#cffafe', dark: '#030712' },
   'elegant':    { primary: '#2b1b17', accent: '#b58e58', light: '#f5f1ed', dark: '#0f0805' },
 };
+
+const WA_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>`;
 
 function formatBusinessName(domain: string | null, segment: string): string {
   if (!domain) {
@@ -52,110 +52,262 @@ function whatsappLink(number: string | null): string {
   return `https://wa.me/${full}`;
 }
 
-function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette): string {
-  if (!products || products.length === 0) return '';
-  const cards = products.map((p) => {
-    const img = p.imagePreview
-      ? `<img src="${p.imagePreview}" alt="${p.name}" class="prod-img" />`
-      : `<div class="prod-img-placeholder"></div>`;
-    return `
-      <div class="prod-card">
+function waFloat(waLink: string): string {
+  return `
+<a href="${waLink}" target="_blank" class="wa-float" aria-label="Falar pelo WhatsApp">
+  ${WA_SVG}
+</a>`;
+}
+
+// ─── SHARED SECTION HELPERS ──────────────────────────────────────────────────
+
+function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette, dark = false): string {
+  const gradients = [
+    `linear-gradient(135deg,${pal.primary}33,${pal.accent}22)`,
+    `linear-gradient(135deg,${pal.accent}33,${pal.light})`,
+    `linear-gradient(135deg,${pal.light},${pal.primary}22)`,
+  ];
+  const items = (products && products.length > 0)
+    ? products.map((p, i) => {
+        const img = p.imagePreview
+          ? `<img src="${p.imagePreview}" alt="${p.name}" style="width:100%;height:180px;object-fit:cover">`
+          : `<div class="item-photo" style="background:${gradients[i % 3]}">
+               <div class="item-photo-circle" style="background:${pal.primary}44"></div>
+             </div>`;
+        return `
+      <div class="item-card">
         ${img}
-        <div class="prod-info">
-          <span class="prod-name">${p.name || 'Produto'}</span>
-          ${p.price ? `<span class="prod-price">${p.price}</span>` : ''}
+        <div class="item-body">
+          <span class="item-name">${p.name || 'Item'}</span>
+          ${p.price ? `<span class="item-price" style="color:${pal.accent}">${p.price}</span>` : ''}
+          <button class="item-btn" style="background:${pal.primary}">Saiba mais</button>
         </div>
       </div>`;
-  }).join('');
+      }).join('')
+    : [1,2,3,4,5,6].map((i) => `
+      <div class="item-card">
+        <div class="item-photo" style="background:${gradients[i % 3]}">
+          <div class="item-photo-circle" style="background:${pal.primary}55"></div>
+        </div>
+        <div class="item-body">
+          <span class="item-name">Item ${i}</span>
+          <button class="item-btn" style="background:${pal.primary}">Saiba mais</button>
+        </div>
+      </div>`).join('');
+  const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
   return `
-  <section id="catalogo" class="section">
-    <div class="container">
-      <div class="section-header">
-        <span class="eyebrow" style="color:${pal.primary}">Catálogo</span>
-        <h2 class="section-title">Nossos produtos e serviços</h2>
-      </div>
-      <div class="prod-grid">${cards}</div>
+<section id="servicos" style="padding:80px 0;background:${bg}">
+  <div class="container">
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Catálogo</span>
+      <h2 class="sec-title">Nossos produtos e serviços</h2>
     </div>
-  </section>`;
+    <div class="items-grid">${items}</div>
+  </div>
+</section>`;
 }
 
 function hoursSection(hours: string | null, waLink: string, pal: Palette): string {
   if (!hours) return '';
-  const hoursHtml = hours.split('\n').map((line) => `<p>${line}</p>`).join('');
+  const rows = hours.split('\n').filter(Boolean).map((line) => {
+    const [day, ...rest] = line.split(':');
+    return `<tr><td class="h-day">${day.trim()}</td><td class="h-val">${rest.join(':').trim()}</td></tr>`;
+  }).join('');
   return `
-  <section id="agendamento" class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <span class="eyebrow" style="color:${pal.primary}">Agendamento</span>
-        <h2 class="section-title">Horários de atendimento</h2>
-      </div>
-      <div class="hours-box">
-        <div class="hours-text">${hoursHtml}</div>
-        <a href="${waLink}?text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="btn-wa">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
-          Agendar pelo WhatsApp
-        </a>
-      </div>
+<section id="horarios" style="padding:80px 0">
+  <div class="container">
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Horários</span>
+      <h2 class="sec-title">Quando estamos disponíveis</h2>
     </div>
-  </section>`;
+    <div style="max-width:520px;margin:0 auto;text-align:center">
+      <table class="hours-table">
+        <tbody>${rows}</tbody>
+      </table>
+      <a href="${waLink}?text=Olá!%20Gostaria%20de%20agendar%20um%20horário." target="_blank" class="btn-wa-inline" style="background:#16a34a">
+        ${WA_SVG} Agendar pelo WhatsApp
+      </a>
+    </div>
+  </div>
+</section>`;
 }
 
-function portfolioSection(pal: Palette): string {
+function gallerySection(pal: Palette, dark = false): string {
+  const colors = [pal.primary, pal.accent, pal.light, pal.primary, pal.accent, pal.light];
+  const tags = ['Projeto', 'Trabalho', 'Cliente', 'Case', 'Portfolio', 'Resultado'];
+  const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
   return `
-  <section id="portfolio" class="section">
-    <div class="container">
-      <div class="section-header">
-        <span class="eyebrow" style="color:${pal.primary}">Portfólio</span>
-        <h2 class="section-title">Nossos trabalhos</h2>
-        <p class="section-sub">Conheça alguns projetos que realizamos para nossos clientes.</p>
-      </div>
-      <div class="portfolio-grid">
-        ${[1,2,3,4].map((i) => `
-          <div class="portfolio-card">
-            <div class="portfolio-thumb" style="background:linear-gradient(135deg,${pal.light},${pal.accent}22)"></div>
-            <div class="portfolio-info">
-              <span class="portfolio-tag" style="color:${pal.primary}">Projeto ${i}</span>
-              <p class="portfolio-desc">Descrição do projeto e resultado alcançado para o cliente.</p>
-            </div>
-          </div>`).join('')}
-      </div>
+<section id="galeria" style="padding:80px 0;background:${bg}">
+  <div class="container">
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Galeria</span>
+      <h2 class="sec-title">Nossos trabalhos</h2>
+      <p class="sec-sub">Conheça alguns projetos que realizamos para nossos clientes.</p>
     </div>
-  </section>`;
+    <div class="gallery-grid">
+      ${[0,1,2,3,4,5].map((i) => `
+      <div class="gallery-card">
+        <div class="gallery-thumb" style="background:linear-gradient(135deg,${colors[i % 3]}33,${colors[(i+1) % 3]}22);position:relative">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <div style="width:64px;height:64px;border-radius:50%;background:${pal.primary}44"></div>
+          </div>
+        </div>
+        <div class="gallery-body">
+          <span class="gallery-tag" style="color:${pal.primary}">${tags[i]}</span>
+          <p class="gallery-name">Trabalho ${i + 1}</p>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
 }
 
-function blogSection(pal: Palette): string {
+function testimonialsSection(pal: Palette, dark = false): string {
+  const names = ['Ana Silva', 'Carlos Mendes', 'Fernanda Lima'];
+  const roles = ['Cliente fiel', 'Parceiro', 'Cliente satisfeita'];
+  const texts = [
+    'Atendimento impecável e resultado acima das expectativas. Recomendo a todos!',
+    'Profissionalismo e qualidade em cada detalhe. Voltarei com certeza.',
+    'Equipe atenciosa, pontual e comprometida com o cliente. Nota 10!',
+  ];
+  const avatarGrads = [
+    `linear-gradient(135deg,${pal.primary},${pal.accent})`,
+    `linear-gradient(135deg,${pal.accent},${pal.primary}88)`,
+    `linear-gradient(135deg,${pal.primary}88,${pal.accent})`,
+  ];
+  const bg = dark ? 'var(--surface2,#0f172a)' : 'var(--bg,#ffffff)';
   return `
-  <section id="blog" class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <span class="eyebrow" style="color:${pal.primary}">Blog</span>
-        <h2 class="section-title">Artigos e novidades</h2>
-      </div>
-      <div class="blog-grid">
-        ${['Primeiro artigo do blog', 'Dicas e novidades', 'Saiba mais sobre nós'].map((title) => `
-          <div class="blog-card">
-            <div class="blog-thumb" style="background:${pal.light}"></div>
-            <div class="blog-body">
-              <span class="blog-cat" style="color:${pal.primary}">Novidade</span>
-              <h3 class="blog-title">${title}</h3>
-              <p class="blog-excerpt">Em breve novos conteúdos por aqui. Fique ligado!</p>
-            </div>
-          </div>`).join('')}
-      </div>
+<section id="depoimentos" style="padding:80px 0;background:${bg}">
+  <div class="container">
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Depoimentos</span>
+      <h2 class="sec-title">O que nossos clientes dizem</h2>
     </div>
-  </section>`;
+    <div class="testimonials-grid">
+      ${names.map((n, i) => `
+      <div class="testimonial-card">
+        <div style="color:${pal.accent};font-size:1.2rem;margin-bottom:12px">★★★★★</div>
+        <p class="testimonial-text">"${texts[i]}"</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:${avatarGrads[i]}">
+            ${n.charAt(0)}
+          </div>
+          <div>
+            <div class="testimonial-name">${n}</div>
+            <div class="testimonial-role">${roles[i]}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
 }
 
-function waFloat(waLink: string): string {
+function aboutSection(description: string, pal: Palette): string {
+  if (!description) return '';
   return `
-  <a href="${waLink}" target="_blank" class="wa-float" aria-label="Falar pelo WhatsApp">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
-  </a>`;
+<section id="sobre" style="padding:80px 0">
+  <div class="container">
+    <div style="max-width:760px;margin:0 auto;text-align:center">
+      <span class="eyebrow" style="color:${pal.primary}">Sobre nós</span>
+      <h2 class="sec-title" style="margin-top:10px">Nossa história</h2>
+      <p style="color:var(--muted);margin-top:20px;font-size:1.05rem;line-height:1.8">${description}</p>
+    </div>
+  </div>
+</section>`;
 }
+
+function faqSection(pal: Palette): string {
+  const items = [
+    { q: 'Como posso entrar em contato?', a: 'Fale conosco pelo WhatsApp — é a forma mais rápida. Respondemos em instantes.' },
+    { q: 'Quais são os horários de atendimento?', a: 'Atendemos de segunda a sexta, das 9h às 18h. Sábados das 9h às 13h.' },
+    { q: 'Como solicito um orçamento?', a: 'Entre em contato pelo WhatsApp e retornamos em até 24 horas com todas as informações.' },
+  ];
+  return `
+<section id="faq" style="padding:80px 0">
+  <div class="container">
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Dúvidas</span>
+      <h2 class="sec-title">Perguntas frequentes</h2>
+    </div>
+    <div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
+      ${items.map(item => `
+      <div class="faq-item" style="border-color:${pal.primary}22">
+        <p class="faq-q">${item.q}</p>
+        <p class="faq-a">${item.a}</p>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>`;
+}
+
+// ─── SHARED BASE CSS ──────────────────────────────────────────────────────────
+
+const BASE_CSS = `
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+/* section headers */
+.sec-hdr{margin-bottom:48px}
+.sec-hdr.centered{text-align:center}
+.eyebrow{font-size:.76rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:8px}
+.sec-title{font-size:clamp(1.7rem,3vw,2.4rem);font-weight:800;line-height:1.15}
+.sec-sub{margin-top:12px;font-size:1rem;opacity:.7}
+/* items/catalog grid */
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px}
+.item-card{border-radius:20px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.item-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.item-photo{height:180px;position:relative;display:flex;align-items:center;justify-content:center}
+.item-photo-circle{width:70px;height:70px;border-radius:50%}
+.item-body{padding:16px;display:flex;flex-direction:column;gap:6px}
+.item-name{font-weight:700;font-size:.95rem}
+.item-price{font-weight:800;font-size:1.05rem}
+.item-btn{margin-top:8px;padding:10px 16px;border:none;border-radius:10px;color:#fff;font-weight:700;font-size:.85rem;cursor:pointer;transition:opacity .2s}
+.item-btn:hover{opacity:.85}
+/* gallery */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+.gallery-card{border-radius:20px;overflow:hidden;transition:transform .2s}
+.gallery-card:hover{transform:translateY(-4px)}
+.gallery-thumb{height:180px}
+.gallery-body{padding:16px}
+.gallery-tag{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;display:block}
+.gallery-name{font-size:.95rem;font-weight:700;margin-top:4px}
+/* testimonials */
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.testimonial-card{border-radius:20px;padding:28px;border-width:1px;border-style:solid}
+.testimonial-text{font-size:.95rem;line-height:1.7;font-style:italic;opacity:.85}
+.testimonial-author{display:flex;align-items:center;gap:14px;margin-top:20px}
+.testimonial-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0}
+.testimonial-name{font-weight:700;font-size:.9rem}
+.testimonial-role{font-size:.8rem;opacity:.6;margin-top:2px}
+/* hours */
+.hours-table{width:100%;margin:0 auto 0;border-collapse:collapse;margin-bottom:28px}
+.h-day{padding:10px 16px;font-weight:600;font-size:.9rem;text-align:left;opacity:.8}
+.h-val{padding:10px 16px;font-size:.9rem;text-align:right}
+/* faq */
+.faq-item{border-radius:16px;padding:24px;border:1px solid}
+.faq-q{font-weight:700;margin-bottom:8px}
+.faq-a{font-size:.9rem;line-height:1.7;opacity:.7}
+/* wa buttons */
+.btn-wa-inline{display:inline-flex;align-items:center;gap:10px;background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
+.btn-wa-inline:hover{opacity:.88}
+/* wa float */
+.wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(22,163,74,.55);transition:transform .2s;color:#fff}
+.wa-float:hover{transform:scale(1.1)}
+@media(max-width:768px){.nav-links{display:none!important}.hero-split{flex-direction:column!important}}
+`;
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
 function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
+  const services = ai?.services ?? [
+    { icon: '🌟', name: 'Ingredientes Frescos', description: 'Selecionamos os melhores ingredientes para cada prato, garantindo sabor e qualidade.' },
+    { icon: '🚀', name: 'Atendimento Rápido', description: 'Pedidos ágeis pelo WhatsApp, sem espera e com entrega no prazo combinado.' },
+    { icon: '❤️', name: 'Receitas Exclusivas', description: 'Pratos únicos preparados com carinho e técnica artesanal para você.' },
+  ];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -165,94 +317,72 @@ function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#1c1917;--surface:#292524;--surface2:#3c3836;--text:#fafaf9;--muted:#a8a29e}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
-/* NAV */
-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid rgba(255,255,255,0.08);padding:16px 0}
-.nav-inner{display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:1.25rem;font-weight:800;color:var(--accent)}
-.nav-links{display:flex;gap:24px;list-style:none}
+${BASE_CSS}
+:root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#1a1614;--surface:#252120;--surface2:#2e2b29;--text:#fafaf9;--muted:#a8a29e}
+body{background:var(--bg);color:var(--text)}
+/* nav */
+nav{position:sticky;top:0;z-index:100;background:rgba(37,33,32,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:0}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-size:1.3rem;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+.nav-links{display:flex;gap:28px;list-style:none}
 .nav-links a{font-size:.875rem;font-weight:500;color:var(--muted);transition:color .2s}
 .nav-links a:hover{color:var(--text)}
-/* HERO */
-.hero{background:linear-gradient(135deg,var(--surface) 0%,#0c0a09 100%);padding:80px 0;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,${pal.primary}22,transparent 70%)}
-.hero-inner{position:relative;display:flex;gap:48px;align-items:center}
-.hero-content{flex:1}
-.hero-tag{display:inline-block;background:${pal.primary}22;color:var(--accent);border:1px solid ${pal.primary}44;border-radius:999px;padding:6px 16px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
-.hero-title{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:16px}
-.hero-sub{font-size:1.1rem;color:var(--muted);margin-bottom:32px;max-width:480px}
+/* hero */
+.hero{position:relative;overflow:hidden;padding:80px 0 100px;background:var(--surface)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 90% 70% at 70% 50%,${pal.primary}28,transparent 70%)}
+.hero-split{display:flex;align-items:center;gap:48px;position:relative}
+.hero-content{flex:1;min-width:0}
+.rating-badge{display:inline-flex;align-items:center;gap:8px;background:${pal.primary}22;border:1px solid ${pal.primary}44;border-radius:999px;padding:8px 18px;font-size:.82rem;font-weight:700;color:${pal.accent};margin-bottom:24px}
+.hero-title{font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1.05;letter-spacing:-.025em;margin-bottom:16px}
+.hero-sub{font-size:1.05rem;color:var(--muted);margin-bottom:32px;max-width:460px;line-height:1.7}
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
-.btn-primary:hover{opacity:.88}
-.btn-outline{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,0.25);color:var(--text);padding:14px 28px;border-radius:14px;font-weight:600;font-size:.95rem;transition:background .2s}
-.btn-outline:hover{background:rgba(255,255,255,0.06)}
-.hero-badge{display:flex;gap:20px;margin-top:32px}
-.badge-item{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
-/* SECTION */
-.section{padding:80px 0}
-.section-alt{background:var(--surface)}
-.section-header{text-align:center;margin-bottom:48px}
-.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-top:8px}
-.section-sub{color:var(--muted);margin-top:10px;font-size:1rem}
-/* FEATURES */
-.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px}
-.feature-card{background:var(--surface);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:28px;transition:border-color .2s}
-.feature-card:hover{border-color:${pal.primary}55}
-.feature-icon{width:48px;height:48px;border-radius:14px;background:${pal.primary}22;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.5rem}
-.feature-title{font-size:1rem;font-weight:700;margin-bottom:8px}
-.feature-desc{font-size:.875rem;color:var(--muted);line-height:1.6}
-/* PRODUCTS */
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px}
-.prod-card{background:var(--surface);border:1px solid rgba(255,255,255,0.07);border-radius:20px;overflow:hidden;transition:transform .2s}
-.prod-card:hover{transform:translateY(-4px)}
-.prod-img{width:100%;height:160px;object-fit:cover}
-.prod-img-placeholder{width:100%;height:160px;background:var(--surface2)}
-.prod-info{padding:16px}
-.prod-name{display:block;font-size:.95rem;font-weight:700;margin-bottom:6px}
-.prod-price{display:inline-block;color:var(--accent);font-weight:700;font-size:1rem}
-/* HOURS */
-.hours-box{max-width:500px;margin:0 auto;background:var(--surface);border-radius:20px;padding:32px;text-align:center}
-.hours-text p{color:var(--muted);margin-bottom:8px;font-size:.95rem}
-.btn-wa{display:inline-flex;align-items:center;gap:10px;background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;font-size:.95rem;margin-top:24px;transition:opacity .2s}
-.btn-wa:hover{opacity:.88}
-/* PORTFOLIO */
-.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px}
-.portfolio-card{background:var(--surface);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.07)}
-.portfolio-thumb{height:160px}
-.portfolio-info{padding:20px}
-.portfolio-tag{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.portfolio-desc{font-size:.875rem;color:var(--muted);margin-top:8px}
-/* BLOG */
-.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
-.blog-card{background:var(--surface);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.07)}
-.blog-thumb{height:140px}
-.blog-body{padding:20px}
-.blog-cat{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.blog-title{font-size:1rem;font-weight:700;margin-top:8px}
-.blog-excerpt{font-size:.875rem;color:var(--muted);margin-top:8px}
-/* CTA BANNER */
-.cta-banner{background:linear-gradient(135deg,var(--primary),${pal.accent});padding:64px 0;text-align:center}
-.cta-banner h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:12px}
-.cta-banner p{color:rgba(255,255,255,.8);margin-bottom:28px;font-size:1rem}
-/* FOOTER */
-footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padding:40px 0}
-.footer-inner{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
-.footer-logo{font-size:1.2rem;font-weight:800;color:var(--accent)}
-.footer-domain{font-size:.875rem;color:var(--muted)}
-/* WA FLOAT */
-.wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(22,163,74,.5);transition:transform .2s}
-.wa-float:hover{transform:scale(1.1)}
-@media(max-width:768px){
-  .hero-inner{flex-direction:column}
-  .nav-links{display:none}
-}
+.btn-main{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
+.btn-main:hover{opacity:.88}
+.btn-ghost-white{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.2);color:var(--text);padding:14px 28px;border-radius:14px;font-weight:600;font-size:.95rem;transition:background .2s}
+.btn-ghost-white:hover{background:rgba(255,255,255,.07)}
+/* food visual */
+.food-visual{flex-shrink:0;width:300px;height:300px;position:relative}
+.food-blob{position:absolute;border-radius:50%}
+/* category tabs */
+.tabs-bar{background:var(--bg);padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.tabs-inner{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.tab-pill{display:inline-block;padding:8px 20px;border-radius:999px;font-size:.85rem;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid rgba(255,255,255,.12);color:var(--muted);transition:all .2s}
+.tab-pill.active,.tab-pill:hover{background:var(--primary);border-color:var(--primary);color:#fff}
+/* features */
+.features-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.feat-card{background:var(--surface2);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px;transition:border-color .2s}
+.feat-card:hover{border-color:${pal.primary}55}
+.feat-icon{font-size:2rem;margin-bottom:16px}
+.feat-title{font-size:1rem;font-weight:700;margin-bottom:8px}
+.feat-desc{font-size:.875rem;color:var(--muted);line-height:1.6}
+/* overrides for item cards dark */
+.item-card{background:var(--surface2);border:1px solid rgba(255,255,255,.07)}
+.item-name{color:var(--text)}
+.item-price{color:var(--accent)!important}
+/* overrides gallery dark */
+.gallery-card{background:var(--surface2);border:1px solid rgba(255,255,255,.07)}
+.gallery-name{color:var(--text)}
+/* testimonials dark */
+.testimonial-card{background:var(--surface2);border-color:rgba(255,255,255,.07)}
+.testimonial-text{color:var(--text)}
+.testimonial-name{color:var(--text)}
+/* hours dark */
+.hours-table tr{border-bottom:1px solid rgba(255,255,255,.07)}
+.h-day,.h-val{color:var(--muted)}
+/* about dark */
+/* faq dark */
+.faq-item{background:var(--surface2);border-color:${pal.primary}22}
+.faq-q{color:var(--text)}
+.faq-a{color:var(--muted)}
+/* cta banner */
+.cta-band{background:linear-gradient(135deg,${pal.primary},${pal.accent});padding:72px 0;text-align:center}
+.cta-band h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;margin-bottom:12px;color:#fff}
+.cta-band p{color:rgba(255,255,255,.82);margin-bottom:32px;font-size:1rem}
+/* footer */
+footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
+.footer-inner{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.footer-logo{font-size:1.3rem;font-weight:800;color:var(--accent)}
+.footer-sub{font-size:.85rem;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -270,49 +400,61 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
 </nav>
 
 <section class="hero">
-  <div class="container hero-inner">
+  <div class="container hero-split">
     <div class="hero-content">
-      <div class="hero-tag">🍽️ Bem-vindo</div>
+      <div class="rating-badge">⭐ 4.8 — Mais de 200 avaliações</div>
       <h1 class="hero-title">${name}</h1>
-      <p class="hero-sub">${ai?.hero_subheadline ?? 'Sabor e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.'}</p>
+      <p class="hero-sub">${ai?.hero_subheadline ?? 'Sabor autêntico e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.'}</p>
       <div class="hero-ctas">
-        ${mods.includes('servicos') ? `<a href="#servicos" class="btn-primary">Ver Cardápio</a>` : ''}
-        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
+        ${mods.includes('servicos') ? `<a href="#servicos" class="btn-main">Ver Cardápio</a>` : ''}
+        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-ghost-white">📱 Pedir pelo WhatsApp</a>` : ''}
       </div>
+    </div>
+    <div class="food-visual">
+      <div class="food-blob" style="width:240px;height:240px;top:10px;left:10px;background:radial-gradient(circle at 40% 40%,${pal.accent}88,${pal.primary}55,transparent 70%)"></div>
+      <div class="food-blob" style="width:180px;height:180px;top:40px;left:40px;background:radial-gradient(circle at 45% 45%,${pal.primary}66,transparent 70%)"></div>
+      <div class="food-blob" style="width:100px;height:100px;top:80px;left:80px;background:radial-gradient(circle,${pal.accent}99,${pal.primary}66)"></div>
+      <div style="position:absolute;bottom:20px;right:10px;width:80px;height:80px;border-radius:50%;background:${pal.primary}44"></div>
     </div>
   </div>
 </section>
 
-<section class="section">
+<div class="tabs-bar">
+  <div class="container tabs-inner">
+    ${['Todos', 'Pratos', 'Bebidas', 'Sobremesas', 'Combos'].map((t, i) => `<span class="tab-pill${i === 0 ? ' active' : ''}">${t}</span>`).join('')}
+  </div>
+</div>
+
+<section style="padding:80px 0;background:var(--bg)">
   <div class="container">
-    <div class="section-header">
+    <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Por que nos escolher</span>
-      <h2 class="section-title">Qualidade em cada detalhe</h2>
+      <h2 class="sec-title">Qualidade em cada detalhe</h2>
     </div>
-    <div class="features-grid">
-      ${(ai?.services ?? [
-        {icon:'🌟',name:'Qualidade Premium',description:'Ingredientes selecionados e preparo artesanal em cada prato.'},
-        {icon:'🚀',name:'Atendimento Ágil',description:'Pedidos rápidos pelo WhatsApp, sem espera desnecessária.'},
-        {icon:'❤️',name:'Feito com Amor',description:'Receitas exclusivas preparadas com dedicação e carinho.'},
-      ]).map(s=>`<div class="feature-card"><div class="feature-icon">${s.icon}</div><div class="feature-title">${s.name}</div><div class="feature-desc">${s.description}</div></div>`).join('')}
+    <div class="features-row">
+      ${services.map(s => `
+      <div class="feat-card">
+        <div class="feat-icon">${s.icon}</div>
+        <div class="feat-title">${s.name}</div>
+        <div class="feat-desc">${s.description}</div>
+      </div>`).join('')}
     </div>
   </div>
 </section>
 
 ${mods.includes('sobre') ? aboutSection(description, pal) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? portfolioSection(pal) : ''}
-${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('galeria') ? gallerySection(pal, true) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
 ${mods.includes('faq') ? faqSection(pal) : ''}
 
-<section id="contato" class="cta-banner">
+<section id="contato" class="cta-band">
   <div class="container">
-    <h2>${ai?.cta_main ?? 'Fale com a gente'}</h2>
-    <p>${ai?.cta_sub ?? 'Tire suas dúvidas ou faça seu pedido diretamente pelo WhatsApp.'}</p>
-    <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
-      Falar pelo WhatsApp
+    <h2>${ai?.cta_main ?? 'Peça agora pelo WhatsApp'}</h2>
+    <p>${ai?.cta_sub ?? 'Atendimento rápido, entrega no prazo. Fale com a gente!'}</p>
+    <a href="${waLink}" target="_blank" class="btn-wa-inline" style="margin:0 auto">
+      ${WA_SVG} Falar pelo WhatsApp
     </a>
   </div>
 </section>
@@ -320,8 +462,8 @@ ${mods.includes('faq') ? faqSection(pal) : ''}
 <footer>
   <div class="container footer-inner">
     <span class="footer-logo">${name}</span>
-    <span class="footer-domain">${b.domain ? `${b.domain}.com.br` : 'siteprontodemo.com.br'}</span>
-    <span class="footer-domain" style="font-size:.75rem">${ai?.footer_tagline ?? 'Feito com SitePronto'}</span>
+    <span class="footer-sub">${b.domain ? `${b.domain}.com.br` : ''}</span>
+    <span class="footer-sub" style="font-size:.78rem">${ai?.footer_tagline ?? 'Feito com SitePronto'}</span>
   </div>
 </footer>
 
@@ -333,6 +475,17 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
 function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
+  const services = ai?.services ?? [
+    { icon: '🩺', name: 'Equipe Especializada', description: 'Profissionais qualificados e atualizados com as melhores práticas do mercado.' },
+    { icon: '📅', name: 'Agendamento Online', description: 'Marque sua consulta ou atendimento diretamente pelo WhatsApp, sem complicação.' },
+    { icon: '💚', name: 'Atendimento Humano', description: 'Cada cliente é único. Atendimento personalizado com atenção e cuidado individual.' },
+  ];
+  const categories = ['💊 Medicamentos', '🌿 Natural', '💆 Bem-estar', '👶 Infantil'];
+  const steps = [
+    { n: '01', title: 'Entre em contato', desc: 'Fale conosco pelo WhatsApp ou venha pessoalmente.' },
+    { n: '02', title: 'Avaliação', desc: 'Nossa equipe entende suas necessidades e recomenda o melhor.' },
+    { n: '03', title: 'Solução completa', desc: 'Atendimento rápido com qualidade e preço justo.' },
+  ];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -342,79 +495,93 @@ function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: st
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#f8fafc;--surface:#ffffff;--surface2:#f1f5f9;--text:#0f172a;--muted:#64748b}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
-nav{background:var(--primary);padding:16px 0;position:sticky;top:0;z-index:100}
-.nav-inner{display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:1.2rem;font-weight:800;color:#fff}
+${BASE_CSS}
+:root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#f7faf8;--surface:#ffffff;--surface2:#f0f4f2;--text:#0d1f1a;--muted:#5c7a6e}
+body{background:var(--bg);color:var(--text)}
+/* promo */
+.promo-bar{background:linear-gradient(90deg,var(--primary),var(--accent));color:#fff;text-align:center;padding:10px 24px;font-size:.875rem;font-weight:600}
+/* nav */
+nav{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:0;position:sticky;top:0;z-index:100}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-size:1.2rem;font-weight:800;color:var(--primary)}
 .nav-links{display:flex;gap:24px;list-style:none}
-.nav-links a{font-size:.875rem;font-weight:500;color:rgba(255,255,255,.8);transition:color .2s}
-.nav-links a:hover{color:#fff}
-.hero{background:linear-gradient(135deg,${pal.primary},${pal.accent});padding:80px 0;color:#fff}
-.hero-tag{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:6px 16px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
-.hero-title{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px;max-width:600px}
-.hero-sub{font-size:1rem;color:rgba(255,255,255,.85);margin-bottom:32px;max-width:480px}
+.nav-links a{font-size:.875rem;font-weight:500;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+/* hero */
+.hero{padding:72px 0;background:linear-gradient(135deg,${pal.primary}18,${pal.accent}10);border-bottom:1px solid ${pal.primary}18}
+.hero-split{display:flex;align-items:center;gap:48px}
+.hero-content{flex:1}
+.hero-badge{display:inline-block;background:${pal.primary}15;color:var(--primary);border-radius:999px;padding:6px 16px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
+.hero-title{font-size:clamp(1.9rem,4.5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
+.hero-sub{font-size:1rem;color:var(--muted);margin-bottom:32px;max-width:460px;line-height:1.7}
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--primary);padding:14px 28px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
-.btn-primary:hover{opacity:.9}
-.btn-outline{display:inline-flex;align-items:center;gap:8px;border:2px solid rgba(255,255,255,.5);color:#fff;padding:14px 28px;border-radius:14px;font-weight:600;font-size:.95rem;transition:background .2s}
-.btn-outline:hover{background:rgba(255,255,255,.1)}
-.promo-bar{background:var(--accent);color:#fff;text-align:center;padding:12px;font-weight:700;font-size:.95rem}
-.section{padding:80px 0}
-.section-alt{background:var(--surface2)}
-.section-header{text-align:center;margin-bottom:48px}
-.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-top:8px;color:var(--text)}
-.section-sub{color:var(--muted);margin-top:10px}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
-.feature-card{background:var(--surface);border-radius:20px;padding:28px;box-shadow:0 1px 8px rgba(0,0,0,.06);border:1px solid #e2e8f0;transition:box-shadow .2s}
-.feature-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1)}
-.feature-icon{width:48px;height:48px;border-radius:14px;background:var(--light);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.5rem}
-.feature-title{font-size:1rem;font-weight:700;margin-bottom:8px}
-.feature-desc{font-size:.875rem;color:var(--muted)}
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px}
-.prod-card{background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1px solid #e2e8f0;transition:transform .2s}
-.prod-card:hover{transform:translateY(-4px)}
-.prod-img{width:100%;height:160px;object-fit:cover}
-.prod-img-placeholder{width:100%;height:160px;background:var(--light)}
-.prod-info{padding:16px}
-.prod-name{display:block;font-size:.95rem;font-weight:700;margin-bottom:6px;color:var(--text)}
-.prod-price{display:inline-block;color:var(--primary);font-weight:700}
-.hours-box{max-width:500px;margin:0 auto;background:var(--surface);border-radius:20px;padding:32px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,.06)}
-.hours-text p{color:var(--muted);margin-bottom:8px;font-size:.95rem}
-.btn-wa{display:inline-flex;align-items:center;gap:10px;background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;margin-top:24px}
-.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px}
-.portfolio-card{background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.portfolio-thumb{height:160px}
-.portfolio-info{padding:20px}
-.portfolio-tag{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.portfolio-desc{font-size:.875rem;color:var(--muted);margin-top:8px}
-.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
-.blog-card{background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.blog-thumb{height:140px}
-.blog-body{padding:20px}
-.blog-cat{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.blog-title{font-size:1rem;font-weight:700;margin-top:8px;color:var(--text)}
-.blog-excerpt{font-size:.875rem;color:var(--muted);margin-top:8px}
-.cta-banner{background:linear-gradient(135deg,var(--primary),var(--accent));padding:64px 0;text-align:center;color:#fff}
-.cta-banner h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:12px}
-.cta-banner p{color:rgba(255,255,255,.85);margin-bottom:28px}
-footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
-.footer-inner{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.btn-main{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
+.btn-main:hover{opacity:.88}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--primary);color:var(--primary);padding:14px 28px;border-radius:14px;font-weight:600;font-size:.95rem;transition:background .2s}
+.btn-outline:hover{background:${pal.primary}08}
+/* hero stats */
+.hero-stats{display:flex;gap:32px;margin-top:36px;padding-top:32px;border-top:1px solid ${pal.primary}20}
+.stat-n{font-size:1.6rem;font-weight:800;color:var(--primary)}
+.stat-l{font-size:.78rem;color:var(--muted);margin-top:2px}
+/* hero visual */
+.hero-visual{flex-shrink:0;width:260px;height:260px;position:relative}
+.h-blob{position:absolute;border-radius:50%}
+/* trust strip */
+.trust-strip{background:#fff;border-bottom:1px solid rgba(0,0,0,.07);padding:20px 0}
+.trust-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;gap:24px}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;color:var(--text)}
+.trust-icon{font-size:1.1rem}
+/* features */
+.feats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.feat{background:#fff;border-radius:20px;padding:28px;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 12px rgba(0,0,0,.04);transition:box-shadow .2s}
+.feat:hover{box-shadow:0 6px 24px rgba(0,0,0,.1)}
+.feat-ico{font-size:1.8rem;margin-bottom:16px}
+.feat-t{font-size:1rem;font-weight:700;margin-bottom:8px}
+.feat-d{font-size:.875rem;color:var(--muted);line-height:1.6}
+/* categories */
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px}
+.cat-card{background:#fff;border-radius:16px;padding:24px 16px;text-align:center;border:1px solid rgba(0,0,0,.07);transition:all .2s;cursor:default}
+.cat-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.cat-ico{font-size:2rem;margin-bottom:10px}
+.cat-name{font-size:.9rem;font-weight:700;color:var(--text)}
+/* steps */
+.steps-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
+.step-card{text-align:center;padding:24px}
+.step-num{font-size:2.4rem;font-weight:800;color:var(--primary);opacity:.15;margin-bottom:12px}
+.step-t{font-size:1rem;font-weight:700;margin-bottom:8px}
+.step-d{font-size:.875rem;color:var(--muted);line-height:1.6}
+/* item cards light */
+.item-card{background:#fff;border:1px solid rgba(0,0,0,.07);box-shadow:0 1px 8px rgba(0,0,0,.05)}
+.item-name{color:var(--text)}
+/* gallery light */
+.gallery-card{background:#fff;border:1px solid rgba(0,0,0,.07)}
+.gallery-name{color:var(--text)}
+/* testimonial light */
+.testimonial-card{background:#fff;border-color:rgba(0,0,0,.08)}
+.testimonial-text{color:var(--muted)}
+/* hours light */
+.hours-table tr{border-bottom:1px solid rgba(0,0,0,.07)}
+.h-day{color:var(--muted);font-weight:700}
+.h-val{color:var(--text)}
+/* faq */
+.faq-item{background:#fff;border-color:${pal.primary}22}
+.faq-q{color:var(--text)}
+.faq-a{color:var(--muted)}
+/* cta */
+.cta-band{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;padding:72px 0;text-align:center}
+.cta-band h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;margin-bottom:12px}
+.cta-band p{opacity:.85;margin-bottom:32px}
+/* footer */
+footer{background:var(--primary);color:rgba(255,255,255,.85);padding:48px 0}
+.footer-inner{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .footer-logo{font-size:1.2rem;font-weight:800;color:#fff}
-.footer-domain{font-size:.875rem;color:rgba(255,255,255,.7)}
-.wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(22,163,74,.5);transition:transform .2s}
-.wa-float:hover{transform:scale(1.1)}
-@media(max-width:768px){.nav-links{display:none}}
+.footer-sub{font-size:.85rem;opacity:.7}
 </style>
 </head>
 <body>
+
 <div class="promo-bar">✨ Atendimento especializado — Agende agora pelo WhatsApp</div>
+
 <nav>
   <div class="container nav-inner">
     <span class="logo">${name}</span>
@@ -426,56 +593,126 @@ footer{background:var(--primary);color:rgba(255,255,255,.9);padding:40px 0}
     </ul>
   </div>
 </nav>
+
 <section class="hero">
-  <div class="container">
-    <div class="hero-tag">🏥 Saúde & Bem-estar</div>
-    <h1 class="hero-title">${name}</h1>
-    <p class="hero-sub">${ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.'}</p>
-    <div class="hero-ctas">
-      ${mods.includes('contato') ? `<a href="#contato" class="btn-primary">Agendar Consulta</a>` : ''}
-      ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
+  <div class="container hero-split">
+    <div class="hero-content">
+      <div class="hero-badge">🏥 Saúde &amp; Bem-estar</div>
+      <h1 class="hero-title">${name}</h1>
+      <p class="hero-sub">${ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.'}</p>
+      <div class="hero-ctas">
+        ${mods.includes('contato') ? `<a href="#contato" class="btn-main">Agendar Consulta</a>` : ''}
+        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-n">98%</div><div class="stat-l">Satisfação</div></div>
+        <div><div class="stat-n">10+</div><div class="stat-l">Anos de experiência</div></div>
+        <div><div class="stat-n">5★</div><div class="stat-l">Avaliação</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="h-blob" style="width:230px;height:230px;top:0;left:0;background:radial-gradient(circle at 40%,${pal.primary}33,transparent 70%)"></div>
+      <div class="h-blob" style="width:160px;height:160px;top:40px;left:40px;background:${pal.accent}22;border:3px solid ${pal.primary}22"></div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:4rem">🏥</div>
     </div>
   </div>
 </section>
-<section class="section">
+
+<div class="trust-strip">
+  <div class="container trust-row">
+    ${['✅ Equipe certificada', '🔒 Atendimento sigiloso', '⚡ Resposta rápida', '💳 Diversas formas de pagamento'].map(t => `<span class="trust-item"><span>${t}</span></span>`).join('')}
+  </div>
+</div>
+
+<section style="padding:80px 0;background:var(--bg)">
   <div class="container">
-    <div class="section-header">
+    <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Diferenciais</span>
-      <h2 class="section-title">Por que escolher a ${name}?</h2>
+      <h2 class="sec-title">Por que escolher a ${name}?</h2>
     </div>
-    <div class="features-grid">
-      ${(ai?.services ?? [
-        {icon:'🩺',name:'Equipe Especializada',description:'Profissionais qualificados e atualizados com as melhores práticas.'},
-        {icon:'📅',name:'Agendamento Fácil',description:'Marque sua consulta diretamente pelo WhatsApp, sem complicação.'},
-        {icon:'💚',name:'Atendimento Humano',description:'Cada paciente é único. Tratamos com atenção e cuidado individual.'},
-      ]).map(s=>`<div class="feature-card"><div class="feature-icon">${s.icon}</div><div class="feature-title">${s.name}</div><div class="feature-desc">${s.description}</div></div>`).join('')}
+    <div class="feats-grid">
+      ${services.map(s => `
+      <div class="feat">
+        <div class="feat-ico">${s.icon}</div>
+        <div class="feat-t">${s.name}</div>
+        <div class="feat-d">${s.description}</div>
+      </div>`).join('')}
     </div>
   </div>
 </section>
-${mods.includes('sobre') ? aboutSection(description, pal) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal) : ''}
-${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? portfolioSection(pal) : ''}
-${mods.includes('depoimentos') ? blogSection(pal) : ''}
-${mods.includes('faq') ? faqSection(pal) : ''}
-<section id="contato" class="cta-banner">
+
+<section style="padding:64px 0;background:var(--surface2)">
   <div class="container">
-    <h2>${ai?.cta_main ?? 'Pronto para cuidar da sua saúde?'}</h2>
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Categorias</span>
+      <h2 class="sec-title">O que oferecemos</h2>
+    </div>
+    <div class="cats-grid">
+      ${categories.map(c => `
+      <div class="cat-card">
+        <div class="cat-ico">${c.split(' ')[0]}</div>
+        <div class="cat-name">${c.split(' ').slice(1).join(' ')}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<section style="padding:64px 0;background:var(--bg)">
+  <div class="container">
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">Como funciona</span>
+      <h2 class="sec-title">Simples e rápido</h2>
+    </div>
+    <div class="steps-row">
+      ${steps.map(s => `
+      <div class="step-card">
+        <div class="step-num">${s.n}</div>
+        <div class="step-t">${s.title}</div>
+        <div class="step-d">${s.desc}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
+${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
+${mods.includes('galeria') ? gallerySection(pal, false) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
+${mods.includes('faq') ? faqSection(pal) : ''}
+
+<section id="contato" class="cta-band">
+  <div class="container">
+    <h2>${ai?.cta_main ?? 'Pronto para cuidar de você?'}</h2>
     <p>${ai?.cta_sub ?? 'Agende agora pelo WhatsApp. Retornamos em instantes!'}</p>
-    <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
-      Agendar pelo WhatsApp
+    <a href="${waLink}" target="_blank" class="btn-wa-inline" style="margin:0 auto">
+      ${WA_SVG} Agendar pelo WhatsApp
     </a>
   </div>
 </section>
-<footer><div class="container footer-inner"><span class="footer-logo">${name}</span><span class="footer-domain">${b.domain ? `${b.domain}.com.br` : ''}</span><span class="footer-domain" style="font-size:.75rem">${ai?.footer_tagline ?? 'Feito com SitePronto'}</span></div></footer>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-logo">${name}</span>
+    <span class="footer-sub">${b.domain ? `${b.domain}.com.br` : ''}</span>
+    <span class="footer-sub" style="font-size:.78rem">${ai?.footer_tagline ?? 'Feito com SitePronto'}</span>
+  </div>
+</footer>
+
 ${mods.includes('contato') ? waFloat(waLink) : ''}
-</body></html>`;
+</body>
+</html>`;
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
 function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
+  const services = ai?.services ?? [
+    { icon: '🚚', name: 'Entrega Rápida', description: 'Envio ágil para todo o Brasil com rastreamento em tempo real.' },
+    { icon: '✅', name: 'Qualidade Garantida', description: 'Produtos selecionados com procedência e qualidade comprovada.' },
+    { icon: '💬', name: 'Suporte Direto', description: 'Atendimento pelo WhatsApp para dúvidas e pedidos especiais.' },
+  ];
+  const filters = ['Todos', 'Novidades', 'Mais Vendidos', 'Promoções'];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -485,126 +722,180 @@ function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: stri
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+${BASE_CSS}
 :root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#ffffff;--surface:#f8fafc;--surface2:#f1f5f9;--text:#111827;--muted:#6b7280}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
-nav{background:#fff;border-bottom:1px solid #e5e7eb;padding:16px 0;position:sticky;top:0;z-index:100}
-.nav-inner{display:flex;align-items:center;justify-content:space-between}
+body{background:var(--bg);color:var(--text)}
+/* nav */
+nav{background:#fff;border-bottom:1px solid #e5e7eb;padding:0;position:sticky;top:0;z-index:100}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
 .logo{font-size:1.3rem;font-weight:800;color:var(--text)}
-.logo span{color:var(--accent)}
+.logo-dot{color:var(--accent)}
 .nav-links{display:flex;gap:24px;list-style:none}
 .nav-links a{font-size:.875rem;font-weight:500;color:var(--muted);transition:color .2s}
 .nav-links a:hover{color:var(--text)}
-.hero{background:linear-gradient(135deg,var(--light),${pal.accent}22);padding:80px 0;border-bottom:1px solid #e5e7eb}
-.hero-tag{display:inline-block;background:var(--light);color:var(--primary);border-radius:999px;padding:6px 16px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
-.hero-title{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
-.hero-sub{font-size:1rem;color:var(--muted);margin-bottom:32px;max-width:480px}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:12px;font-weight:700;font-size:.95rem;transition:opacity .2s}
-.btn-primary:hover{opacity:.88}
-.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid #e5e7eb;color:var(--text);padding:14px 28px;border-radius:12px;font-weight:600;font-size:.95rem}
+.nav-icons{display:flex;align-items:center;gap:12px}
+.nav-icon{width:36px;height:36px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer}
+/* hero */
+.hero{padding:72px 0;background:linear-gradient(135deg,${pal.light}88,${pal.accent}14);border-bottom:1px solid #e5e7eb;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;background:${pal.accent}12}
+.hero-split{display:flex;align-items:center;gap:48px;position:relative}
+.hero-content{flex:1}
+.hero-tag{display:inline-block;background:${pal.primary}10;color:var(--primary);border-radius:999px;padding:6px 16px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
+.hero-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.08;margin-bottom:16px;letter-spacing:-.025em}
+.hero-sub{font-size:1rem;color:var(--muted);margin-bottom:32px;max-width:460px;line-height:1.7}
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
-.section{padding:80px 0}
-.section-alt{background:var(--surface)}
-.section-header{text-align:center;margin-bottom:48px}
-.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-top:8px}
-.section-sub{color:var(--muted);margin-top:10px}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
-.feature-card{padding:28px;border-radius:20px;background:#fff;border:1px solid #e5e7eb}
-.feature-icon{font-size:1.8rem;margin-bottom:16px}
-.feature-title{font-size:1rem;font-weight:700;margin-bottom:8px}
-.feature-desc{font-size:.875rem;color:var(--muted)}
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
-.prod-card{background:#fff;border-radius:20px;overflow:hidden;border:1px solid #e5e7eb;transition:box-shadow .2s}
-.prod-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.1)}
-.prod-img{width:100%;height:200px;object-fit:cover}
-.prod-img-placeholder{width:100%;height:200px;background:var(--light);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted)}
-.prod-info{padding:16px}
-.prod-name{display:block;font-size:.95rem;font-weight:700;margin-bottom:6px}
-.prod-price{display:inline-block;color:var(--accent);font-weight:800;font-size:1.1rem}
-.add-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--primary);color:#fff;border-radius:8px;float:right;font-size:1.2rem;cursor:pointer}
-.hours-box{max-width:500px;margin:0 auto;background:#fff;border-radius:20px;padding:32px;text-align:center;border:1px solid #e5e7eb}
-.hours-text p{color:var(--muted);margin-bottom:8px}
-.btn-wa{display:inline-flex;align-items:center;gap:10px;background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;margin-top:24px}
-.portfolio-grid,.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px}
-.portfolio-card,.blog-card{background:#fff;border-radius:20px;overflow:hidden;border:1px solid #e5e7eb}
-.portfolio-thumb,.blog-thumb{height:160px}
-.portfolio-info,.blog-body{padding:20px}
-.portfolio-tag,.blog-cat{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.portfolio-desc,.blog-excerpt{font-size:.875rem;color:var(--muted);margin-top:8px}
-.blog-title{font-size:1rem;font-weight:700;margin-top:8px}
-.cta-banner{background:var(--primary);padding:64px 0;text-align:center;color:#fff}
-.cta-banner h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:12px}
-.cta-banner p{color:rgba(255,255,255,.85);margin-bottom:28px}
-footer{background:#111827;color:rgba(255,255,255,.75);padding:40px 0}
-.footer-inner{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.btn-main{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:12px;font-weight:700;font-size:.95rem;transition:opacity .2s}
+.btn-main:hover{opacity:.88}
+.btn-sec{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #e5e7eb;color:var(--text);padding:14px 28px;border-radius:12px;font-weight:600;font-size:.95rem;transition:background .2s}
+.btn-sec:hover{background:var(--surface2)}
+/* hero product visual */
+.product-visual{flex-shrink:0;width:280px;height:280px;position:relative}
+.prod-blob{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center}
+/* filter bar */
+.filter-bar{background:#fff;padding:16px 0;border-bottom:1px solid #e5e7eb}
+.filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.filter-pill{padding:8px 20px;border-radius:999px;font-size:.85rem;font-weight:600;border:1.5px solid #e5e7eb;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s;background:#fff}
+.filter-pill.active,.filter-pill:hover{background:var(--primary);border-color:var(--primary);color:#fff}
+/* features */
+.feats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.feat-card{padding:28px;border-radius:20px;background:#fff;border:1px solid #e5e7eb;transition:box-shadow .2s}
+.feat-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08)}
+.feat-ico{font-size:2rem;margin-bottom:16px}
+.feat-t{font-size:1rem;font-weight:700;margin-bottom:8px}
+.feat-d{font-size:.875rem;color:var(--muted);line-height:1.6}
+/* items light */
+.item-card{background:#fff;border:1px solid #e5e7eb;box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.item-name{color:var(--text)}
+.item-price{color:var(--accent)!important}
+/* gallery */
+.gallery-card{background:#fff;border:1px solid #e5e7eb}
+.gallery-name{color:var(--text)}
+/* testimonials */
+.testimonial-card{background:#fff;border-color:#e5e7eb}
+.testimonial-text{color:var(--muted)}
+/* hours */
+.hours-table tr{border-bottom:1px solid #e5e7eb}
+.h-day{color:var(--muted);font-weight:700}
+.h-val{color:var(--text)}
+/* faq */
+.faq-item{background:#fff;border-color:${pal.primary}22}
+.faq-q{color:var(--text)}
+.faq-a{color:var(--muted)}
+/* cta */
+.cta-band{background:var(--primary);color:#fff;padding:72px 0;text-align:center}
+.cta-band h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;margin-bottom:12px}
+.cta-band p{opacity:.85;margin-bottom:32px}
+/* newsletter */
+.newsletter{display:flex;gap:8px;max-width:400px;margin:0 auto;margin-top:24px}
+.newsletter input{flex:1;padding:12px 18px;border-radius:12px;border:none;font-size:.9rem}
+.newsletter button{padding:12px 20px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;border:none;cursor:pointer}
+/* footer */
+footer{background:#111827;color:rgba(255,255,255,.75);padding:48px 0}
+.footer-inner{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .footer-logo{font-size:1.2rem;font-weight:800;color:#fff}
-.wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(22,163,74,.5);transition:transform .2s}
-.wa-float:hover{transform:scale(1.1)}
-@media(max-width:768px){.nav-links{display:none}}
+.footer-sub{font-size:.85rem}
 </style>
 </head>
 <body>
+
 <nav>
   <div class="container nav-inner">
-    <span class="logo">${name}<span>.</span></span>
+    <span class="logo">${name}<span class="logo-dot">.</span></span>
     <ul class="nav-links">
       ${mods.includes('servicos') ? '<li><a href="#servicos">Produtos</a></li>' : ''}
       ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
       <li><a href="#contato">Contato</a></li>
     </ul>
+    <div class="nav-icons">
+      <div class="nav-icon">🔍</div>
+      <div class="nav-icon">🛒</div>
+    </div>
   </div>
 </nav>
+
 <section class="hero">
-  <div class="container">
-    <div class="hero-tag">🛍️ Loja Online</div>
-    <h1 class="hero-title">${name}</h1>
-    <p class="hero-sub">${ai?.hero_subheadline ?? 'Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.'}</p>
-    <div class="hero-ctas">
-      ${mods.includes('servicos') ? `<a href="#servicos" class="btn-primary">Ver Produtos</a>` : ''}
-      ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-secondary">📱 Pedir pelo WhatsApp</a>` : ''}
+  <div class="container hero-split">
+    <div class="hero-content">
+      <div class="hero-tag">🛍️ Loja Online</div>
+      <h1 class="hero-title">${name}</h1>
+      <p class="hero-sub">${ai?.hero_subheadline ?? 'Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.'}</p>
+      <div class="hero-ctas">
+        ${mods.includes('servicos') ? `<a href="#servicos" class="btn-main">Ver Produtos</a>` : ''}
+        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-sec">📱 Pedir pelo WhatsApp</a>` : ''}
+      </div>
+    </div>
+    <div class="product-visual">
+      <div class="prod-blob" style="width:240px;height:240px;top:10px;left:10px;background:linear-gradient(135deg,${pal.light},${pal.accent}22)">
+        <div style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,${pal.primary}22,${pal.accent}33);display:flex;align-items:center;justify-content:center;font-size:4rem">🛍️</div>
+      </div>
+      <div style="position:absolute;top:-10px;right:-10px;width:70px;height:70px;border-radius:50%;background:${pal.accent}22"></div>
+      <div style="position:absolute;bottom:10px;left:-10px;width:50px;height:50px;border-radius:50%;background:${pal.primary}15"></div>
     </div>
   </div>
 </section>
-<section class="section">
+
+<div class="filter-bar">
+  <div class="container filter-row">
+    ${filters.map((f, i) => `<span class="filter-pill${i === 0 ? ' active' : ''}">${f}</span>`).join('')}
+  </div>
+</div>
+
+<section style="padding:64px 0;background:var(--surface2)">
   <div class="container">
-    <div class="features-grid">
-      ${(ai?.services ?? [
-        {icon:'🚚',name:'Entrega Rápida',description:'Envio ágil para todo o Brasil com rastreamento em tempo real.'},
-        {icon:'✅',name:'Qualidade Garantida',description:'Produtos selecionados com procedência e qualidade comprovada.'},
-        {icon:'💬',name:'Suporte Direto',description:'Atendimento pelo WhatsApp para dúvidas e pedidos especiais.'},
-      ]).map(s=>`<div class="feature-card"><div class="feature-icon">${s.icon}</div><div class="feature-title">${s.name}</div><div class="feature-desc">${s.description}</div></div>`).join('')}
+    <div class="feats-row">
+      ${services.map(s => `
+      <div class="feat-card">
+        <div class="feat-ico">${s.icon}</div>
+        <div class="feat-t">${s.name}</div>
+        <div class="feat-d">${s.description}</div>
+      </div>`).join('')}
     </div>
   </div>
 </section>
+
 ${mods.includes('sobre') ? aboutSection(description, pal) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? portfolioSection(pal) : ''}
-${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('galeria') ? gallerySection(pal, false) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
 ${mods.includes('faq') ? faqSection(pal) : ''}
-<section id="contato" class="cta-banner">
+
+<section id="contato" class="cta-band">
   <div class="container">
     <h2>${ai?.cta_main ?? 'Quer fazer um pedido especial?'}</h2>
     <p>${ai?.cta_sub ?? 'Fale diretamente com a gente pelo WhatsApp.'}</p>
-    <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
-      Falar pelo WhatsApp
+    <a href="${waLink}" target="_blank" class="btn-wa-inline" style="margin:0 auto">
+      ${WA_SVG} Falar pelo WhatsApp
     </a>
+    <div class="newsletter">
+      <input type="email" placeholder="Seu melhor e-mail" />
+      <button>Assinar</button>
+    </div>
   </div>
 </section>
-<footer><div class="container footer-inner"><span class="footer-logo">${name}</span><span style="font-size:.875rem;color:rgba(255,255,255,.5)">${b.domain ? `${b.domain}.com.br` : ''} · ${ai?.footer_tagline ?? 'Feito com SitePronto'}</span></div></footer>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-logo">${name}</span>
+    <span class="footer-sub">${b.domain ? `${b.domain}.com.br` : ''} · ${ai?.footer_tagline ?? 'Feito com SitePronto'}</span>
+  </div>
+</footer>
+
 ${mods.includes('contato') ? waFloat(waLink) : ''}
-</body></html>`;
+</body>
+</html>`;
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
 function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
   const mods = b.selected_modules ?? [];
+  const services = ai?.services ?? [
+    { icon: '🎯', name: 'Consultoria Estratégica', description: 'Análise completa do seu negócio com recomendações práticas para crescimento.' },
+    { icon: '📊', name: 'Análise e Resultados', description: 'Métricas e relatórios detalhados para decisões baseadas em dados reais.' },
+    { icon: '🚀', name: 'Execução e Entrega', description: 'Implementação ágil com foco em resultado e prazo definido.' },
+  ];
+  const skills = ['Estratégia', 'Design', 'Tecnologia', 'Marketing', 'Gestão'];
+  const skillWidths = [92, 88, 82, 75, 90];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -614,91 +905,104 @@ function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+${BASE_CSS}
 :root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#0f172a;--surface:#1e293b;--surface2:#0f172a;--text:#f8fafc;--muted:#94a3b8}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
-nav{background:rgba(15,23,42,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);padding:20px 0;position:sticky;top:0;z-index:100}
-.nav-inner{display:flex;align-items:center;justify-content:space-between}
-.logo{font-size:1.2rem;font-weight:800}
-.logo span{color:var(--primary)}
+body{background:var(--bg);color:var(--text)}
+/* nav */
+nav{background:rgba(15,23,42,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06);padding:0;position:sticky;top:0;z-index:100}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-size:1.2rem;font-weight:800;letter-spacing:-.02em}
+.logo-dot{color:var(--primary)}
 .nav-links{display:flex;gap:24px;list-style:none}
 .nav-links a{font-size:.875rem;font-weight:500;color:var(--muted);transition:color .2s}
 .nav-links a:hover{color:var(--text)}
-.hero{min-height:90vh;display:flex;align-items:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 50% -20%,${pal.primary}30,transparent 70%)}
-.hero-inner{position:relative;max-width:700px}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;background:${pal.primary}20;border:1px solid ${pal.primary}40;border-radius:999px;padding:8px 18px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;color:var(--primary)}
-.hero-title{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:20px}
-.hero-title span{color:var(--primary)}
-.hero-sub{font-size:1.1rem;color:var(--muted);margin-bottom:36px;max-width:560px}
+/* hero */
+.hero{min-height:88vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:80px 0}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 70% at 70% 30%,${pal.primary}2a,transparent 65%)}
+.hero-split{display:flex;align-items:center;gap:64px;position:relative;width:100%}
+.hero-content{flex:1}
+.hello-tag{display:inline-flex;align-items:center;gap:8px;background:${pal.primary}20;border:1px solid ${pal.primary}40;border-radius:999px;padding:8px 18px;font-size:.82rem;font-weight:700;color:var(--primary);margin-bottom:24px}
+.hero-title{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.02;letter-spacing:-.03em;margin-bottom:16px}
+.hero-role{font-size:1.1rem;color:${pal.accent};font-weight:600;margin-bottom:16px}
+.hero-sub{font-size:1rem;color:var(--muted);margin-bottom:36px;max-width:520px;line-height:1.7}
 .hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
-.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:15px 32px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
-.btn-primary:hover{opacity:.88}
-.btn-outline{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.2);color:var(--text);padding:15px 32px;border-radius:14px;font-weight:600;font-size:.95rem;transition:background .2s}
-.btn-outline:hover{background:rgba(255,255,255,.06)}
-.stats{display:flex;gap:40px;margin-top:48px;padding-top:40px;border-top:1px solid rgba(255,255,255,.08)}
-.stat-num{font-size:1.8rem;font-weight:800;color:var(--primary)}
-.stat-label{font-size:.8rem;color:var(--muted);margin-top:2px}
-.section{padding:96px 0}
-.section-alt{background:var(--surface)}
-.section-header{margin-bottom:56px}
-.section-header.centered{text-align:center}
-.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--primary)}
-.section-title{font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:800;margin-top:10px;line-height:1.2}
-.section-sub{color:var(--muted);margin-top:12px;font-size:1rem}
-.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
-.service-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:32px;transition:border-color .2s,transform .2s}
+.btn-primary-full{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:15px 32px;border-radius:14px;font-weight:700;font-size:.95rem;transition:opacity .2s}
+.btn-primary-full:hover{opacity:.88}
+.btn-ghost-dark{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.18);color:var(--text);padding:15px 32px;border-radius:14px;font-weight:600;font-size:.95rem;transition:background .2s}
+.btn-ghost-dark:hover{background:rgba(255,255,255,.06)}
+/* stats */
+.stats-row{display:flex;gap:32px;flex-wrap:wrap;margin-top:44px;padding-top:40px;border-top:1px solid rgba(255,255,255,.08)}
+.stat-n{font-size:1.8rem;font-weight:800;color:var(--primary)}
+.stat-l{font-size:.8rem;color:var(--muted);margin-top:4px}
+/* avatar */
+.avatar-wrap{flex-shrink:0;width:280px;height:280px;position:relative}
+.avatar-circle{width:260px;height:260px;border-radius:50%;background:linear-gradient(135deg,${pal.primary}44,${pal.accent}33);display:flex;align-items:center;justify-content:center;font-size:6rem;border:3px solid ${pal.primary}33;position:absolute;top:10px;left:10px}
+.avatar-badge{position:absolute;bottom:10px;right:-10px;background:var(--surface);border:2px solid ${pal.primary}44;border-radius:16px;padding:12px 16px}
+.badge-val{font-size:1.2rem;font-weight:800;color:var(--primary);display:block}
+.badge-lbl{font-size:.72rem;color:var(--muted)}
+/* services */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.service-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:32px;transition:all .2s}
 .service-card:hover{border-color:${pal.primary}55;transform:translateY(-4px)}
-.service-icon{width:52px;height:52px;border-radius:16px;background:${pal.primary}20;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:1.6rem}
-.service-title{font-size:1.05rem;font-weight:700;margin-bottom:10px}
-.service-desc{font-size:.875rem;color:var(--muted);line-height:1.7}
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.prod-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;transition:transform .2s}
-.prod-card:hover{transform:translateY(-4px)}
-.prod-img{width:100%;height:160px;object-fit:cover}
-.prod-img-placeholder{width:100%;height:160px;background:${pal.primary}18}
-.prod-info{padding:16px}
-.prod-name{display:block;font-size:.95rem;font-weight:700;margin-bottom:6px}
-.prod-price{color:var(--primary);font-weight:700}
-.hours-box{max-width:500px;margin:0 auto;background:var(--surface);border-radius:20px;padding:32px;text-align:center;border:1px solid rgba(255,255,255,.07)}
-.hours-text p{color:var(--muted);margin-bottom:8px}
-.btn-wa{display:inline-flex;align-items:center;gap:10px;background:#16a34a;color:#fff;padding:14px 28px;border-radius:14px;font-weight:700;margin-top:24px}
-.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
-.portfolio-card{background:var(--surface);border-radius:24px;overflow:hidden;border:1px solid rgba(255,255,255,.07);transition:transform .2s}
-.portfolio-card:hover{transform:translateY(-4px)}
-.portfolio-thumb{height:200px}
-.portfolio-info{padding:24px}
-.portfolio-tag{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--primary)}
-.portfolio-desc{font-size:.875rem;color:var(--muted);margin-top:10px;line-height:1.6}
-.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
-.blog-card{background:var(--surface);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.07)}
-.blog-thumb{height:140px}
-.blog-body{padding:20px}
-.blog-cat{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--primary)}
-.blog-title{font-size:1rem;font-weight:700;margin-top:8px}
-.blog-excerpt{font-size:.875rem;color:var(--muted);margin-top:8px}
+.svc-icon{width:52px;height:52px;border-radius:16px;background:${pal.primary}20;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:20px}
+.svc-title{font-size:1rem;font-weight:700;margin-bottom:10px}
+.svc-desc{font-size:.875rem;color:var(--muted);line-height:1.7}
+/* skills */
+.skills-list{display:flex;flex-direction:column;gap:16px;max-width:700px}
+.skill-row{display:flex;align-items:center;gap:16px}
+.skill-name{min-width:120px;font-size:.9rem;font-weight:600;color:var(--muted)}
+.skill-track{flex:1;height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
+.skill-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.skill-pct{font-size:.8rem;font-weight:700;color:var(--primary);min-width:40px;text-align:right}
+/* project grid */
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.project-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;transition:transform .2s}
+.project-card:hover{transform:translateY(-4px)}
+.project-thumb{height:200px;display:flex;align-items:center;justify-content:center;position:relative}
+.project-body{padding:20px}
+.project-tag{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--primary)}
+.project-name{font-size:1rem;font-weight:700;margin-top:6px}
+.project-year{font-size:.8rem;color:var(--muted);margin-top:4px}
+/* testimonials dark overrides */
+.testimonial-card{background:var(--surface);border-color:rgba(255,255,255,.07)}
+.testimonial-text{color:var(--text)}
+.testimonial-name{color:var(--text)}
+/* gallery dark */
+.gallery-card{background:var(--surface);border:1px solid rgba(255,255,255,.07)}
+.gallery-name{color:var(--text)}
+/* hours dark */
+.hours-table tr{border-bottom:1px solid rgba(255,255,255,.07)}
+.h-day,.h-val{color:var(--muted)}
+/* faq dark */
+.faq-item{background:var(--surface);border-color:rgba(255,255,255,.07)}
+.faq-q{color:var(--text)}
+.faq-a{color:var(--muted)}
+/* items dark */
+.item-card{background:var(--surface);border:1px solid rgba(255,255,255,.07)}
+.item-name{color:var(--text)}
+/* cta section */
 .cta-section{padding:96px 0;text-align:center;position:relative;overflow:hidden}
-.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,${pal.primary}25,transparent 70%)}
-.cta-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;margin-bottom:16px;position:relative}
-.cta-sub{color:var(--muted);margin-bottom:36px;font-size:1rem;position:relative}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 50% 50%,${pal.primary}28,transparent 70%)}
+.cta-section .container{position:relative}
+.cta-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;margin-bottom:16px}
+.cta-sub{color:var(--muted);margin-bottom:36px}
+.contact-card{background:var(--surface);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:40px;max-width:440px;margin:0 auto}
+.contact-info{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;text-align:left}
+.contact-row{display:flex;align-items:center;gap:12px;font-size:.9rem;color:var(--muted)}
+.contact-ico{font-size:1.1rem}
+/* footer */
 footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
 .footer-inner{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .footer-logo{font-size:1.3rem;font-weight:800}
-.footer-logo span{color:var(--primary)}
-.footer-domain{font-size:.875rem;color:var(--muted)}
-.wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(22,163,74,.5);transition:transform .2s}
-.wa-float:hover{transform:scale(1.1)}
-@media(max-width:768px){.nav-links{display:none}.stats{gap:24px}}
+.footer-dot{color:var(--primary)}
+.footer-sub{font-size:.85rem;color:var(--muted)}
 </style>
 </head>
 <body>
+
 <nav>
   <div class="container nav-inner">
-    <span class="logo">${name}<span>.</span></span>
+    <span class="logo">${name}<span class="logo-dot">.</span></span>
     <ul class="nav-links">
       <li><a href="#servicos">Serviços</a></li>
       ${mods.includes('galeria') ? '<li><a href="#galeria">Portfólio</a></li>' : ''}
@@ -707,94 +1011,136 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
     </ul>
   </div>
 </nav>
+
 <section class="hero">
-  <div class="container hero-inner">
-    <div class="hero-tag">⚡ Especialistas</div>
-    <h1 class="hero-title">${name}<span>.</span></h1>
-    <p class="hero-sub">${ai?.hero_subheadline ?? 'Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.'}</p>
-    <div class="hero-ctas">
-      <a href="#contato" class="btn-primary">Fale Conosco</a>
-      ${mods.includes('galeria') ? `<a href="#galeria" class="btn-outline">Ver Portfólio</a>` : ''}
+  <div class="container hero-split">
+    <div class="hero-content">
+      <div class="hello-tag">👋 Olá, somos a ${name}</div>
+      <h1 class="hero-title">${name}</h1>
+      <p class="hero-role">${ai?.footer_tagline ?? 'Especialistas em soluções para o seu negócio'}</p>
+      <p class="hero-sub">${ai?.hero_subheadline ?? 'Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.'}</p>
+      <div class="hero-ctas">
+        <a href="#contato" class="btn-primary-full">Fale Conosco</a>
+        ${mods.includes('galeria') ? `<a href="#galeria" class="btn-ghost-dark">Ver Portfólio</a>` : ''}
+      </div>
+      <div class="stats-row">
+        <div><div class="stat-n">+50</div><div class="stat-l">Projetos entregues</div></div>
+        <div><div class="stat-n">5★</div><div class="stat-l">Avaliação média</div></div>
+        <div><div class="stat-n">8</div><div class="stat-l">Anos de experiência</div></div>
+        <div><div class="stat-n">100%</div><div class="stat-l">Comprometimento</div></div>
+      </div>
     </div>
-    <div class="stats">
-      <div><div class="stat-num">+50</div><div class="stat-label">Clientes atendidos</div></div>
-      <div><div class="stat-num">5★</div><div class="stat-label">Avaliação média</div></div>
-      <div><div class="stat-num">100%</div><div class="stat-label">Comprometidos</div></div>
+    <div class="avatar-wrap">
+      <div class="avatar-circle">💼</div>
+      <div class="avatar-badge">
+        <span class="badge-val" style="color:${pal.primary}">+50</span>
+        <span class="badge-lbl">Clientes felizes</span>
+      </div>
     </div>
   </div>
 </section>
-<section id="servicos" class="section">
+
+<section id="servicos" style="padding:96px 0;background:var(--surface)">
   <div class="container">
-    <div class="section-header centered">
-      <span class="eyebrow">O que fazemos</span>
-      <h2 class="section-title">Nossos Serviços</h2>
-      <p class="section-sub">Soluções completas para o seu negócio crescer com estratégia.</p>
+    <div class="sec-hdr centered">
+      <span class="eyebrow" style="color:${pal.primary}">O que fazemos</span>
+      <h2 class="sec-title">Nossos Serviços</h2>
+      <p class="sec-sub">Soluções completas para o seu negócio crescer com estratégia e propósito.</p>
     </div>
     <div class="services-grid">
-      ${(ai?.services ?? [
-        {icon:'🎯',name:'Consultoria Estratégica',description:'Análise completa do seu negócio com recomendações práticas para crescimento.'},
-        {icon:'📊',name:'Análise e Resultados',description:'Métricas e relatórios detalhados para decisões baseadas em dados.'},
-        {icon:'🚀',name:'Execução e Entrega',description:'Implementação ágil com foco em resultado e prazo definido.'},
-      ]).map(s=>`<div class="service-card"><div class="service-icon">${s.icon}</div><div class="service-title">${s.name}</div><div class="service-desc">${s.description}</div></div>`).join('')}
+      ${services.map(s => `
+      <div class="service-card">
+        <div class="svc-icon">${s.icon}</div>
+        <div class="svc-title">${s.name}</div>
+        <div class="svc-desc">${s.description}</div>
+      </div>`).join('')}
     </div>
   </div>
 </section>
+
+<section style="padding:80px 0;background:var(--bg)">
+  <div class="container">
+    <div class="sec-hdr">
+      <span class="eyebrow" style="color:${pal.primary}">Competências</span>
+      <h2 class="sec-title">Nossas especialidades</h2>
+    </div>
+    <div class="skills-list">
+      ${skills.map((s, i) => `
+      <div class="skill-row">
+        <span class="skill-name">${s}</span>
+        <div class="skill-track"><div class="skill-fill" style="width:${skillWidths[i]}%"></div></div>
+        <span class="skill-pct">${skillWidths[i]}%</span>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
 ${mods.includes('sobre') ? aboutSection(description, pal) : ''}
-${mods.includes('galeria') ? portfolioSection(pal) : ''}
+
+${mods.includes('galeria') ? `
+<section id="galeria" style="padding:80px 0;background:var(--surface)">
+  <div class="container">
+    <div class="sec-hdr">
+      <span class="eyebrow" style="color:${pal.primary}">Portfólio</span>
+      <h2 class="sec-title">Projetos recentes</h2>
+    </div>
+    <div class="project-grid">
+      ${[
+        ['Branding Digital', 'Design', '2024'],
+        ['E-commerce B2C', 'Desenvolvimento', '2024'],
+        ['Estratégia de Marketing', 'Consultoria', '2023'],
+        ['App Mobile', 'Tecnologia', '2023'],
+        ['Identidade Visual', 'Design', '2024'],
+        ['Gestão de Projetos', 'Consultoria', '2023'],
+      ].map(([pname, tag, year], i) => {
+        const cols = [pal.primary, pal.accent, `${pal.primary}88`, `${pal.accent}88`];
+        return `
+      <div class="project-card">
+        <div class="project-thumb" style="background:linear-gradient(135deg,${cols[i%4]}33,${cols[(i+1)%4]}22)">
+          <div style="width:80px;height:80px;border-radius:50%;background:${cols[i%4]}55;display:flex;align-items:center;justify-content:center;font-size:2rem">✦</div>
+        </div>
+        <div class="project-body">
+          <span class="project-tag">${tag}</span>
+          <div class="project-name">${pname}</div>
+          <div class="project-year">${year}</div>
+        </div>
+      </div>`;
+      }).join('')}
+    </div>
+  </div>
+</section>` : ''}
+
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('depoimentos') ? blogSection(pal) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
 ${mods.includes('faq') ? faqSection(pal) : ''}
+
 <section id="contato" class="cta-section">
   <div class="container">
     <h2 class="cta-title">${ai?.cta_main ?? 'Pronto para começar?'}</h2>
     <p class="cta-sub">${ai?.cta_sub ?? 'Entre em contato hoje e vamos transformar seu negócio juntos.'}</p>
-    <a href="${waLink}" target="_blank" class="btn-wa" style="margin:0 auto">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L0 24l6.335-1.502A11.946 11.946 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.007-1.374l-.36-.213-3.724.882.93-3.618-.234-.372A9.794 9.794 0 012.182 12C2.182 6.575 6.575 2.182 12 2.182S21.818 6.575 21.818 12 17.425 21.818 12 21.818z"/></svg>
-      Falar pelo WhatsApp
-    </a>
+    <div class="contact-card">
+      <div class="contact-info">
+        <div class="contact-row"><span class="contact-ico">📱</span> WhatsApp direto e rápido</div>
+        <div class="contact-row"><span class="contact-ico">⏱️</span> Resposta em até 24h</div>
+        <div class="contact-row"><span class="contact-ico">🌎</span> Atendemos todo o Brasil</div>
+      </div>
+      <a href="${waLink}" target="_blank" class="btn-wa-inline" style="width:100%;justify-content:center">
+        ${WA_SVG} Falar pelo WhatsApp
+      </a>
+    </div>
   </div>
 </section>
-<footer><div class="container footer-inner"><span class="footer-logo">${name}<span>.</span></span><span class="footer-domain">${b.domain ? `${b.domain}.com.br` : ''} · ${ai?.footer_tagline ?? 'Feito com SitePronto'}</span></div></footer>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-logo">${name}<span class="footer-dot">.</span></span>
+    <span class="footer-sub">${b.domain ? `${b.domain}.com.br` : ''} · ${ai?.footer_tagline ?? 'Feito com SitePronto'}</span>
+  </div>
+</footer>
+
 ${mods.includes('contato') ? waFloat(waLink) : ''}
-</body></html>`;
-}
-
-function aboutSection(description: string, pal: Palette): string {
-  if (!description) return '';
-  return `
-  <section id="sobre" class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <span class="eyebrow" style="color:${pal.primary}">Sobre nós</span>
-        <h2 class="section-title">Quem somos</h2>
-        <p class="section-sub" style="max-width:640px;margin:16px auto 0;line-height:1.8">${description}</p>
-      </div>
-    </div>
-  </section>`;
-}
-
-function faqSection(pal: Palette): string {
-  const items = [
-    { q: 'Como posso entrar em contato?', a: 'Fale conosco pelo WhatsApp ou através do formulário de contato. Respondemos rapidamente.' },
-    { q: 'Quais são os horários de atendimento?', a: 'Atendemos de segunda a sexta, das 9h às 18h. Sábados das 9h às 13h.' },
-    { q: 'Como faço para solicitar um orçamento?', a: 'Entre em contato pelo WhatsApp e retornaremos em até 24 horas com todas as informações.' },
-  ];
-  return `
-  <section id="faq" class="section">
-    <div class="container">
-      <div class="section-header">
-        <span class="eyebrow" style="color:${pal.primary}">Dúvidas</span>
-        <h2 class="section-title">Perguntas frequentes</h2>
-      </div>
-      <div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:12px">
-        ${items.map(item => `
-        <div style="border-radius:16px;padding:24px;border:1px solid ${pal.primary}22;background:var(--surface,#fff)">
-          <p style="font-weight:700;margin-bottom:8px">${item.q}</p>
-          <p style="color:var(--muted,#666);font-size:.9rem;line-height:1.7">${item.a}</p>
-        </div>`).join('')}
-      </div>
-    </div>
-  </section>`;
+</body>
+</html>`;
 }
 
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
@@ -845,6 +1191,5 @@ Paleta: ${briefing.palette}
 Domínio: ${domain}
 Gerado em: ${new Date().toLocaleString('pt-BR')}
 
-Dúvidas? Acesse sitepronto.com.br ou responda o e-mail de confirmação.
-`;
+Dúvidas? Acesse sitepronto.com.br ou responda o e-mail de confirmação.`;
 }

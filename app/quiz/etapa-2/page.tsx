@@ -5,12 +5,13 @@ import { ArrowRight, ArrowLeft, Sparkles, CheckCircle2, UploadCloud, X } from 'l
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useQuiz } from '@/lib/quiz-context';
-import { palettes, quizModules, templates } from '@/lib/quiz-data';
+import { palettes, quizModules } from '@/lib/quiz-data';
+import { TemplateSelector } from '@/components/quiz/TemplateSelector';
 
 export default function QuizEtapa2() {
   const router = useRouter();
   const { state, dispatch } = useQuiz();
-  const { objective, businessName, logoName, logoPreview, palette, template, selectedModules } = state;
+  const { objective, logoName, logoPreview, palette, template, selectedModules } = state;
 
   useEffect(() => {
     if (!objective) router.replace('/quiz');
@@ -151,7 +152,7 @@ export default function QuizEtapa2() {
             </div>
           </div>
 
-          {/* Right column: Modules + Templates */}
+          {/* Right column: Modules */}
           <div className="space-y-10">
             {/* Modules */}
             <div>
@@ -186,52 +187,13 @@ export default function QuizEtapa2() {
                 Selecione pelo menos um módulo.
               </p>
             </div>
-
-            {/* Templates */}
-            <div>
-              <p className="mb-3 text-label-md font-semibold">Template do site</p>
-              <div className="grid grid-cols-2 gap-3">
-                {templates.map((tmpl) => {
-                  const active = template === tmpl.id;
-                  const suggested = objective && (tmpl.suggested as readonly string[]).includes(objective);
-                  return (
-                    <button
-                      key={tmpl.id}
-                      type="button"
-                      onClick={() => dispatch({ type: 'SET_TEMPLATE', payload: tmpl.id })}
-                      className={`relative flex flex-col items-start gap-2 rounded-2xl p-3 text-left transition-all ${
-                        active ? 'ring-2 ring-primary' : 'hover:bg-surface-low'
-                      }`}
-                      style={{ backgroundColor: 'var(--surface-container-low)' }}
-                    >
-                      {active && (
-                        <span className="absolute right-2 top-2">
-                          <CheckCircle2 size={14} className="text-primary" />
-                        </span>
-                      )}
-                      {suggested && !active && (
-                        <span className="absolute right-2 top-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                          Sugerido
-                        </span>
-                      )}
-                      {/* Mini mockup */}
-                      <div className="flex h-20 w-full items-center justify-center rounded-xl bg-surface-med">
-                        <div className="w-3/4 space-y-1.5">
-                          <div className="h-2 w-full rounded-full bg-on-surface/10" />
-                          <div className="h-1.5 w-2/3 rounded-full bg-on-surface/8" />
-                          <div className="h-5 w-full rounded-lg bg-primary/20" />
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-label-sm font-bold">{tmpl.name}</p>
-                        <p className="text-[10px] text-on-surface-variant">{tmpl.helper}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </div>
+        </div>
+
+        {/* Template selector — full width */}
+        <div className="mt-10">
+          <p className="mb-4 text-label-md font-semibold">Template do site</p>
+          <TemplateSelector />
         </div>
       </section>
 
