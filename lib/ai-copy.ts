@@ -26,30 +26,43 @@ export async function generateAICopy(input: {
   const objLabel = OBJECTIVE_LABELS[input.objective] ?? input.objective;
   const modulesLabel = input.modules.join(', ') || 'padrão';
 
-  const prompt = `Você é copywriter especialista em sites para pequenas empresas brasileiras.
+  const hasDescription = (input.description ?? '').trim().length > 20;
+  const hasName = (input.businessName ?? '').trim().length > 1;
 
-Gere textos profissionais para o site de: "${input.businessName || 'Meu Negócio'}"
-Tipo de negócio: ${objLabel}
-Descrição fornecida pelo cliente: "${input.description || 'não informada'}"
-Seções do site: ${modulesLabel}
+  const contextHint = hasDescription
+    ? `O cliente forneceu a seguinte descrição do negócio: "${input.description}"`
+    : hasName
+    ? `O cliente informou apenas o nome "${input.businessName}". Pesquise mentalmente o que negócios com esse nome costumam oferecer no mercado brasileiro e use esse conhecimento para gerar textos específicos e plausíveis.`
+    : `Nenhuma descrição foi fornecida. Use o tipo de negócio para gerar textos plausíveis e profissionais para o mercado brasileiro.`;
+
+  const prompt = `Você é copywriter especialista em sites para pequenas empresas brasileiras. Sua tarefa é gerar textos que soem autênticos, específicos ao negócio — não genéricos.
+
+**Negócio:** "${input.businessName || 'Meu Negócio'}"
+**Tipo:** ${objLabel}
+**Seções do site:** ${modulesLabel}
+**Contexto:** ${contextHint}
+
+Instruções:
+- Se o cliente descreveu o negócio, extraia diferenciais reais da descrição (produtos, serviços, localização, público, método de trabalho)
+- Se a descrição menciona um link ou site existente, imagine o que esse negócio provavelmente oferece e escreva com especificidade
+- Se pouca informação foi fornecida, use o nome e tipo para inferir o segmento e gerar textos que fariam sentido para esse tipo de empresa no Brasil
+- Nunca use frases genéricas como "Qualidade e excelência", "Seu sucesso é nossa missão" — sempre prefira especificidade
+- Escreva em português brasileiro informal mas profissional
 
 Responda APENAS com este JSON válido (sem markdown, sem bloco de código):
 {
-  "hero_subheadline": "frase de impacto de até 15 palavras que descreve o negócio",
+  "hero_subheadline": "frase de impacto de até 15 palavras que descreve o negócio de forma específica",
   "cta_main": "texto do botão CTA principal (máx 4 palavras)",
   "cta_sub": "frase de apoio ao CTA (máx 10 palavras)",
   "services": [
-    {"name": "Nome do Diferencial ou Serviço 1", "description": "descrição em 1 frase curta", "icon": "emoji relevante"},
-    {"name": "Nome do Diferencial ou Serviço 2", "description": "descrição em 1 frase curta", "icon": "emoji relevante"},
-    {"name": "Nome do Diferencial ou Serviço 3", "description": "descrição em 1 frase curta", "icon": "emoji relevante"}
+    {"name": "Nome do Diferencial ou Serviço 1", "description": "descrição em 1 frase específica ao negócio", "icon": "emoji relevante"},
+    {"name": "Nome do Diferencial ou Serviço 2", "description": "descrição em 1 frase específica ao negócio", "icon": "emoji relevante"},
+    {"name": "Nome do Diferencial ou Serviço 3", "description": "descrição em 1 frase específica ao negócio", "icon": "emoji relevante"}
   ],
   "footer_tagline": "tagline da empresa em até 6 palavras"
 }
 
-Regras obrigatórias:
-- Escreva em português brasileiro informal mas profissional
-- Seja específico ao negócio descrito, evite frases genéricas
-- services deve ter exatamente 3 itens`;
+services deve ter exatamente 3 itens.`;
 
   try {
     const res = await fetch(

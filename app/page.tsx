@@ -307,7 +307,7 @@ export default function Home() {
           <div className="space-y-3">
             <FaqItem
               question="E se eu não gostar do site?"
-              answer="Você tem 7 dias de garantia. Se não ficar satisfeito por qualquer motivo, devolvemos 100% do valor pago — sem perguntas e sem burocracia."
+              answer="Ao aprovar o layout final, você confirma que está de acordo com a estrutura e diagramação entregue. Ajustes pontuais de texto e imagens são aceitos pelo suporte. Alterações de layout ou diagramação após a aprovação têm custo adicional."
             />
             <FaqItem
               question="Posso alterar o conteúdo depois?"
