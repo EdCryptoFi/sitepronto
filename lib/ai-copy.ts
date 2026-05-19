@@ -57,28 +57,58 @@ export async function generateAICopy(input: {
   const hasDescription = (input.description ?? '').trim().length > 5;
   const hasName = (input.businessName ?? '').trim().length > 1;
 
+  const industryRefs = industry.fallbackServices.map(s =>
+    `- ${s.icon} ${s.name}: ${s.description}`
+  ).join('\n');
+
   let contextHint: string;
   let extractionInstructions: string;
 
   if (hasDescription) {
-    contextHint = `O cliente forneceu a seguinte descrição do negócio: "${input.description}"`;
-    extractionInstructions = `A descrição acima contém as ÚNICAS fontes de verdade sobre o negócio.
-CRÍTICO: Você DEVE extrair serviços, produtos e diferenciais DIRETAMENTE da descrição.
-- Se a descrição menciona "escapamento, pneus, alinhamento", os services DEVEM ser esses.
-- Se menciona "pizza, esfiha, delivery", os services DEVEM ser sobre pizza e esfiha.
-- NUNCA invente serviços que não estão na descrição.
-- Copie as palavras EXATAS da descrição para compor os nomes dos serviços.`;
+    contextHint = `O cliente forneceu a seguinte descrição do negócio: "${input.description}"
+
+📌 REFERÊNCIAS DO SEGMENTO (${industry.label}):
+Use como contexto para enriquecer a descrição do cliente, NÃO para substituí-la.
+${industryRefs}
+
+🔹 Headline de referência: "${industry.fallbackHeadline}"
+🔹 CTA típico do segmento: "${industry.fallbackCTA}" — "${industry.fallbackCTASub}"
+🔹 Slogan de referência: "${industry.fallbackTagline}"
+🔹 Cena típica para imagem principal: ${industry.imagePrompt}`;
+    extractionInstructions = `A descrição do cliente é sua fonte PRINCIPAL e OBRIGATÓRIA para os services.
+REGRAS:
+- Extraia os 3 services EXATAMENTE da descrição do cliente (ex: "escapamento, pneus, alinhamento")
+- Use as referências do segmento para COMPLEMENTAR a descrição de cada serviço (campo "description" de cada service)
+- Se a descrição do cliente for curta (ex: só "escapamento, pneus"), você PODE usar as referências para dar mais profundidade
+- NUNCA ignore os termos do cliente em favor das referências — a descrição dele tem PRIORIDADE
+- NUNCA use: "Consultoria Estratégica", "Análise e Resultados", "Execução e Entrega"`;
   } else if (hasName) {
-    contextHint = `O cliente informou apenas o nome "${input.businessName}".`;
-    const detectedLabel = industry.label;
-    extractionInstructions = `O nome sugere que é do ramo de ${detectedLabel}.
-Use seu conhecimento sobre empresas brasileiras desse segmento para gerar serviços REALISTAS e ESPECÍFICOS.
-Exemplos de serviços REAIS para ${detectedLabel}: ${industry.fallbackServices.map(s => `"${s.name}"`).join(', ')}
-NÃO use serviços genéricos como "Consultoria Estratégica" ou "Análise de Resultados".`;
+    contextHint = `O cliente informou apenas o nome "${input.businessName}".
+O segmento detectado é ${industry.label}.
+
+📌 REFERÊNCIAS DO SEGMENTO (use como fonte principal):
+${industryRefs}
+
+🔹 Headline de referência: "${industry.fallbackHeadline}"
+🔹 CTA típico: "${industry.fallbackCTA}" — "${industry.fallbackCTASub}"
+🔹 Slogan de referência: "${industry.fallbackTagline}"
+🔹 Cena típica para imagem principal: ${industry.imagePrompt}`;
+    extractionInstructions = `Use as referências do segmento para gerar services REALISTAS e ESPECÍFICOS para ${industry.label}.
+- Adapte os nomes e descrições para o negócio específico "${input.businessName}"
+- NUNCA use serviços genéricos como "Consultoria Estratégica" ou "Análise de Resultados"
+- Personalize as descrições como se fossem reais (horários, preços, bairros, etc.)`;
   } else {
     contextHint = `Nenhuma descrição foi fornecida.`;
     extractionInstructions = `Use o tipo de negócio (${objLabel}) para gerar textos PLÁUSIVEIS para o mercado brasileiro.
 Evite termos vagos. Prefira serviços concretos e específicos.`;
+  }
+
+  let industryImageHints = '';
+  if (industry && industry.id !== 'generico') {
+    industryImageHints = `\n📸 SUGESTÕES DE IMAGEM PARA GALERIA:
+${industry.galleryPrompts.map((g, i) => `${i + 1}. ${g}`).join('\n')}
+
+🔑 SEO keywords de referência: ${industry.label}, ${industry.label.toLowerCase()}, ${industry.fallbackServices.map(s => s.name.toLowerCase()).join(', ')}`;
   }
 
   const paletteHint = input.palette && input.paletteColors
@@ -93,6 +123,7 @@ Evite termos vagos. Prefira serviços concretos e específicos.`;
 **Seções:** ${modulesLabel}
 ${paletteHint}
 ${contextHint}
+${industryImageHints}
 
 ${extractionInstructions}
 
@@ -101,7 +132,7 @@ ${extractionInstructions}
 2. Se a descrição cita serviços específicos (ex: "troca de óleo, alinhamento, pneus"), USE-OS exatamente
 3. NUNCA use: "Consultoria Estratégica", "Análise e Resultados", "Execução e Entrega" ou variações genéricas
 4. hero_subheadline deve mencionar algo ESPECÍFICO do negócio (localização, especialidade, diferencial)
-5. image_prompts.hero deve descrever uma cena REALISTA do negócio (ex: "mecânico trabalhando em motor de carro")
+5. image_prompts.hero deve seguir a sugestão acima (📸 cena típica)
 6. Emoji dos services deve combinar com o serviço (🔧 para mecânica, 🍕 para pizza, 💇 para cabeleireiro)
 
 Responda APENAS com este JSON (sem markdown):
