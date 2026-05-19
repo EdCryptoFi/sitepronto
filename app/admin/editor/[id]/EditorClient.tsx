@@ -1,21 +1,27 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Editor, Frame, Element, useEditor } from '@craftjs/core';
 import {
   ArrowLeft, Save, Undo2, Redo2, Loader2,
   LayoutTemplate, Type, ImageIcon, Mail,
+  Star, Grid3x3, HelpCircle, BarChart3, Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
-import { HeroSection, TextBlock, ImageBlock, ContactForm } from '@/lib/craftjs/components';
+import { HeroSection, TextBlock, ImageBlock, ContactForm, ServicesSection, TestimonialsSection, GallerySection, FAQSection, StatsSection } from '@/lib/craftjs/components';
 
 /* ─── Resolver ─── */
-const resolver = { HeroSection, TextBlock, ImageBlock, ContactForm };
+const resolver = { HeroSection, TextBlock, ImageBlock, ContactForm, ServicesSection, TestimonialsSection, GallerySection, FAQSection, StatsSection };
 
 /* ─── Toolbox ─── */
 const TOOLS = [
   { label: 'Hero', component: HeroSection, icon: LayoutTemplate },
   { label: 'Texto', component: TextBlock, icon: Type },
+  { label: 'Serviços', component: ServicesSection, icon: Sparkles },
+  { label: 'Depoimentos', component: TestimonialsSection, icon: Star },
+  { label: 'Galeria', component: GallerySection, icon: Grid3x3 },
+  { label: 'FAQ', component: FAQSection, icon: HelpCircle },
+  { label: 'Estatísticas', component: StatsSection, icon: BarChart3 },
   { label: 'Imagem', component: ImageBlock, icon: ImageIcon },
   { label: 'Contato', component: ContactForm, icon: Mail },
 ];
@@ -142,34 +148,38 @@ function EditorToolbar({ briefingId, segment }: { briefingId: string; segment?: 
 }
 
 /* ─── Canvas Drop Area ─── */
-function CanvasArea() {
+function CanvasArea({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex-1 overflow-y-auto bg-[#e8ecef] p-6">
       <div className="mx-auto min-h-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-xl">
-        <Frame>
-          <Element
-            is="div"
-            canvas
-            className="min-h-screen"
-          >
-            <HeroSection />
-            <TextBlock content="Adicione mais seções arrastando componentes do painel à esquerda." />
-          </Element>
-        </Frame>
+        {children}
       </div>
     </div>
   );
 }
 
+function DefaultFrame() {
+  return (
+    <Frame>
+      <Element is="div" canvas className="min-h-screen">
+        <HeroSection />
+        <TextBlock content="Adicione mais seções arrastando componentes do painel à esquerda." />
+      </Element>
+    </Frame>
+  );
+}
+
 /* ─── Main Export ─── */
-export function EditorClient({ briefingId, segment }: { briefingId: string; segment?: string }) {
+export function EditorClient({ briefingId, segment, initialContent }: { briefingId: string; segment?: string; initialContent?: React.ReactElement }) {
   return (
     <Editor resolver={resolver}>
       <div className="flex h-screen flex-col overflow-hidden bg-surface text-on-surface">
         <EditorToolbar briefingId={briefingId} segment={segment} />
         <div className="flex flex-1 overflow-hidden">
           <Toolbox />
-          <CanvasArea />
+          <CanvasArea>
+            {initialContent ? <Frame>{initialContent}</Frame> : <DefaultFrame />}
+          </CanvasArea>
           <PropertiesPanel />
         </div>
       </div>

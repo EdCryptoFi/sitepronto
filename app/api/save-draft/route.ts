@@ -3,8 +3,20 @@ import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getIp } from '@/lib/rate-limit';
 import { generateAICopy } from '@/lib/ai-copy';
 
+const PALETTE_COLORS: Record<string, { primary: string; accent: string }> = {
+  'azul-editorial': { primary: '#004ac6', accent: '#2563eb' },
+  'verde-servico':  { primary: '#0f766e', accent: '#14b8a6' },
+  'vinho-premium':  { primary: '#7f1d1d', accent: '#be123c' },
+  minimal:          { primary: '#374151', accent: '#6b7280' },
+  vibrant:          { primary: '#004ac6', accent: '#eab308' },
+  corporate:        { primary: '#002855', accent: '#004ac6' },
+  nature:           { primary: '#059669', accent: '#f97316' },
+  tech:             { primary: '#111827', accent: '#06b6d4' },
+  elegant:          { primary: '#2b1b17', accent: '#b58e58' },
+};
+
 const ALLOWED_OBJECTIVES = ['vender-produtos', 'servicos', 'portfolio', 'institucional'];
-const ALLOWED_PALETTES = ['minimal', 'vibrant', 'corporate', 'nature', 'tech', 'elegant'];
+const ALLOWED_PALETTES = ['azul-editorial', 'verde-servico', 'vinho-premium', 'minimal', 'vibrant', 'corporate', 'nature', 'tech', 'elegant'];
 const ALLOWED_TEMPLATES = ['restaurant', 'farmacy', 'store', 'portfolio'];
 const ALLOWED_MODULES = ['servicos', 'sobre', 'contato', 'galeria', 'depoimentos', 'faq'];
 const ALLOWED_DOMAIN_CHOICES = ['new', 'later'];
@@ -88,6 +100,8 @@ export async function POST(req: NextRequest) {
     description,
     template,
     modules,
+    palette,
+    paletteColors: PALETTE_COLORS[palette],
   });
 
   const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy });

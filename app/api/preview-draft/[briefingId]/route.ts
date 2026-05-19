@@ -22,11 +22,10 @@ export async function GET(
     .from('briefings')
     .select('id, segment, goal, palette, template, selected_modules, domain, domain_choice, whatsapp_number, business_hours, catalog_products, content_notes, logo_name, created_at')
     .eq('id', briefingId)
-    .eq('payment_status', 'pending')
     .single();
 
   if (error || !data) {
-    return new NextResponse('Preview não encontrado ou briefing já pago', { status: 404 });
+    return new NextResponse('Briefing não encontrado', { status: 404 });
   }
 
   const rawHtml = generateSiteHTML(data as SiteBriefing);

@@ -31,6 +31,12 @@ const PALETTE_COLORS: Record<string, string> = {
   'azul-editorial': '#004ac6',
   'verde-servico': '#0f766e',
   'vinho-premium': '#7f1d1d',
+  'minimal': '#6b7280',
+  'vibrant': '#eab308',
+  'corporate': '#002855',
+  'nature': '#059669',
+  'tech': '#111827',
+  'elegant': '#2b1b17',
 };
 
 export default function PreviewFrame({ briefing }: { briefing: BriefingMeta }) {

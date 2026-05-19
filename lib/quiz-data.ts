@@ -33,6 +33,24 @@ export const objectives = [
 
 export const palettes = [
   {
+    id: 'azul-editorial',
+    name: 'Azul Editorial',
+    helper: 'Clássico e profissional.',
+    colors: ['#004ac6', '#2563eb', '#dbe6ff'],
+  },
+  {
+    id: 'verde-servico',
+    name: 'Verde Serviço',
+    helper: 'Natureza e confiança.',
+    colors: ['#0f766e', '#14b8a6', '#ccfbf1'],
+  },
+  {
+    id: 'vinho-premium',
+    name: 'Vinho Premium',
+    helper: 'Sofisticação e requinte.',
+    colors: ['#7f1d1d', '#be123c', '#ffe4e6'],
+  },
+  {
     id: 'minimal',
     name: 'Minimal',
     helper: 'Sóbrio e atemporal.',

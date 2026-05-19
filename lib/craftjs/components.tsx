@@ -230,3 +230,200 @@ ContactForm.craft = {
   props: { title: 'Fale conosco', bgColor: '#f7f9fb' },
   related: { toolbar: ContactSettings },
 };
+
+/* ─── ServicesSection ─── */
+type ServicesProps = {
+  services?: { icon: string; name: string; description: string }[];
+  title?: string;
+  bgColor?: string;
+};
+
+export function ServicesSection({
+  services = [
+    { icon: '✅', name: 'Qualidade', description: 'Serviço de qualidade comprovada.' },
+    { icon: '🚀', name: 'Agilidade', description: 'Entrega rápida e eficiente.' },
+    { icon: '💬', name: 'Suporte', description: 'Atendimento personalizado.' },
+  ],
+  title = 'Nossos diferenciais',
+  bgColor = '#f8fafc',
+}: ServicesProps) {
+  const { connectors: { connect, drag } } = useNode();
+  return (
+    <section ref={(ref) => { if (ref) connect(drag(ref)); }} style={{ backgroundColor: bgColor }} className="px-8 py-16">
+      <div className="mx-auto max-w-5xl">
+        <h2 className="mb-10 text-center text-2xl font-bold">{title}</h2>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {services.map((s, i) => (
+            <div key={i} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+              <div className="mb-4 text-3xl">{s.icon}</div>
+              <h3 className="mb-2 text-lg font-bold">{s.name}</h3>
+              <p className="text-sm text-gray-500">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ServicesSettings() {
+  const { actions: { setProp }, props } = useNode((n) => ({ props: n.data.props as ServicesProps }));
+  return (
+    <SettingsPanel>
+      <Field label="Título">
+        <input className={inputCls} value={props.title} onChange={(e) => setProp((p: ServicesProps) => (p.title = e.target.value))} />
+      </Field>
+    </SettingsPanel>
+  );
+}
+
+ServicesSection.craft = {
+  displayName: 'Serviços',
+  props: { services: [], title: 'Nossos diferenciais', bgColor: '#f8fafc' },
+  related: { toolbar: ServicesSettings },
+};
+
+/* ─── TestimonialsSection ─── */
+type TestimonialsProps = {
+  testimonials?: { name: string; text: string; role: string }[];
+  title?: string;
+};
+
+export function TestimonialsSection({
+  testimonials = [
+    { name: 'Ana Silva', text: 'Atendimento excelente, recomendo!', role: 'Cliente' },
+    { name: 'Carlos Lima', text: 'Profissionalismo e qualidade.', role: 'Parceiro' },
+  ],
+  title = 'Depoimentos',
+}: TestimonialsProps) {
+  const { connectors: { connect, drag } } = useNode();
+  return (
+    <section ref={(ref) => { if (ref) connect(drag(ref)); }} className="px-8 py-16">
+      <div className="mx-auto max-w-5xl">
+        <h2 className="mb-10 text-center text-2xl font-bold">{title}</h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {testimonials.map((t, i) => (
+            <div key={i} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+              <div className="mb-2 text-lg text-amber-400">{'★'.repeat(5)}</div>
+              <p className="mb-4 italic text-gray-600">&ldquo;{t.text}&rdquo;</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-bold">{t.name}</p>
+                  <p className="text-xs text-gray-400">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+TestimonialsSection.craft = {
+  displayName: 'Depoimentos',
+  props: { testimonials: [], title: 'Depoimentos' },
+  related: { toolbar: null },
+};
+
+/* ─── GallerySection ─── */
+type GalleryProps = { title?: string; bgColor?: string };
+
+export function GallerySection({ title = 'Galeria', bgColor = '#f8fafc' }: GalleryProps) {
+  const { connectors: { connect, drag } } = useNode();
+  const items = [1, 2, 3, 4, 5, 6];
+  return (
+    <section ref={(ref) => { if (ref) connect(drag(ref)); }} style={{ backgroundColor: bgColor }} className="px-8 py-16">
+      <div className="mx-auto max-w-5xl">
+        <h2 className="mb-10 text-center text-2xl font-bold">{title}</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {items.map((i) => (
+            <div key={i} className="flex aspect-square items-center justify-center rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10">
+              <div className="h-16 w-16 rounded-full bg-primary/20" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+GallerySection.craft = {
+  displayName: 'Galeria',
+  props: { title: 'Galeria', bgColor: '#f8fafc' },
+  related: { toolbar: null },
+};
+
+/* ─── FAQSection ─── */
+type FAQProps = { items?: { q: string; a: string }[]; title?: string };
+
+export function FAQSection({
+  items = [
+    { q: 'Como funciona?', a: 'É simples e rápido. Entre em contato pelo WhatsApp.' },
+    { q: 'Qual o prazo?', a: 'Normalmente em até 24 horas úteis.' },
+  ],
+  title = 'Perguntas frequentes',
+}: FAQProps) {
+  const { connectors: { connect, drag } } = useNode();
+  return (
+    <section ref={(ref) => { if (ref) connect(drag(ref)); }} className="px-8 py-16">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="mb-10 text-center text-2xl font-bold">{title}</h2>
+        <div className="space-y-3">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+              <p className="mb-2 font-bold">{item.q}</p>
+              <p className="text-sm text-gray-500">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+FAQSection.craft = {
+  displayName: 'FAQ',
+  props: { items: [], title: 'Perguntas frequentes' },
+  related: { toolbar: null },
+};
+
+/* ─── StatsSection ─── */
+type StatsProps = {
+  stats?: { value: string; label: string }[];
+  bgColor?: string;
+  textColor?: string;
+};
+
+export function StatsSection({
+  stats = [
+    { value: '50+', label: 'Projetos' },
+    { value: '5★', label: 'Avaliação' },
+    { value: '98%', label: 'Satisfação' },
+  ],
+  bgColor = '#004ac6',
+  textColor = '#ffffff',
+}: StatsProps) {
+  const { connectors: { connect, drag } } = useNode();
+  return (
+    <section ref={(ref) => { if (ref) connect(drag(ref)); }} style={{ backgroundColor: bgColor, color: textColor }} className="px-8 py-12">
+      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-8">
+        {stats.map((s, i) => (
+          <div key={i} className="text-center">
+            <p className="text-3xl font-extrabold">{s.value}</p>
+            <p className="mt-1 text-sm opacity-80">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+StatsSection.craft = {
+  displayName: 'Estatísticas',
+  props: { stats: [], bgColor: '#004ac6', textColor: '#ffffff' },
+  related: { toolbar: null },
+};

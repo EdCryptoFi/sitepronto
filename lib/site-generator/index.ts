@@ -1,4 +1,5 @@
 import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
+import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
 
 export type SiteBriefing = {
   id: string;
@@ -62,18 +63,12 @@ function waFloat(waLink: string): string {
 // ─── SHARED SECTION HELPERS ──────────────────────────────────────────────────
 
 function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette, dark = false): string {
-  const gradients = [
-    `linear-gradient(135deg,${pal.primary}33,${pal.accent}22)`,
-    `linear-gradient(135deg,${pal.accent}33,${pal.light})`,
-    `linear-gradient(135deg,${pal.light},${pal.primary}22)`,
-  ];
+  const prodImg = dataUrl(generateProductSVG(pal));
   const items = (products && products.length > 0)
     ? products.map((p, i) => {
         const img = p.imagePreview
           ? `<img src="${p.imagePreview}" alt="${p.name}" style="width:100%;height:180px;object-fit:cover">`
-          : `<div class="item-photo" style="background:${gradients[i % 3]}">
-               <div class="item-photo-circle" style="background:${pal.primary}44"></div>
-             </div>`;
+          : `<img src="${prodImg}" alt="${p.name || 'Item'}" style="width:100%;height:180px;object-fit:cover">`;
         return `
       <div class="item-card">
         ${img}
@@ -86,9 +81,7 @@ function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette
       }).join('')
     : [1,2,3,4,5,6].map((i) => `
       <div class="item-card">
-        <div class="item-photo" style="background:${gradients[i % 3]}">
-          <div class="item-photo-circle" style="background:${pal.primary}55"></div>
-        </div>
+        <img src="${prodImg}" alt="Item ${i}" style="width:100%;height:180px;object-fit:cover">
         <div class="item-body">
           <span class="item-name">Item ${i}</span>
           <button class="item-btn" style="background:${pal.primary}">Saiba mais</button>
@@ -96,7 +89,7 @@ function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette
       </div>`).join('');
   const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
   return `
-<section id="servicos" style="padding:80px 0;background:${bg}">
+<section id="servicos" class="section-animate" style="padding:80px 0;background:${bg}">
   <div class="container">
     <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Catálogo</span>
@@ -114,7 +107,7 @@ function hoursSection(hours: string | null, waLink: string, pal: Palette): strin
     return `<tr><td class="h-day">${day.trim()}</td><td class="h-val">${rest.join(':').trim()}</td></tr>`;
   }).join('');
   return `
-<section id="horarios" style="padding:80px 0">
+<section id="horarios" class="section-animate" style="padding:80px 0">
   <div class="container">
     <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Horários</span>
@@ -133,11 +126,10 @@ function hoursSection(hours: string | null, waLink: string, pal: Palette): strin
 }
 
 function gallerySection(pal: Palette, dark = false): string {
-  const colors = [pal.primary, pal.accent, pal.light, pal.primary, pal.accent, pal.light];
   const tags = ['Projeto', 'Trabalho', 'Cliente', 'Case', 'Portfolio', 'Resultado'];
   const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
   return `
-<section id="galeria" style="padding:80px 0;background:${bg}">
+<section id="galeria" class="section-animate" style="padding:80px 0;background:${bg}">
   <div class="container">
     <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Galeria</span>
@@ -147,11 +139,7 @@ function gallerySection(pal: Palette, dark = false): string {
     <div class="gallery-grid">
       ${[0,1,2,3,4,5].map((i) => `
       <div class="gallery-card">
-        <div class="gallery-thumb" style="background:linear-gradient(135deg,${colors[i % 3]}33,${colors[(i+1) % 3]}22);position:relative">
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-            <div style="width:64px;height:64px;border-radius:50%;background:${pal.primary}44"></div>
-          </div>
-        </div>
+        <img src="${dataUrl(generateGallerySVG(pal, i))}" alt="Trabalho ${i + 1}" style="width:100%;height:180px;object-fit:cover;display:block">
         <div class="gallery-body">
           <span class="gallery-tag" style="color:${pal.primary}">${tags[i]}</span>
           <p class="gallery-name">Trabalho ${i + 1}</p>
@@ -170,14 +158,9 @@ function testimonialsSection(pal: Palette, dark = false): string {
     'Profissionalismo e qualidade em cada detalhe. Voltarei com certeza.',
     'Equipe atenciosa, pontual e comprometida com o cliente. Nota 10!',
   ];
-  const avatarGrads = [
-    `linear-gradient(135deg,${pal.primary},${pal.accent})`,
-    `linear-gradient(135deg,${pal.accent},${pal.primary}88)`,
-    `linear-gradient(135deg,${pal.primary}88,${pal.accent})`,
-  ];
   const bg = dark ? 'var(--surface2,#0f172a)' : 'var(--bg,#ffffff)';
   return `
-<section id="depoimentos" style="padding:80px 0;background:${bg}">
+<section id="depoimentos" class="section-animate" style="padding:80px 0;background:${bg}">
   <div class="container">
     <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Depoimentos</span>
@@ -189,9 +172,7 @@ function testimonialsSection(pal: Palette, dark = false): string {
         <div style="color:${pal.accent};font-size:1.2rem;margin-bottom:12px">★★★★★</div>
         <p class="testimonial-text">"${texts[i]}"</p>
         <div class="testimonial-author">
-          <div class="testimonial-avatar" style="background:${avatarGrads[i]}">
-            ${n.charAt(0)}
-          </div>
+          <img src="${dataUrl(generateAvatarSVG(pal, n.charAt(0)))}" alt="${n}" class="testimonial-avatar" style="width:44px;height:44px;border-radius:50%;flex-shrink:0;display:block">
           <div>
             <div class="testimonial-name">${n}</div>
             <div class="testimonial-role">${roles[i]}</div>
@@ -206,7 +187,7 @@ function testimonialsSection(pal: Palette, dark = false): string {
 function aboutSection(description: string, pal: Palette): string {
   if (!description) return '';
   return `
-<section id="sobre" style="padding:80px 0">
+<section id="sobre" class="section-animate" style="padding:80px 0">
   <div class="container">
     <div style="max-width:760px;margin:0 auto;text-align:center">
       <span class="eyebrow" style="color:${pal.primary}">Sobre nós</span>
@@ -224,7 +205,7 @@ function faqSection(pal: Palette): string {
     { q: 'Como solicito um orçamento?', a: 'Entre em contato pelo WhatsApp e retornamos em até 24 horas com todas as informações.' },
   ];
   return `
-<section id="faq" style="padding:80px 0">
+<section id="faq" class="section-animate" style="padding:80px 0">
   <div class="container">
     <div class="sec-hdr centered">
       <span class="eyebrow" style="color:${pal.primary}">Dúvidas</span>
@@ -243,13 +224,33 @@ function faqSection(pal: Palette): string {
 
 // ─── SHARED BASE CSS ──────────────────────────────────────────────────────────
 
+const FONT_PAIRS: Record<string, { heading: string; body: string }> = {
+  restaurant: { heading: 'Playfair+Display:ital,wght@0,400;0,700;1,400', body: 'Inter:wght@400;500;600;700;800' },
+  farmacy:    { heading: 'Merriweather:wght@400;700', body: 'Inter:wght@400;500;600;700;800' },
+  store:      { heading: 'Poppins:wght@400;600;700;800', body: 'Inter:wght@400;500;600;700;800' },
+  portfolio:  { heading: 'Outfit:wght@400;600;700;800;900', body: 'DM+Sans:wght@400;500;700' },
+};
+
+function fontLink(tpl: string): string {
+  const pair = FONT_PAIRS[tpl] ?? FONT_PAIRS.portfolio;
+  return `https://fonts.googleapis.com/css2?family=${pair.heading}&family=${pair.body}&display=swap`;
+}
+
+function fontCSS(tpl: string): string {
+  const pair = FONT_PAIRS[tpl] ?? FONT_PAIRS.portfolio;
+  return `body{font-family:'${pair.body.split(':')[0].replace(/\+/g, ' ')}',system-ui,sans-serif;line-height:1.6}
+h1,h2,h3,h4,h5,h6,.logo,.hero-title,.sec-title,.item-name,.item-price{font-family:'${pair.heading.split(':')[0].replace(/\+/g, ' ')}',serif}`;
+}
+
 const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;line-height:1.6}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 .container{max-width:1100px;margin:0 auto;padding:0 24px}
+/* animations */
+.section-animate{animation:fadeInUp .6s ease both}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 /* section headers */
 .sec-hdr{margin-bottom:48px}
 .sec-hdr.centered{text-align:center}
@@ -314,10 +315,14 @@ function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
+<meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
 ${BASE_CSS}
+${fontCSS(b.template)}
 :root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#1a1614;--surface:#252120;--surface2:#2e2b29;--text:#fafaf9;--muted:#a8a29e}
 body{background:var(--bg);color:var(--text)}
 /* nav */
@@ -410,11 +415,8 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
         ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-ghost-white">📱 Pedir pelo WhatsApp</a>` : ''}
       </div>
     </div>
-    <div class="food-visual">
-      <div class="food-blob" style="width:240px;height:240px;top:10px;left:10px;background:radial-gradient(circle at 40% 40%,${pal.accent}88,${pal.primary}55,transparent 70%)"></div>
-      <div class="food-blob" style="width:180px;height:180px;top:40px;left:40px;background:radial-gradient(circle at 45% 45%,${pal.primary}66,transparent 70%)"></div>
-      <div class="food-blob" style="width:100px;height:100px;top:80px;left:80px;background:radial-gradient(circle,${pal.accent}99,${pal.primary}66)"></div>
-      <div style="position:absolute;bottom:20px;right:10px;width:80px;height:80px;border-radius:50%;background:${pal.primary}44"></div>
+    <div class="food-visual" style="border-radius:24px;overflow:hidden">
+      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
     </div>
   </div>
 </section>
@@ -492,10 +494,14 @@ function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: st
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
+<meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
 ${BASE_CSS}
+${fontCSS(b.template)}
 :root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#f7faf8;--surface:#ffffff;--surface2:#f0f4f2;--text:#0d1f1a;--muted:#5c7a6e}
 body{background:var(--bg);color:var(--text)}
 /* promo */
@@ -610,10 +616,8 @@ footer{background:var(--primary);color:rgba(255,255,255,.85);padding:48px 0}
         <div><div class="stat-n">5★</div><div class="stat-l">Avaliação</div></div>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="h-blob" style="width:230px;height:230px;top:0;left:0;background:radial-gradient(circle at 40%,${pal.primary}33,transparent 70%)"></div>
-      <div class="h-blob" style="width:160px;height:160px;top:40px;left:40px;background:${pal.accent}22;border:3px solid ${pal.primary}22"></div>
-      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:4rem">🏥</div>
+    <div class="hero-visual" style="border-radius:24px;overflow:hidden">
+      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
     </div>
   </div>
 </section>
@@ -719,10 +723,14 @@ function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: stri
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
+<meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
 ${BASE_CSS}
+${fontCSS(b.template)}
 :root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#ffffff;--surface:#f8fafc;--surface2:#f1f5f9;--text:#111827;--muted:#6b7280}
 body{background:var(--bg);color:var(--text)}
 /* nav */
@@ -824,12 +832,8 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:48px 0}
         ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-sec">📱 Pedir pelo WhatsApp</a>` : ''}
       </div>
     </div>
-    <div class="product-visual">
-      <div class="prod-blob" style="width:240px;height:240px;top:10px;left:10px;background:linear-gradient(135deg,${pal.light},${pal.accent}22)">
-        <div style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,${pal.primary}22,${pal.accent}33);display:flex;align-items:center;justify-content:center;font-size:4rem">🛍️</div>
-      </div>
-      <div style="position:absolute;top:-10px;right:-10px;width:70px;height:70px;border-radius:50%;background:${pal.accent}22"></div>
-      <div style="position:absolute;bottom:10px;left:-10px;width:50px;height:50px;border-radius:50%;background:${pal.primary}15"></div>
+    <div class="product-visual" style="border-radius:24px;overflow:hidden">
+      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
     </div>
   </div>
 </section>
@@ -902,10 +906,14 @@ function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
+<meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
 ${BASE_CSS}
+${fontCSS(b.template)}
 :root{--primary:${pal.primary};--accent:${pal.accent};--light:${pal.light};--bg:#0f172a;--surface:#1e293b;--surface2:#0f172a;--text:#f8fafc;--muted:#94a3b8}
 body{background:var(--bg);color:var(--text)}
 /* nav */
@@ -1030,11 +1038,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
         <div><div class="stat-n">100%</div><div class="stat-l">Comprometimento</div></div>
       </div>
     </div>
-    <div class="avatar-wrap">
-      <div class="avatar-circle">💼</div>
-      <div class="avatar-badge">
-        <span class="badge-val" style="color:${pal.primary}">+50</span>
-        <span class="badge-lbl">Clientes felizes</span>
+    <div class="avatar-wrap" style="border-radius:50%;overflow:hidden">
+      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
+      <div class="avatar-badge" style="position:absolute;bottom:10px;right:-10px;background:var(--surface);border:2px solid ${pal.primary}44;border-radius:16px;padding:12px 16px">
+        <span class="badge-val" style="font-size:1.2rem;font-weight:800;color:${pal.primary};display:block">+50</span>
+        <span class="badge-lbl" style="font-size:.72rem;color:var(--muted)">Clientes felizes</span>
       </div>
     </div>
   </div>

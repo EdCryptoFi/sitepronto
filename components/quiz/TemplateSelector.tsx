@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CheckCircle2, X, Eye } from 'lucide-react';
+import { CheckCircle2, X, Eye, Monitor } from 'lucide-react';
 import { useQuiz } from '@/lib/quiz-context';
 import { OBJECTIVE_TO_TEMPLATE, type TemplateId, type ObjectiveId } from '@/lib/quiz-data';
+import { LivePreview } from '@/components/quiz/LivePreview';
 
 type TemplateMeta = {
   name: string;
@@ -497,6 +498,7 @@ function TemplateModal({ id, onClose, onSelect }: {
 export function TemplateSelector() {
   const { state, dispatch } = useQuiz();
   const [modalId, setModalId] = useState<TemplateId | null>(null);
+  const [livePreviewOpen, setLivePreviewOpen] = useState(false);
 
   const suggested = (OBJECTIVE_TO_TEMPLATE[state.objective as ObjectiveId] ?? 'portfolio') as TemplateId;
   const active = ((state.template || suggested) as TemplateId);
@@ -521,6 +523,10 @@ export function TemplateSelector() {
           onClose={() => setModalId(null)}
           onSelect={handleSelect}
         />
+      )}
+
+      {livePreviewOpen && (
+        <LivePreview onClose={() => setLivePreviewOpen(false)} />
       )}
 
       <div className="grid grid-cols-2 gap-4">
@@ -572,9 +578,19 @@ export function TemplateSelector() {
         })}
       </div>
 
-      <p className="mt-3 text-label-sm text-on-surface-variant">
-        Passe o mouse para ver detalhes e uma prévia maior de cada template.
-      </p>
+      <div className="mt-4 flex items-center gap-2">
+        <p className="text-label-sm text-on-surface-variant">
+          Passe o mouse para ver detalhes e uma prévia maior de cada template.
+        </p>
+        <button
+          type="button"
+          onClick={() => setLivePreviewOpen(true)}
+          className="btn-ghost ml-auto gap-1.5 text-label-sm"
+          disabled={!state.template}
+        >
+          <Monitor size={14} /> Preview ao vivo
+        </button>
+      </div>
     </>
   );
 }
