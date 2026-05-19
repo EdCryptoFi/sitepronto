@@ -299,7 +299,79 @@ img{max-width:100%;display:block}
 /* wa float */
 .wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(22,163,74,.55);transition:transform .2s;color:#fff}
 .wa-float:hover{transform:scale(1.1)}
-@media(max-width:768px){.nav-links{display:none!important}.hero-split{flex-direction:column!important}}
+@media(max-width:768px){
+  .container{padding:0 16px}
+  .nav-links{display:none!important}
+  .nav-icons{margin-left:auto!important}
+  .logo{font-size:1.1rem!important}
+  .hero-split{flex-direction:column!important}
+  .hero-content{padding:32px 0!important;text-align:center!important}
+  .hero-content .hero-title{font-size:clamp(1.5rem,6vw,1.8rem)!important}
+  .hero-content .hero-sub{font-size:.9rem!important}
+  .hero-content .hero-ctas{justify-content:center!important}
+  .hero-content .hero-stats{justify-content:center!important;flex-wrap:wrap!important;gap:8px!important}
+  .hero-visual{min-height:200px!important;max-height:240px!important;width:100%!important;margin-top:0!important}
+  .hero-badge{font-size:.75rem!important;padding:4px 12px!important}
+  .hero-tag,.hello-tag,.rating-badge{justify-content:center!important}
+  .sec-title{font-size:clamp(1.2rem,5vw,1.6rem)!important}
+  .sec-hdr{margin-bottom:28px!important}
+  .items-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important;gap:12px!important}
+  .item-card{border-radius:14px!important}
+  .item-body{padding:12px!important}
+  .item-name{font-size:.85rem!important}
+  .item-price{font-size:.9rem!important}
+  .item-btn{padding:8px 12px!important;font-size:.78rem!important;margin-top:4px!important}
+  .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important;gap:12px!important}
+  .gallery-body{padding:12px!important}
+  .testimonials-grid{grid-template-columns:1fr!important;gap:16px!important}
+  .testimonial-card{padding:20px!important}
+  .testimonial-text{font-size:.88rem!important}
+  .services-grid{grid-template-columns:1fr!important;gap:16px!important}
+  .service-card{padding:20px!important}
+  .feats-grid,.features-row{grid-template-columns:1fr!important;gap:16px!important}
+  .stats-row{flex-wrap:wrap!important;gap:8px!important;justify-content:center!important}
+  .stat-n{font-size:1.1rem!important}
+  .stat-l{font-size:.75rem!important}
+  .hours-table{font-size:.8rem!important}
+  .h-day,.h-val{padding:8px 10px!important}
+  .faq-item{padding:16px!important}
+  .faq-q{font-size:.9rem!important}
+  .cats-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
+  .project-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
+  .btn-wa-inline{padding:12px 20px!important;font-size:.88rem!important;width:100%!important;justify-content:center!important}
+  .wa-float{bottom:16px!important;right:16px!important;width:48px!important;height:48px!important}
+  .promo-bar{font-size:.78rem!important;padding:6px 12px!important;text-align:center!important}
+  .trust-strip .container{flex-wrap:wrap!important;gap:8px!important;justify-content:center!important}
+  .trust-item{font-size:.8rem!important}
+  .cta-section{padding:40px 0!important;text-align:center!important}
+  .cta-title{font-size:1.2rem!important}
+  .cta-sub{font-size:.9rem!important}
+  .cta-band{flex-direction:column!important;text-align:center!important;gap:16px!important}
+  .food-visual{max-height:180px!important}
+  .product-visual{max-height:180px!important}
+  .filter-bar{overflow-x:auto!important;gap:6px!important;padding:8px 4px!important}
+  .filter-pill{white-space:nowrap!important;font-size:.75rem!important;padding:4px 10px!important}
+  .avatar-wrap{flex-direction:column!important;text-align:center!important}
+  .avatar-badge{justify-content:center!important}
+  .hero-role{font-size:.85rem!important}
+  .footer-inner{flex-direction:column!important;text-align:center!important;gap:12px!important}
+  .contact-row{flex-direction:column!important;gap:12px!important}
+  .contact-card{padding:16px!important}
+  section{padding:48px 0!important}
+  header{padding:12px 0!important}
+}
+@media(max-width:480px){
+  .items-grid{grid-template-columns:repeat(2,1fr)!important}
+  .gallery-grid{grid-template-columns:repeat(2,1fr)!important}
+  .cats-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .container{padding:0 12px}
+  .hero-content{padding:24px 0!important}
+  .hero-title{font-size:1.3rem!important}
+  .sec-title{font-size:1.1rem!important}
+  section{padding:36px 0!important}
+  .testimonial-card{padding:16px!important}
+  .service-card{padding:16px!important}
+}
 `;
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────

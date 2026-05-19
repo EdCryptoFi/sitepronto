@@ -425,10 +425,11 @@ const MOCKUP_COMPONENTS: Record<TemplateId, React.ComponentType<MockupProps>> = 
   portfolio: PortfolioMockup,
 };
 
-function TemplateModal({ id, onClose, onSelect }: {
+function TemplateModal({ id, onClose, onSelect, onPreview }: {
   id: TemplateId;
   onClose: () => void;
   onSelect: (id: TemplateId) => void;
+  onPreview: (id: TemplateId) => void;
 }) {
   const meta = TEMPLATES[id];
   const Mockup = MOCKUP_COMPONENTS[id];
@@ -484,6 +485,13 @@ function TemplateModal({ id, onClose, onSelect }: {
           </button>
           <button
             type="button"
+            onClick={() => { onPreview(id); onClose(); }}
+            className="btn-ghost flex-1 justify-center gap-1.5 text-label-sm"
+          >
+            <Monitor size={14} /> Preview ao vivo
+          </button>
+          <button
+            type="button"
             onClick={() => { onSelect(id); onClose(); }}
             className="btn-accent flex-1 justify-center"
           >
@@ -522,6 +530,7 @@ export function TemplateSelector() {
           id={modalId}
           onClose={() => setModalId(null)}
           onSelect={handleSelect}
+          onPreview={(tid) => { dispatch({ type: 'SET_TEMPLATE', payload: tid }); setModalId(null); setLivePreviewOpen(true); }}
         />
       )}
 
