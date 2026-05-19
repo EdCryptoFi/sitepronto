@@ -1,5 +1,6 @@
 import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
 import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
+import { detectIndustry } from '@/lib/industry';
 
 export type SiteBriefing = {
   id: string;
@@ -1155,14 +1156,34 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 export function generateSiteHTML(briefing: SiteBriefing): string {
   const pal = PALETTES[briefing.palette] ?? PALETTES['azul-editorial'];
   const { businessName, description, ai } = parseAICopyFromNotes(briefing.content_notes);
+
+  // Detect industry and get fallback content
+  const industry = detectIndustry(businessName || '', description || '');
+  const industryFallback = ai ? null : industry.fallbackServices;
+
+  // If AI failed, inject industry fallbacks into the AICopy
+  const effectiveAI: AICopy | null = ai ?? (industryFallback ? {
+    hero_subheadline: industry.fallbackHeadline,
+    cta_main: industry.fallbackCTA,
+    cta_sub: industry.fallbackCTASub,
+    services: industryFallback,
+    footer_tagline: industry.fallbackTagline,
+    image_prompts: {
+      hero: industry.imagePrompt,
+      gallery: industry.galleryPrompts,
+      catalog: industry.imagePrompt,
+    },
+    seo_keywords: [businessName || '', industry.label],
+  } : null);
+
   const name = businessName || formatBusinessName(briefing.domain, briefing.segment);
   const waLink = whatsappLink(briefing.whatsapp_number);
   const tpl = briefing.template || 'portfolio';
 
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, ai);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, ai);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, ai);
-  return generatePortfolio(briefing, pal, name, waLink, description, ai);
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI);
+  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {

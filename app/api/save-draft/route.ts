@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getIp } from '@/lib/rate-limit';
 import { generateAICopy } from '@/lib/ai-copy';
+import { detectIndustry } from '@/lib/industry';
 
 const PALETTE_COLORS: Record<string, { primary: string; accent: string }> = {
   'azul-editorial': { primary: '#004ac6', accent: '#2563eb' },
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
   );
 
   const palette = typeof b.palette === 'string' && ALLOWED_PALETTES.includes(b.palette) ? b.palette : 'corporate';
-  const template = typeof b.template === 'string' && ALLOWED_TEMPLATES.includes(b.template) ? b.template : 'portfolio';
+  let template = typeof b.template === 'string' && ALLOWED_TEMPLATES.includes(b.template) ? b.template : 'portfolio';
   const domainChoice = typeof b.domainChoice === 'string' && ALLOWED_DOMAIN_CHOICES.includes(b.domainChoice) ? b.domainChoice : 'later';
 
   const portfolioItems = Array.isArray(b.portfolioItems)
@@ -92,6 +93,12 @@ export async function POST(req: NextRequest) {
   const domain = truncate(b.domain, 100);
   const logoName = truncate(b.logoName, 200);
   const whatsappNumber = truncate(b.whatsappNumber, 20);
+
+  // Auto-suggest better template based on detected industry
+  const industry = detectIndustry(businessName, description);
+  if (!template || template === 'portfolio') {
+    template = industry.template;
+  }
 
   // Generate AI copy (non-blocking fallback if Gemini fails)
   const aiCopy = await generateAICopy({

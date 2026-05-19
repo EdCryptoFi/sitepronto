@@ -4,6 +4,7 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useQuiz } from '@/lib/quiz-context';
 import { objectives, OBJECTIVE_TO_TEMPLATE } from '@/lib/quiz-data';
+import { detectIndustry } from '@/lib/industry';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function QuizEtapa1() {
@@ -15,10 +16,14 @@ export default function QuizEtapa1() {
 
   const handleNext = () => {
     if (!canAdvance) return;
-    // Auto-suggest template from objective
+    // Auto-suggest template: first try objective mapping, then industry detection
     const suggestedTemplate = OBJECTIVE_TO_TEMPLATE[objective as keyof typeof OBJECTIVE_TO_TEMPLATE];
-    if (suggestedTemplate && !state.template) {
-      dispatch({ type: 'SET_TEMPLATE', payload: suggestedTemplate });
+    if (!state.template) {
+      // Try industry detection from business name for better template suggestion
+      const industry = detectIndustry(businessName, '');
+      const isGenericObj = suggestedTemplate === 'portfolio';
+      const bestTemplate = isGenericObj && industry ? industry.template : suggestedTemplate;
+      dispatch({ type: 'SET_TEMPLATE', payload: bestTemplate });
     }
     router.push('/quiz/etapa-2');
   };

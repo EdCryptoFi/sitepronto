@@ -1,3 +1,5 @@
+import { detectIndustry } from '@/lib/industry';
+
 export type AICopy = {
   hero_subheadline: string;
   cta_main: string;
@@ -20,10 +22,10 @@ const OBJECTIVE_LABELS: Record<string, string> = {
 };
 
 const TEMPLATE_DESCRIPTIONS: Record<string, string> = {
-  restaurant: 'fundo escuro com cores quentes, estilo gastronômico, hero com visual de pratos, seção de horários e WhatsApp',
-  farmacy: 'layout limpo e claro, cores suaves, seção de especialidades, promoções e agendamento online',
-  store: 'grid de produtos minimalista, barra de filtros, carrinho e newsletter',
-  portfolio: 'dark mode profissional, seção de skills, grid de projetos, depoimentos e CTA',
+  restaurant: 'fundo escuro com cores quentes, estilo gastronômico',
+  farmacy: 'layout limpo e claro, cores suaves, seção de especialidades',
+  store: 'grid de produtos minimalista, barra de filtros',
+  portfolio: 'dark mode profissional, seção de skills, grid de projetos',
 };
 
 const MODULE_LABELS: Record<string, string> = {
@@ -47,61 +49,79 @@ export async function generateAICopy(input: {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
 
+  const industry = detectIndustry(input.businessName, input.description);
   const objLabel = OBJECTIVE_LABELS[input.objective] ?? input.objective;
   const modulesLabel = input.modules.map(m => MODULE_LABELS[m] ?? m).join(', ') || 'padrão';
   const templateDesc = TEMPLATE_DESCRIPTIONS[input.template] ?? 'layout profissional responsivo';
 
-  const hasDescription = (input.description ?? '').trim().length > 20;
+  const hasDescription = (input.description ?? '').trim().length > 5;
   const hasName = (input.businessName ?? '').trim().length > 1;
 
-  const contextHint = hasDescription
-    ? `O cliente forneceu a seguinte descrição do negócio: "${input.description}"`
-    : hasName
-    ? `O cliente informou apenas o nome "${input.businessName}". Pesquise mentalmente o que negócios com esse nome costumam oferecer no mercado brasileiro e use esse conhecimento para gerar textos específicos e plausíveis.`
-    : `Nenhuma descrição foi fornecida. Use o tipo de negócio para gerar textos plausíveis e profissionais para o mercado brasileiro.`;
+  let contextHint: string;
+  let extractionInstructions: string;
+
+  if (hasDescription) {
+    contextHint = `O cliente forneceu a seguinte descrição do negócio: "${input.description}"`;
+    extractionInstructions = `A descrição acima contém as ÚNICAS fontes de verdade sobre o negócio.
+CRÍTICO: Você DEVE extrair serviços, produtos e diferenciais DIRETAMENTE da descrição.
+- Se a descrição menciona "escapamento, pneus, alinhamento", os services DEVEM ser esses.
+- Se menciona "pizza, esfiha, delivery", os services DEVEM ser sobre pizza e esfiha.
+- NUNCA invente serviços que não estão na descrição.
+- Copie as palavras EXATAS da descrição para compor os nomes dos serviços.`;
+  } else if (hasName) {
+    contextHint = `O cliente informou apenas o nome "${input.businessName}".`;
+    const detectedLabel = industry.label;
+    extractionInstructions = `O nome sugere que é do ramo de ${detectedLabel}.
+Use seu conhecimento sobre empresas brasileiras desse segmento para gerar serviços REALISTAS e ESPECÍFICOS.
+Exemplos de serviços REAIS para ${detectedLabel}: ${industry.fallbackServices.map(s => `"${s.name}"`).join(', ')}
+NÃO use serviços genéricos como "Consultoria Estratégica" ou "Análise de Resultados".`;
+  } else {
+    contextHint = `Nenhuma descrição foi fornecida.`;
+    extractionInstructions = `Use o tipo de negócio (${objLabel}) para gerar textos PLÁUSIVEIS para o mercado brasileiro.
+Evite termos vagos. Prefira serviços concretos e específicos.`;
+  }
 
   const paletteHint = input.palette && input.paletteColors
-    ? `A paleta de cores escolhida é "${input.palette}" com as cores: primária ${input.paletteColors.primary}, destaque ${input.paletteColors.accent}. Gere textos que combinem com essa identidade visual.`
+    ? `Paleta: primária ${input.paletteColors.primary}, destaque ${input.paletteColors.accent}.`
     : '';
 
-  const prompt = `Você é copywriter especialista em sites para pequenas empresas brasileiras. Sua tarefa é gerar textos que soem autênticos, específicos ao negócio — não genéricos.
+  const prompt = `Você é copywriter especialista em sites para pequenas empresas brasileiras.
 
 **Negócio:** "${input.businessName || 'Meu Negócio'}"
 **Tipo:** ${objLabel}
-**Template escolhido:** ${input.template} — ${templateDesc}
-**Seções do site:** ${modulesLabel}
+**Template:** ${input.template} — ${templateDesc}
+**Seções:** ${modulesLabel}
 ${paletteHint}
-**Contexto:** ${contextHint}
+${contextHint}
 
-Instruções:
-- Se o cliente descreveu o negócio, extraia diferenciais reais da descrição (produtos, serviços, localização, público, método de trabalho)
-- Se a descrição menciona um link ou site existente, imagine o que esse negócio provavelmente oferece e escreva com especificidade
-- Se pouca informação foi fornecida, use o nome e tipo para inferir o segmento e gerar textos que fariam sentido para esse tipo de empresa no Brasil
-- Nunca use frases genéricas como "Qualidade e excelência", "Seu sucesso é nossa missão" — sempre prefira especificidade
-- Escreva em português brasileiro informal mas profissional
-- Gere image_prompts como descrições curtas para fotos de banco de imagens (ex: "prato de massa italiana em mesa rústica")
-- Gere seo_keywords com 5-8 palavras-chave relevantes para o negócio no mercado brasileiro
+${extractionInstructions}
 
-Responda APENAS com este JSON válido (sem markdown, sem bloco de código):
+⚠️ REGRAS ABSOLUTAS (NÃO IGNORE):
+1. Os 3 services DEVEM ser EXTRAÍDOS da descrição do cliente — NUNCA invente serviços genéricos
+2. Se a descrição cita serviços específicos (ex: "troca de óleo, alinhamento, pneus"), USE-OS exatamente
+3. NUNCA use: "Consultoria Estratégica", "Análise e Resultados", "Execução e Entrega" ou variações genéricas
+4. hero_subheadline deve mencionar algo ESPECÍFICO do negócio (localização, especialidade, diferencial)
+5. image_prompts.hero deve descrever uma cena REALISTA do negócio (ex: "mecânico trabalhando em motor de carro")
+6. Emoji dos services deve combinar com o serviço (🔧 para mecânica, 🍕 para pizza, 💇 para cabeleireiro)
+
+Responda APENAS com este JSON (sem markdown):
 {
-  "hero_subheadline": "frase de impacto de até 15 palavras que descreve o negócio de forma específica",
-  "cta_main": "texto do botão CTA principal (máx 4 palavras)",
-  "cta_sub": "frase de apoio ao CTA (máx 10 palavras)",
+  "hero_subheadline": "específica ao negócio, até 15 palavras",
+  "cta_main": "até 4 palavras",
+  "cta_sub": "até 10 palavras",
   "services": [
-    {"name": "Nome do Diferencial ou Serviço 1", "description": "descrição em 1 frase específica ao negócio", "icon": "emoji relevante"},
-    {"name": "Nome do Diferencial ou Serviço 2", "description": "descrição em 1 frase específica ao negócio", "icon": "emoji relevante"},
-    {"name": "Nome do Diferencial ou Serviço 3", "description": "descrição em 1 frase específica ao negócio", "icon": "emoji relevante"}
+    {"name": "extraído da descrição", "description": "1 frase específica", "icon": "emoji relevante"},
+    {"name": "extraído da descrição", "description": "1 frase específica", "icon": "emoji relevante"},
+    {"name": "extraído da descrição", "description": "1 frase específica", "icon": "emoji relevante"}
   ],
-  "footer_tagline": "tagline da empresa em até 6 palavras",
+  "footer_tagline": "até 6 palavras",
   "image_prompts": {
-    "hero": "descrição curta para foto principal do site (máx 10 palavras)",
+    "hero": "descrição para foto principal (máx 10 palavras)",
     "gallery": ["descrição 1", "descrição 2", "descrição 3"],
-    "catalog": "descrição genérica para fotos de produtos/serviços"
+    "catalog": "descrição para fotos de produtos/serviços"
   },
-  "seo_keywords": ["palavra1", "palavra2", "palavra3", "palavra4", "palavra5"]
-}
-
-services deve ter exatamente 3 itens. gallery deve ter exatamente 3 itens. seo_keywords deve ter 5 a 8 itens.`;
+  "seo_keywords": ["5-8 palavras-chave relevantes"]
+}`;
 
   try {
     const res = await fetch(
@@ -113,7 +133,7 @@ services deve ter exatamente 3 itens. gallery deve ter exatamente 3 itens. seo_k
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             response_mime_type: 'application/json',
-            temperature: 0.7,
+            temperature: 0.4,
             maxOutputTokens: 1000,
           },
         }),
@@ -129,6 +149,16 @@ services deve ter exatamente 3 itens. gallery deve ter exatamente 3 itens. seo_k
     if (!parsed.hero_subheadline || !Array.isArray(parsed.services) || parsed.services.length < 3) {
       return null;
     }
+
+    // Validate that services are not generic
+    const genericTerms = ['consultoria', 'estratégica', 'estratégico', 'resultados', 'execução', 'entrega'];
+    const hasGeneric = parsed.services.some((s: { name: string }) =>
+      genericTerms.some(t => s.name.toLowerCase().includes(t))
+    );
+    if (hasGeneric && hasDescription) {
+      return null; // Reject if client gave description but AI ignored it
+    }
+
     return parsed as AICopy;
   } catch {
     return null;
