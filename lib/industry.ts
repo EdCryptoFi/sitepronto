@@ -163,6 +163,27 @@ const INDUSTRIES: IndustryInfo[] = [
     ],
   },
   {
+    id: 'generico',
+    label: 'Genérico',
+    keywords: [],
+    template: 'portfolio',
+    fallbackServices: [
+      { icon: '⭐', name: 'Serviço Principal', description: 'Conheça nossos serviços profissionais de alta qualidade.' },
+      { icon: '📞', name: 'Atendimento Personalizado', description: 'Suporte direto e personalizado para cada cliente.' },
+      { icon: '💡', name: 'Soluções Sob Medida', description: 'Soluções adaptadas às necessidades específicas do seu negócio.' },
+    ],
+    fallbackHeadline: 'Soluções profissionais para o seu negócio',
+    fallbackCTA: 'Fale Conosco',
+    fallbackCTASub: 'Solicite um orçamento agora mesmo',
+    fallbackTagline: 'Excelência em serviços',
+    imagePrompt: 'escritório profissional moderno e iluminado',
+    galleryPrompts: [
+      'equipe trabalhando em escritório moderno',
+      'reunião de negócios em sala corporativa',
+      'detalhes de ambiente profissional',
+    ],
+  },
+  {
     id: 'educacao',
     label: 'Educação e Cursos',
     keywords: ['escola', 'curso', 'educação', 'educacao', 'aula', 'professor', 'treinamento', 'ensino', 'idiomas', 'reforço', 'reforco', 'academia', 'matemática', 'matematica', 'português', 'portugues', 'pré-vestibular', 'pre-vestibular', 'concursos', 'ead', 'online'],
@@ -188,8 +209,9 @@ const INDUSTRIES: IndustryInfo[] = [
 export function detectIndustry(businessName: string, description: string): IndustryInfo {
   const text = `${businessName} ${description}`.toLowerCase();
 
-  let bestMatch = INDUSTRIES[0]; // default to first
+  let bestMatch = INDUSTRIES.find(i => i.id === 'generico') ?? INDUSTRIES[0];
   let bestScore = 0;
+  const MIN_SCORE = 5; // minimum score to consider a match valid
 
   for (const industry of INDUSTRIES) {
     let score = 0;
@@ -211,7 +233,7 @@ export function detectIndustry(businessName: string, description: string): Indus
     }
   }
 
-  return bestMatch;
+  return bestScore >= MIN_SCORE ? bestMatch : (INDUSTRIES.find(i => i.id === 'generico') ?? bestMatch);
 }
 
 export function getIndustryById(id: string): IndustryInfo | undefined {
