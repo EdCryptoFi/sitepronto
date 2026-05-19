@@ -265,6 +265,7 @@ export default function Home() {
                 'Suporte prioritário por 30 dias',
                 'Garantia de 7 dias ou dinheiro de volta',
               ]}
+              savings="Economize R$ 75 no Pix"
               highlighted
             />
             <PriceCard
@@ -402,9 +403,9 @@ export default function Home() {
               © {new Date().getFullYear()} SitePronto
             </div>
             <div className="flex items-center gap-6">
-              <a href="#" className="hover:text-on-surface transition-colors">Termos</a>
-              <a href="#" className="hover:text-on-surface transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-on-surface transition-colors">Contato</a>
+              <a href="/termos" className="hover:text-on-surface transition-colors">Termos</a>
+              <a href="/privacidade" className="hover:text-on-surface transition-colors">Privacidade</a>
+              <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="hover:text-on-surface transition-colors">Contato</a>
             </div>
           </div>
         </div>
@@ -495,10 +496,10 @@ function StepCard({
 }
 
 function PriceCard({
-  badge, price, unit, helper, cta, features, highlighted = false,
+  badge, price, unit, helper, cta, features, highlighted = false, savings,
 }: {
   badge: string; price: string; unit: string; helper: string; cta: string;
-  features: string[]; highlighted?: boolean;
+  features: string[]; highlighted?: boolean; savings?: string;
 }) {
   return (
     <article
@@ -513,9 +514,14 @@ function PriceCard({
     >
       <div className="flex items-center justify-between">
         <span className="eyebrow">{badge}</span>
-        {highlighted && (
-          <span className="text-label-sm font-semibold text-primary">Mais escolhido</span>
-        )}
+        <div className="flex items-center gap-2">
+          {savings && (
+            <span className="rounded-full bg-green-100 px-3 py-0.5 text-label-sm font-bold text-green-700 dark:bg-green-900/40 dark:text-green-400">{savings}</span>
+          )}
+          {highlighted && (
+            <span className="text-label-sm font-semibold text-primary">Mais escolhido</span>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 flex items-baseline gap-2">
@@ -534,7 +540,7 @@ function PriceCard({
       </ul>
 
       <a
-        href="/quiz"
+        href={highlighted ? '/quiz?plan=avista' : '/quiz?plan=parcelado'}
         className={highlighted ? 'btn-primary mt-8 w-full' : 'btn-ghost mt-8 w-full'}
       >
         {cta} <ArrowRight size={16} />

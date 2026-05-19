@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CheckCircle2, ExternalLink, Sparkles } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Sparkles, Share2, MessageCircle } from 'lucide-react';
 import { getBriefingById } from '@/lib/supabase/client';
 import ThemeToggle from '@/components/ThemeToggle';
 import Countdown from './Countdown';
@@ -96,6 +96,26 @@ export default async function ObrigadoPage({ params }: { params: Promise<{ brief
           <Link href="/" className="btn-ghost">
             Voltar ao início
           </Link>
+        </div>
+
+        {/* WhatsApp contact + Share */}
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <a
+            href="https://wa.me/5511999999999?text=Olá!%20Acabei%20de%20contratar%20o%20SitePronto.%20Meu%20pedido%20é%20[BRIEFING_ID]"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
+          >
+            <MessageCircle size={16} /> Fale conosco no WhatsApp
+          </a>
+          <a
+            href={`https://wa.me/?text=Acabei%20de%20criar%20meu%20site%20com%20o%20SitePronto!%20%E2%9C%A8%20https://sitepronto.com/preview/${briefingId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-white/5"
+          >
+            <Share2 size={16} /> Compartilhar no WhatsApp
+          </a>
         </div>
 
         <p className="mt-8 text-label-sm text-on-surface-variant">

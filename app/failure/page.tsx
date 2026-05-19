@@ -1,14 +1,40 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, AlertCircle, Sparkles } from 'lucide-react';
+import { Suspense, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { ArrowLeft, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 
 function FailureContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const paymentId = searchParams.get('payment_id');
   const status = searchParams.get('status');
+  const externalRef = searchParams.get('external_reference');
+  const [retrying, setRetrying] = useState(false);
+
+  const briefingId = externalRef || (typeof window !== 'undefined' ? localStorage.getItem('sitepronto-briefing-retry') : null);
+
+  const handleRetry = async () => {
+    if (!briefingId || retrying) return;
+    setRetrying(true);
+    const storedEmail = localStorage.getItem('sitepronto-payer-email') || '';
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ briefingId, payerEmail: storedEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.payment_preference?.init_point) {
+        router.push(`/quiz/etapa-4?id=${briefingId}`);
+        return;
+      }
+      window.location.href = data.payment_preference.init_point;
+    } catch {
+      router.push(`/quiz/etapa-4?id=${briefingId}`);
+    }
+  };
 
   return (
     <div className="relative mx-auto mt-12 max-w-3xl px-6">
@@ -22,8 +48,8 @@ function FailureContent() {
         <h1 className="mb-4 text-headline-lg font-bold">Pagamento não processado</h1>
 
         <p className="mx-auto mb-8 max-w-md text-body-md text-on-surface-variant">
-          Ocorreu um problema com o seu pagamento. Não se preocupe, você pode tentar novamente
-          ou entrar em contato com nosso suporte.
+          Ocorreu um problema com o seu pagamento. Não se preocupe — seu briefing foi salvo
+          e você pode tentar novamente agora.
         </p>
 
         {paymentId && (
@@ -44,13 +70,36 @@ function FailureContent() {
         )}
 
         <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <a href="/" className="btn-primary">
-            Voltar ao início <ArrowLeft size={16} className="ml-2 rotate-180" />
-          </a>
-          <a href="/quiz" className="btn-ghost">
-            Tentar novamente
+          {briefingId ? (
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={retrying}
+              className="btn-primary"
+            >
+              {retrying ? <Loader2 size={16} className="animate-spin" /> : null}
+              Tentar pagar novamente <ArrowLeft size={16} className="ml-2 rotate-180" />
+            </button>
+          ) : (
+            <a href={`/quiz/etapa-4?id=${briefingId}`} className="btn-primary">
+              Ir para o preview do site <ArrowLeft size={16} className="ml-2 rotate-180" />
+            </a>
+          )}
+          <a href="/" className="btn-ghost">
+            Voltar ao início
           </a>
         </div>
+
+        <p className="mt-6 text-label-sm text-on-surface-variant">
+          Seu briefing foi salvo automaticamente. Nenhuma informação foi perdida.
+        </p>
+
+        <p className="mt-4 text-label-sm text-on-surface-variant">
+          Precisa de ajuda?{' '}
+          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">
+            Fale conosco no WhatsApp
+          </a>
+        </p>
       </div>
     </div>
   );

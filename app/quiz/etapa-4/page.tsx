@@ -40,6 +40,7 @@ function PreviewSandboxInner() {
       if (!res.ok) { setCheckoutError(data.error ?? 'Erro ao iniciar checkout.'); setCheckoutLoading(false); return; }
       if (data.payment_preference?.init_point) {
         localStorage.setItem('sitepronto-payer-email', state.email);
+        localStorage.setItem('sitepronto-briefing-retry', data.briefing_id || briefingId);
         window.location.href = data.payment_preference.init_point;
       }
     } catch {
@@ -90,7 +91,7 @@ function PreviewSandboxInner() {
           </button>
         </div>
 
-        {/* Back + Publish */}
+        {/* Back */}
         <button
           type="button"
           onClick={() => router.push('/quiz/etapa-3')}
@@ -99,6 +100,12 @@ function PreviewSandboxInner() {
           <ArrowLeft size={14} /> Voltar
         </button>
 
+        {/* Pix discount tag */}
+        <div className="hidden items-center gap-1.5 rounded-full bg-green-900/30 px-3 py-1 text-xs font-semibold text-green-400 sm:flex">
+          <span className="hidden md:inline">Economize R$ 75 no</span> Pix
+        </div>
+
+        {/* Publish */}
         <button
           type="button"
           onClick={handlePublish}
@@ -108,7 +115,7 @@ function PreviewSandboxInner() {
         >
           {checkoutLoading
             ? <><Loader2 size={14} className="animate-spin" /> Aguarde...</>
-            : 'Publicar Site →'}
+            : 'Publicar Site — R$ 300 →'}
         </button>
       </div>
 
@@ -116,6 +123,41 @@ function PreviewSandboxInner() {
       {checkoutError && (
         <div className="shrink-0 bg-red-900/30 px-6 py-2 text-center text-sm text-red-300">
           {checkoutError}
+        </div>
+      )}
+
+      {/* Payment redirect overlay */}
+      {checkoutLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="mx-auto max-w-sm rounded-3xl bg-[#1a1d27] p-8 text-center shadow-2xl ring-1 ring-white/10">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary">
+              <Sparkles size={28} className="text-on-primary" />
+            </div>
+            <h2 className="text-lg font-bold text-white">Preparando seu pagamento</h2>
+            <p className="mt-2 text-sm text-white/60">
+              Você será redirecionado para o Mercado Pago em instantes.
+            </p>
+            <div className="mt-6 space-y-3 rounded-2xl bg-white/5 p-4 text-left">
+              <div className="flex justify-between text-sm">
+                <span className="text-white/50">Site</span>
+                <span className="font-semibold text-white">{businessName}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-white/50">Valor</span>
+                <span className="font-semibold text-white">R$ 300</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-white/50">Pagamento</span>
+                <span className="font-semibold text-white">Pix ou Cartão</span>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-center">
+              <Loader2 size={24} className="animate-spin text-primary" />
+            </div>
+            <p className="mt-4 text-xs text-white/40">
+              Pagamento processado pelo Mercado Pago 🔒
+            </p>
+          </div>
         </div>
       )}
 

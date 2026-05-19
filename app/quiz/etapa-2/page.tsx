@@ -69,6 +69,11 @@ export default function QuizEtapa2() {
         <div className="progress-track">
           <div className="progress-fill" style={{ width: '50%' }} role="progressbar" aria-valuenow={50} aria-valuemin={0} aria-valuemax={100} />
         </div>
+        <div className="mt-2 flex justify-center gap-2">
+          {[1, 2, 3, 4].map((s) => (
+            <span key={s} className={`inline-flex h-2 w-2 rounded-full transition-colors ${s <= 2 ? 'bg-primary' : 'bg-on-surface/10'}`} />
+          ))}
+        </div>
       </div>
 
       <section className="relative mx-auto mt-10 max-w-2xl px-6">

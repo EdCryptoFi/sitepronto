@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowRight, ArrowLeft, Sparkles, Plus, X, Clock, Globe2,
-  Mail, ShieldCheck, Loader2, FileText, Image as ImageIcon,
+  Mail, ShieldCheck, Loader2, FileText, Image as ImageIcon, Phone,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -102,6 +102,11 @@ export default function QuizEtapa3() {
       <div className="relative mx-auto mt-4 max-w-2xl px-6">
         <div className="progress-track">
           <div className="progress-fill" style={{ width: '75%' }} role="progressbar" aria-valuenow={75} aria-valuemin={0} aria-valuemax={100} />
+        </div>
+        <div className="mt-2 flex justify-center gap-2">
+          {[1, 2, 3, 4].map((s) => (
+            <span key={s} className={`inline-flex h-2 w-2 rounded-full transition-colors ${s <= 3 ? 'bg-primary' : 'bg-on-surface/10'}`} />
+          ))}
         </div>
       </div>
 
@@ -268,6 +273,26 @@ export default function QuizEtapa3() {
             placeholder="voce@exemplo.com.br"
             autoComplete="email"
           />
+        </div>
+
+        {/* WhatsApp */}
+        <div className="card">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="icon-halo !h-7 !w-7"><Phone size={14} /></span>
+            <span className="text-label-md font-semibold">WhatsApp para contato</span>
+            <span className="ml-auto text-label-sm text-on-surface-variant">opcional</span>
+          </div>
+          <input
+            type="tel"
+            value={state.whatsappNumber}
+            onChange={(e) => dispatch({ type: 'SET_WHATSAPP_NUMBER', payload: e.target.value.replace(/\D/g, '').slice(0, 11) })}
+            className="field"
+            placeholder="(11) 99999-9999"
+            autoComplete="tel"
+          />
+          <p className="mt-2 text-label-sm text-on-surface-variant">
+            Seus clientes poderão falar com você diretamente pelo WhatsApp.
+          </p>
         </div>
 
         {/* Terms */}
