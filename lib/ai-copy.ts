@@ -7,6 +7,8 @@ export type AICopy = {
   cta_sub: string;
   services: { name: string; description: string; icon: string }[];
   footer_tagline: string;
+  faq?: { q: string; a: string }[];
+  about_text?: string;
   image_prompts?: {
     hero: string;
     gallery: string[];
@@ -184,6 +186,12 @@ Responda APENAS com este JSON (sem markdown):
     "gallery": ["cena 1", "cena 2", "cena 3"],
     "catalog": "descrição para fotos de produtos/serviços"
   },
+  "faq": [
+    {"q": "pergunta frequente 1", "a": "resposta direta e útil"},
+    {"q": "pergunta frequente 2", "a": "resposta direta e útil"},
+    {"q": "pergunta frequente 3", "a": "resposta direta e útil"}
+  ],
+  "about_text": "parágrafo sobre a história/diferencial do negócio (máx 30 palavras)",
   "seo_keywords": ["5-8 palavras-chave pesquisadas no Google"]
 }`;
 

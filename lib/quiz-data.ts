@@ -103,3 +103,16 @@ export const templates = [
   { id: 'store' as TemplateId, name: 'Loja & Comércio', helper: 'Venda direta e catálogo de produtos.', suggested: ['vender-produtos'] },
   { id: 'portfolio' as TemplateId, name: 'Portfólio', helper: 'Designers, artistas e fotógrafos.', suggested: ['portfolio'] },
 ] as const;
+
+// Industry → palette auto-suggestion
+export const INDUSTRY_TO_PALETTE: Record<string, string> = {
+  mecanica: 'tech',
+  restaurante: 'nature',
+  clinica: 'verde-servico',
+  loja: 'minimal',
+  advocacia: 'corporate',
+  beleza: 'vibrant',
+  construcao: 'elegant',
+  educacao: 'corporate',
+  generico: 'azul-editorial',
+};

@@ -7,6 +7,7 @@
 import { detectIndustry } from '../lib/industry';
 import { generateSiteHTML } from '../lib/site-generator/index';
 import type { SiteBriefing } from '../lib/site-generator/index';
+import { scoreContent } from '../lib/content-score';
 
 function assert(condition: boolean, msg: string) {
   if (!condition) {
@@ -97,6 +98,24 @@ const genericBriefing: SiteBriefing = {
 
 const html = generateSiteHTML(genericBriefing);
 assert(html.includes('Meu Negócio'), 'Usa nome genérico quando não tem nome específico');
+
+// ─── 4. Style Variations ───────────────────────────────────────────────
+console.log('\n📌 4. Variações de estilo (modern / classic / bold)');
+
+for (const v of ['modern', 'classic', 'bold'] as const) {
+  const h = generateSiteHTML(baseBriefing, v);
+  assert(h.includes('</style><style>') || h.includes('</style>\n<style>'), `Variação "${v}" injeta CSS adicional`);
+  assert(h.includes('--radius') || h.includes('font-scale'), `Variação "${v}" contém variáveis CSS`);
+}
+
+// ─── 5. Content Score ──────────────────────────────────────────────────
+console.log('\n📌 5. Score de conteúdo');
+
+const score = scoreContent('Mecanica Valinhos', 'escapamento, suspensão, alinhamento',
+  [{ name: 'Reparo', description: 'Troca de escapamento' }],
+  ['mecânica', 'escapamento']);
+assert(typeof score.total === 'number' && score.total >= 0, `Score calculado: ${score.total}/100`);
+assert(score.tips.length <= 5, 'Máximo 5 dicas');
 
 // ─── Summary ────────────────────────────────────────────────────────────
 console.log('\n' + (process.exitCode ? '❌ ALGUMAS VALIDAÇÕES FALHARAM' : '✅ TODAS AS VALIDAÇÕES PASSARAM'));

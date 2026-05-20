@@ -186,8 +186,9 @@ function testimonialsSection(pal: Palette, dark = false): string {
 </section>`;
 }
 
-function aboutSection(description: string, pal: Palette): string {
-  if (!description) return '';
+function aboutSection(description: string, pal: Palette, ai?: AICopy | null): string {
+  const text = description || ai?.about_text || '';
+  if (!text) return '';
   return `
 <section id="sobre" class="section-animate" style="padding:80px 0">
   <div class="container">
@@ -200,8 +201,8 @@ function aboutSection(description: string, pal: Palette): string {
 </section>`;
 }
 
-function faqSection(pal: Palette): string {
-  const items = [
+function faqSection(pal: Palette, ai?: AICopy | null): string {
+  const items = ai?.faq && ai.faq.length >= 3 ? ai.faq : [
     { q: 'Como posso entrar em contato?', a: 'Fale conosco pelo WhatsApp — é a forma mais rápida. Respondemos em instantes.' },
     { q: 'Quais são os horários de atendimento?', a: 'Atendemos de segunda a sexta, das 9h às 18h. Sábados das 9h às 13h.' },
     { q: 'Como solicito um orçamento?', a: 'Entre em contato pelo WhatsApp e retornamos em até 24 horas com todas as informações.' },
@@ -223,6 +224,81 @@ function faqSection(pal: Palette): string {
   </div>
 </section>`;
 }
+
+// ─── STYLE VARIATIONS ────────────────────────────────────────────────────────
+
+export type StyleVariationId = 'modern' | 'classic' | 'bold';
+
+export type StyleVariation = {
+  id: StyleVariationId;
+  name: string;
+  label: string;
+  css: string;
+};
+
+export const STYLE_VARIATIONS: StyleVariation[] = [
+  {
+    id: 'modern',
+    name: 'Moderno',
+    label: 'Limpo e arejado, cantos arredondados, sombras suaves',
+    css: `
+:root{--radius-sm:8px;--radius-md:14px;--radius-lg:20px;--shadow-sm:0 2px 8px rgba(0,0,0,.06);--shadow-md:0 8px 30px rgba(0,0,0,.08);--shadow-lg:0 12px 40px rgba(0,0,0,.12);--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-xxl:48px;--font-scale:1}
+.item-card{border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+.item-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+.gallery-card{border-radius:var(--radius-lg)}
+.gallery-thumb{height:180px}
+.testimonial-card{border-radius:var(--radius-lg);padding:28px}
+.faq-item{border-radius:var(--radius-md);padding:24px}
+.btn-wa-inline{border-radius:var(--radius-md)}
+.wa-float{width:56px;height:56px}
+.item-btn{border-radius:var(--radius-sm)}
+section{padding:var(--space-xxl,80px) 0}
+.hero-content{padding:60px 0}
+.hero-visual{border-radius:var(--radius-lg)}
+`,
+  },
+  {
+    id: 'classic',
+    name: 'Clássico',
+    label: 'Tradicional, cantos retos, tipografia formal, espaçamento generoso',
+    css: `
+:root{--radius-sm:2px;--radius-md:4px;--radius-lg:6px;--shadow-sm:none;--shadow-md:0 2px 12px rgba(0,0,0,.06);--shadow-lg:0 4px 20px rgba(0,0,0,.08);--space-sm:10px;--space-md:20px;--space-lg:32px;--space-xl:44px;--space-xxl:64px;--font-scale:1.05}
+.sec-title{font-size:clamp(1.5rem,3.2vw,2.2rem)!important;letter-spacing:-.01em}
+.item-card{border-radius:var(--radius-sm);border:1px solid rgba(0,0,0,.06)}
+.gallery-card{border-radius:var(--radius-sm)}
+.testimonial-card{border-radius:var(--radius-md);padding:32px;border:1px solid}
+.faq-item{border-radius:var(--radius-sm);padding:28px;border-left:4px solid var(--primary)}
+.hero-visual{border-radius:var(--radius-md)}
+.item-btn{border-radius:var(--radius-sm)}
+.btn-wa-inline{border-radius:var(--radius-sm)}
+.wa-float{border-radius:var(--radius-sm);width:52px;height:52px}
+section{padding:var(--space-xxl,80px) 0}
+.hero-content{padding:72px 0}
+`,
+  },
+  {
+    id: 'bold',
+    name: 'Impactante',
+    label: 'Alto contraste, fontes grandes, sombras fortes, bordas marcantes',
+    css: `
+:root{--radius-sm:12px;--radius-md:18px;--radius-lg:28px;--shadow-sm:0 4px 16px rgba(0,0,0,.1);--shadow-md:0 12px 40px rgba(0,0,0,.14);--shadow-lg:0 20px 60px rgba(0,0,0,.18);--space-sm:6px;--space-md:14px;--space-lg:28px;--space-xl:40px;--space-xxl:60px;--font-scale:1.12}
+.sec-title{font-size:clamp(2rem,4vw,2.8rem)!important;font-weight:900!important;letter-spacing:-.02em}
+.hero-title{font-size:clamp(2.2rem,4.5vw,3.2rem)!important;font-weight:900!important}
+.item-card{border-radius:var(--radius-sm);box-shadow:var(--shadow-md)}
+.item-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-6px) scale(1.01)}
+.gallery-card{border-radius:var(--radius-sm)}
+.testimonial-card{border-radius:var(--radius-sm);padding:32px;border:3px solid var(--primary);box-shadow:var(--shadow-md)}
+.faq-item{border-radius:var(--radius-lg);padding:28px;border:2px solid;background:rgba(0,0,0,.02)}
+.hero-visual{border-radius:var(--radius-lg)}
+.item-btn{border-radius:var(--radius-lg);padding:12px 20px!important;font-weight:800!important}
+.btn-wa-inline{border-radius:var(--radius-lg);padding:16px 32px!important;font-weight:800!important}
+.wa-float{width:60px;height:60px;box-shadow:0 6px 32px rgba(22,163,74,.6)!important}
+section{padding:var(--space-xxl,80px) 0}
+.hero-content{padding:48px 0}
+.hero-stats .stat-n{font-size:2rem!important}
+`,
+  },
+];
 
 // ─── SHARED BASE CSS ──────────────────────────────────────────────────────────
 
@@ -376,7 +452,7 @@ img{max-width:100%;display:block}
 `;
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
-function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
+function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🌟', name: 'Ingredientes Frescos', description: 'Selecionamos os melhores ingredientes para cada prato, garantindo sabor e qualidade.' },
@@ -468,6 +544,7 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
 .footer-logo{font-size:1.3rem;font-weight:800;color:var(--accent)}
 .footer-sub{font-size:.85rem;color:var(--muted)}
 </style>
+${variationCSS ? `<style>${variationCSS}</style>` : ''}
 </head>
 <body>
 
@@ -523,12 +600,12 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
   </div>
 </section>
 
-${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, true) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
-${mods.includes('faq') ? faqSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
   <div class="container">
@@ -554,7 +631,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
-function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
+function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🩺', name: 'Equipe Especializada', description: 'Profissionais qualificados e atualizados com as melhores práticas do mercado.' },
@@ -667,6 +744,7 @@ footer{background:var(--primary);color:rgba(255,255,255,.85);padding:48px 0}
 .footer-logo{font-size:1.2rem;font-weight:800;color:#fff}
 .footer-sub{font-size:.85rem;opacity:.7}
 </style>
+${variationCSS ? `<style>${variationCSS}</style>` : ''}
 </head>
 <body>
 
@@ -762,12 +840,12 @@ footer{background:var(--primary);color:rgba(255,255,255,.85);padding:48px 0}
   </div>
 </section>
 
-${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, false) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
-${mods.includes('faq') ? faqSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
   <div class="container">
@@ -793,7 +871,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
-function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
+function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🚚', name: 'Entrega Rápida', description: 'Envio ágil para todo o Brasil com rastreamento em tempo real.' },
@@ -892,6 +970,7 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:48px 0}
 .footer-logo{font-size:1.2rem;font-weight:800;color:#fff}
 .footer-sub{font-size:.85rem}
 </style>
+${variationCSS ? `<style>${variationCSS}</style>` : ''}
 </head>
 <body>
 
@@ -946,12 +1025,12 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:48px 0}
   </div>
 </section>
 
-${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, false) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
-${mods.includes('faq') ? faqSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
   <div class="container">
@@ -980,7 +1059,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
-function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null): string {
+function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🎯', name: 'Consultoria Estratégica', description: 'Análise completa do seu negócio com recomendações práticas para crescimento.' },
@@ -1099,6 +1178,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
 .footer-dot{color:var(--primary)}
 .footer-sub{font-size:.85rem;color:var(--muted)}
 </style>
+${variationCSS ? `<style>${variationCSS}</style>` : ''}
 </head>
 <body>
 
@@ -1177,7 +1257,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
   </div>
 </section>
 
-${mods.includes('sobre') ? aboutSection(description, pal) : ''}
+${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 
 ${mods.includes('galeria') ? `
 <section id="galeria" style="padding:80px 0;background:var(--surface)">
@@ -1214,7 +1294,7 @@ ${mods.includes('galeria') ? `
 
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
-${mods.includes('faq') ? faqSection(pal) : ''}
+${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-section">
   <div class="container">
@@ -1246,7 +1326,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
-export function generateSiteHTML(briefing: SiteBriefing): string {
+export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariationId): string {
   const pal = PALETTES[briefing.palette] ?? PALETTES['azul-editorial'];
   const { businessName, description, ai } = parseAICopyFromNotes(briefing.content_notes);
 
@@ -1273,10 +1353,13 @@ export function generateSiteHTML(briefing: SiteBriefing): string {
   const waLink = whatsappLink(briefing.whatsapp_number);
   const tpl = briefing.template || 'portfolio';
 
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI);
-  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI);
+  // Inject variation CSS into the generated HTML
+  const variationCSS = (variation && STYLE_VARIATIONS.find(v => v.id === variation))?.css ?? '';
+
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
+  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {

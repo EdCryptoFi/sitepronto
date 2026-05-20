@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, X, Eye, Monitor } from 'lucide-react';
 import { useQuiz } from '@/lib/quiz-context';
 import { OBJECTIVE_TO_TEMPLATE, type TemplateId, type ObjectiveId } from '@/lib/quiz-data';
-import { LivePreview } from '@/components/quiz/LivePreview';
+import { PreviewCarousel } from '@/components/quiz/PreviewCarousel';
 
 type TemplateMeta = {
   name: string;
@@ -535,7 +535,7 @@ export function TemplateSelector() {
       )}
 
       {livePreviewOpen && (
-        <LivePreview onClose={() => setLivePreviewOpen(false)} />
+        <PreviewCarousel onClose={() => setLivePreviewOpen(false)} />
       )}
 
       <div className="grid grid-cols-2 gap-4">

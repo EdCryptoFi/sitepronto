@@ -1,33 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateSiteHTML } from '@/lib/site-generator';
-import type { SiteBriefing } from '@/lib/site-generator';
+import { generateSiteHTML, STYLE_VARIATIONS } from '@/lib/site-generator';
+import type { SiteBriefing, StyleVariationId } from '@/lib/site-generator';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { businessName, description, template, palette, selectedModules, whatsappNumber, businessHours, domain, catalogProducts, contentNotes } = body;
+    const { variation, ...rest } = body;
 
-    const briefing: SiteBriefing = {
+    const buildBriefing = (): SiteBriefing => ({
       id: 'preview',
       segment: body.segment ?? 'outro',
       goal: body.goal ?? 'whatsapp',
-      palette: palette ?? 'corporate',
-      template: template ?? 'portfolio',
-      selected_modules: Array.isArray(selectedModules) ? selectedModules : [],
-      domain: domain ?? null,
+      palette: body.palette ?? 'corporate',
+      template: body.template ?? 'portfolio',
+      selected_modules: Array.isArray(body.selectedModules) ? body.selectedModules : [],
+      domain: body.domain ?? null,
       domain_choice: body.domainChoice ?? 'later',
-      whatsapp_number: whatsappNumber ?? null,
-      business_hours: businessHours ?? null,
-      catalog_products: Array.isArray(catalogProducts) ? catalogProducts : [],
+      whatsapp_number: body.whatsappNumber ?? null,
+      business_hours: body.businessHours ?? null,
+      catalog_products: Array.isArray(body.catalogProducts) ? body.catalogProducts : [],
       logo_name: body.logoName ?? null,
-      content_notes: contentNotes ?? (description ? JSON.stringify({ businessName, description, ai: null }) : null),
+      content_notes: body.contentNotes ?? (body.description ? JSON.stringify({ businessName: body.businessName, description: body.description, ai: null }) : null),
       created_at: new Date().toISOString(),
-    };
+    });
 
-    const html = generateSiteHTML(briefing);
-
-    // Inject PREVIEW watermark
-    const watermark = `
+    const wrapWatermark = (html: string) => {
+      const wm = `
 <style>
 #__preview-watermark {
   position: fixed; inset: 0; z-index: 99999;
@@ -47,10 +45,26 @@ export async function POST(req: NextRequest) {
 <div id="__preview-watermark" aria-hidden="true">
   ${Array.from({ length: 25 }, (_, i) => `<span style="top:${(i % 5) * 22}%;left:${Math.floor(i / 5) * 35 - 15}%">PREVIEW</span>`).join('')}
 </div>`;
+      return html.replace('</body>', `${wm}</body>`);
+    };
 
-    return new NextResponse(html.replace('</body>', `${watermark}</body>`), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
+    // If requesting a specific variation, return single HTML
+    if (variation && STYLE_VARIATIONS.some(v => v.id === variation)) {
+      const html = generateSiteHTML(buildBriefing(), variation as StyleVariationId);
+      return new NextResponse(wrapWatermark(html), {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
+    }
+
+    // Otherwise return all 3 variations as JSON for carousel
+    const results = await Promise.all(
+      STYLE_VARIATIONS.map(async (v) => {
+        const html = generateSiteHTML(buildBriefing(), v.id);
+        return { id: v.id, name: v.name, label: v.label, html: wrapWatermark(html) };
+      })
+    );
+
+    return NextResponse.json({ variations: results });
   } catch (err) {
     console.error('preview-quiz error:', err);
     return new NextResponse('Erro ao gerar preview', { status: 500 });
