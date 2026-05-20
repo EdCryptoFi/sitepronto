@@ -1,4 +1,5 @@
 import { detectIndustry } from '@/lib/industry';
+import { TONE_GUIDELINES, FEW_SHOT_EXAMPLES, COPY_FRAMEWORKS } from '@/lib/copy-framework';
 
 export type AICopy = {
   hero_subheadline: string;
@@ -115,7 +116,33 @@ ${industry.galleryPrompts.map((g, i) => `${i + 1}. ${g}`).join('\n')}
     ? `Paleta: primária ${input.paletteColors.primary}, destaque ${input.paletteColors.accent}.`
     : '';
 
+  // ── COPY FRAMEWORK & TONE ──────────────────────────────────────────────
+  const tone = TONE_GUIDELINES[industry.id];
+  const framework = COPY_FRAMEWORKS[0]; // AIDA — best default for small biz
+  const toneSection = tone ? `
+🎯 TOM DE VOZ:
+• ${tone.voice}
+• Vocabulário: ${tone.vocabulary.join(', ')}
+• Evite: ${tone.avoid.join(', ')}
+• CTA style: ${tone.ctaStyle}
+• Exemplo de prova social: ${tone.socialProof}
+• Framework de copy: ${framework.promptInstruction}
+` : '';
+
+  const fewShot = FEW_SHOT_EXAMPLES[input.template] ?? FEW_SHOT_EXAMPLES.portfolio;
+
+  // ── SEO GUIDELINES ─────────────────────────────────────────────────────
+  const seoGuide = `
+📈 DIRETRIZES DE SEO:
+• hero_subheadline: inclua bairro/cidade se possível, e a principal especialidade
+• services[].description: 1 frase com palavra-chave + benefício (máx 15 palavras)
+• footer_tagline: única, memorável, com palavra-chave principal
+• seo_keywords: 5-8 termos que clientes reais pesquisariam no Google
+• image_prompts: descreva cenas REALISTAS que seriam fotografadas no negócio`;
+
+  // ── FULL PROMPT ────────────────────────────────────────────────────────
   const prompt = `Você é copywriter especialista em sites para pequenas empresas brasileiras.
+Você domina copywriting persuasivo e escreve como um profissional de agência premium.
 
 **Negócio:** "${input.businessName || 'Meu Negócio'}"
 **Tipo:** ${objLabel}
@@ -124,6 +151,8 @@ ${industry.galleryPrompts.map((g, i) => `${i + 1}. ${g}`).join('\n')}
 ${paletteHint}
 ${contextHint}
 ${industryImageHints}
+${toneSection}
+${seoGuide}
 
 ${extractionInstructions}
 
@@ -134,24 +163,28 @@ ${extractionInstructions}
 4. hero_subheadline deve mencionar algo ESPECÍFICO do negócio (localização, especialidade, diferencial)
 5. image_prompts.hero deve seguir a sugestão acima (📸 cena típica)
 6. Emoji dos services deve combinar com o serviço (🔧 para mecânica, 🍕 para pizza, 💇 para cabeleireiro)
+7. Cada service.description deve seguir: [benefício concreto] + [prova ou diferencial]. Ex: "Troca rápida com óleos de alta qualidade e filtros originais."
+
+📋 EXEMPLO DE SAÍDA IDEAL (copie a ESTRUTURA, não o conteúdo):
+${fewShot}
 
 Responda APENAS com este JSON (sem markdown):
 {
-  "hero_subheadline": "específica ao negócio, até 15 palavras",
-  "cta_main": "até 4 palavras",
-  "cta_sub": "até 10 palavras",
+  "hero_subheadline": "específica ao negócio com cidade/bairro, até 15 palavras",
+  "cta_main": "CTA persuasivo de até 4 palavras",
+  "cta_sub": "incentivo ou benefício, até 10 palavras",
   "services": [
-    {"name": "extraído da descrição", "description": "1 frase específica", "icon": "emoji relevante"},
-    {"name": "extraído da descrição", "description": "1 frase específica", "icon": "emoji relevante"},
-    {"name": "extraído da descrição", "description": "1 frase específica", "icon": "emoji relevante"}
+    {"name": "extraído da descrição", "description": "benefício + diferencial em 1 frase", "icon": "emoji relevante"},
+    {"name": "extraído da descrição", "description": "benefício + diferencial em 1 frase", "icon": "emoji relevante"},
+    {"name": "extraído da descrição", "description": "benefício + diferencial em 1 frase", "icon": "emoji relevante"}
   ],
-  "footer_tagline": "até 6 palavras",
+  "footer_tagline": "memorável com palavra-chave, até 6 palavras",
   "image_prompts": {
-    "hero": "descrição para foto principal (máx 10 palavras)",
-    "gallery": ["descrição 1", "descrição 2", "descrição 3"],
+    "hero": "cena realista do negócio (máx 10 palavras)",
+    "gallery": ["cena 1", "cena 2", "cena 3"],
     "catalog": "descrição para fotos de produtos/serviços"
   },
-  "seo_keywords": ["5-8 palavras-chave relevantes"]
+  "seo_keywords": ["5-8 palavras-chave pesquisadas no Google"]
 }`;
 
   try {

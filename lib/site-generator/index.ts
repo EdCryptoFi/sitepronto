@@ -1,6 +1,7 @@
 import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
 import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
 import { detectIndustry } from '@/lib/industry';
+import { generateJSONLD, generateOGTags } from '@/lib/copy-framework';
 
 export type SiteBriefing = {
   id: string;
@@ -388,9 +389,14 @@ function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
-<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
-<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
-<meta name="robots" content="index,follow">
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:title" content="${name.replace(/"/g, '&quot;')}" />
+<meta property="og:description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}" />
+<meta name="robots" content="index,follow" />
+<script type="application/ld+json">${(() => { const wa = b.whatsapp_number ?? '5511999999999'; const se = (ai?.hero_subheadline ?? name).replace(/"/g, '&quot;'); return JSON.stringify({ '@context': 'https://schema.org', '@type': 'LocalBusiness', name, description: se, url: `https://${b.domain || 'sitepronto.com.br'}`, telephone: wa, priceRange: '$' }); })()}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
@@ -567,9 +573,14 @@ function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: st
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
-<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
-<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
-<meta name="robots" content="index,follow">
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:title" content="${name.replace(/"/g, '&quot;')}" />
+<meta property="og:description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}" />
+<meta name="robots" content="index,follow" />
+<script type="application/ld+json">${(() => { const wa = b.whatsapp_number ?? '5511999999999'; const se = (ai?.hero_subheadline ?? name).replace(/"/g, '&quot;'); return JSON.stringify({ '@context': 'https://schema.org', '@type': 'LocalBusiness', name, description: se, url: `https://${b.domain || 'sitepronto.com.br'}`, telephone: wa, priceRange: '$' }); })()}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
@@ -796,9 +807,14 @@ function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: stri
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
-<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
-<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
-<meta name="robots" content="index,follow">
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:title" content="${name.replace(/"/g, '&quot;')}" />
+<meta property="og:description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}" />
+<meta name="robots" content="index,follow" />
+<script type="application/ld+json">${(() => { const wa = b.whatsapp_number ?? '5511999999999'; const se = (ai?.hero_subheadline ?? name).replace(/"/g, '&quot;'); return JSON.stringify({ '@context': 'https://schema.org', '@type': 'LocalBusiness', name, description: se, url: `https://${b.domain || 'sitepronto.com.br'}`, telephone: wa, priceRange: '$' }); })()}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
@@ -979,9 +995,14 @@ function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${name}</title>
-<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}">
-<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}">
-<meta name="robots" content="index,follow">
+<meta name="description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:title" content="${name.replace(/"/g, '&quot;')}" />
+<meta property="og:description" content="${(ai?.hero_subheadline ?? name).replace(/"/g, '&quot;')}" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="keywords" content="${(ai?.seo_keywords ?? [name]).join(', ')}" />
+<meta name="robots" content="index,follow" />
+<script type="application/ld+json">${(() => { const wa = b.whatsapp_number ?? '5511999999999'; const se = (ai?.hero_subheadline ?? name).replace(/"/g, '&quot;'); return JSON.stringify({ '@context': 'https://schema.org', '@type': 'LocalBusiness', name, description: se, url: `https://${b.domain || 'sitepronto.com.br'}`, telephone: wa, priceRange: '$' }); })()}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="${fontLink(b.template)}" rel="stylesheet">
 <style>
