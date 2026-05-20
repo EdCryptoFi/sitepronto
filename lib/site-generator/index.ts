@@ -2,6 +2,7 @@ import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
 import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
 import { detectIndustry } from '@/lib/industry';
 import { generateJSONLD, generateOGTags } from '@/lib/copy-framework';
+import { renderNav, renderHero, renderServices } from '@/lib/site-generator/layouts';
 
 export type SiteBriefing = {
   id: string;
@@ -452,7 +453,7 @@ img{max-width:100%;display:block}
 `;
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
-function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
+function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🌟', name: 'Ingredientes Frescos', description: 'Selecionamos os melhores ingredientes para cada prato, garantindo sabor e qualidade.' },
@@ -544,38 +545,28 @@ footer{background:var(--surface);border-top:1px solid rgba(255,255,255,.06);padd
 .footer-logo{font-size:1.3rem;font-weight:800;color:var(--accent)}
 .footer-sub{font-size:.85rem;color:var(--muted)}
 </style>
-${variationCSS ? `<style>${variationCSS}</style>` : ''}
+${variation ? `<style>${STYLE_VARIATIONS.find(v => v.id === variation)?.css ?? ''}</style>` : ''}
 </head>
 <body>
 
-<nav>
-  <div class="container nav-inner">
-    <span class="logo">${name}</span>
-    <ul class="nav-links">
-      ${mods.includes('servicos') ? '<li><a href="#servicos">Cardápio</a></li>' : ''}
-      ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
-      ${mods.includes('depoimentos') ? '<li><a href="#depoimentos">Avaliações</a></li>' : ''}
-      <li><a href="#contato">Contato</a></li>
-    </ul>
-  </div>
-</nav>
+${renderNav(variation ?? 'modern', name, [
+  ...(mods.includes('servicos') ? [{ label: 'Cardápio', href: '#servicos' }] : []),
+  ...(mods.includes('galeria') ? [{ label: 'Galeria', href: '#galeria' }] : []),
+  ...(mods.includes('depoimentos') ? [{ label: 'Avaliações', href: '#depoimentos' }] : []),
+  { label: 'Contato', href: '#contato' },
+], pal)}
 
-<section class="hero">
-  <div class="container hero-split">
-    <div class="hero-content">
-      <div class="rating-badge">⭐ 4.8 — Mais de 200 avaliações</div>
-      <h1 class="hero-title">${name}</h1>
-      <p class="hero-sub">${ai?.hero_subheadline ?? 'Sabor autêntico e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.'}</p>
-      <div class="hero-ctas">
-        ${mods.includes('servicos') ? `<a href="#servicos" class="btn-main">Ver Cardápio</a>` : ''}
-        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-ghost-white">📱 Pedir pelo WhatsApp</a>` : ''}
-      </div>
-    </div>
-    <div class="food-visual" style="border-radius:24px;overflow:hidden">
-      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
-    </div>
-  </div>
-</section>
+${renderHero({
+  v: variation ?? 'modern',
+  name,
+  subheadline: ai?.hero_subheadline ?? 'Sabor autêntico e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.',
+  badge: '⭐ 4.8 — Mais de 200 avaliações',
+  ctas: [
+    ...(mods.includes('servicos') ? [{ label: 'Ver Cardápio', href: '#servicos', primary: true }] : []),
+    ...(mods.includes('contato') ? [{ label: '📱 Pedir pelo WhatsApp', href: waLink }] : []),
+  ],
+  pal,
+})}
 
 <div class="tabs-bar">
   <div class="container tabs-inner">
@@ -583,22 +574,7 @@ ${variationCSS ? `<style>${variationCSS}</style>` : ''}
   </div>
 </div>
 
-<section style="padding:80px 0;background:var(--bg)">
-  <div class="container">
-    <div class="sec-hdr centered">
-      <span class="eyebrow" style="color:${pal.primary}">Por que nos escolher</span>
-      <h2 class="sec-title">Qualidade em cada detalhe</h2>
-    </div>
-    <div class="features-row">
-      ${services.map(s => `
-      <div class="feat-card">
-        <div class="feat-icon">${s.icon}</div>
-        <div class="feat-title">${s.name}</div>
-        <div class="feat-desc">${s.description}</div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
+${renderServices(variation ?? 'modern', services, pal, 'Qualidade em cada detalhe')}
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true) : ''}
@@ -631,7 +607,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
-function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
+function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🩺', name: 'Equipe Especializada', description: 'Profissionais qualificados e atualizados com as melhores práticas do mercado.' },
@@ -744,45 +720,37 @@ footer{background:var(--primary);color:rgba(255,255,255,.85);padding:48px 0}
 .footer-logo{font-size:1.2rem;font-weight:800;color:#fff}
 .footer-sub{font-size:.85rem;opacity:.7}
 </style>
-${variationCSS ? `<style>${variationCSS}</style>` : ''}
+${variation ? `<style>${STYLE_VARIATIONS.find(v => v.id === variation)?.css ?? ''}</style>` : ''}
 </head>
 <body>
 
 <div class="promo-bar">✨ Atendimento especializado — Agende agora pelo WhatsApp</div>
 
-<nav>
-  <div class="container nav-inner">
-    <span class="logo">${name}</span>
-    <ul class="nav-links">
-      ${mods.includes('servicos') ? '<li><a href="#servicos">Serviços</a></li>' : ''}
-      ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
-      ${mods.includes('depoimentos') ? '<li><a href="#depoimentos">Depoimentos</a></li>' : ''}
-      <li><a href="#contato">Contato</a></li>
-    </ul>
-  </div>
-</nav>
+<div class="promo-bar">✨ Atendimento especializado — Agende agora pelo WhatsApp</div>
 
-<section class="hero">
-  <div class="container hero-split">
-    <div class="hero-content">
-      <div class="hero-badge">🏥 Saúde &amp; Bem-estar</div>
-      <h1 class="hero-title">${name}</h1>
-      <p class="hero-sub">${ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.'}</p>
-      <div class="hero-ctas">
-        ${mods.includes('contato') ? `<a href="#contato" class="btn-main">Agendar Consulta</a>` : ''}
-        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-outline">📱 WhatsApp</a>` : ''}
-      </div>
-      <div class="hero-stats">
-        <div><div class="stat-n">98%</div><div class="stat-l">Satisfação</div></div>
-        <div><div class="stat-n">10+</div><div class="stat-l">Anos de experiência</div></div>
-        <div><div class="stat-n">5★</div><div class="stat-l">Avaliação</div></div>
-      </div>
-    </div>
-    <div class="hero-visual" style="border-radius:24px;overflow:hidden">
-      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
-    </div>
-  </div>
-</section>
+${renderNav(variation ?? 'modern', name, [
+  ...(mods.includes('servicos') ? [{ label: 'Serviços', href: '#servicos' }] : []),
+  ...(mods.includes('galeria') ? [{ label: 'Galeria', href: '#galeria' }] : []),
+  ...(mods.includes('depoimentos') ? [{ label: 'Depoimentos', href: '#depoimentos' }] : []),
+  { label: 'Contato', href: '#contato' },
+], pal)}
+
+${renderHero({
+  v: variation ?? 'modern',
+  name,
+  subheadline: ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.',
+  badge: '🏥 Saúde & Bem-estar',
+  ctas: [
+    ...(mods.includes('contato') ? [{ label: 'Agendar Consulta', href: '#contato', primary: true }] : []),
+    ...(mods.includes('contato') ? [{ label: '📱 WhatsApp', href: waLink }] : []),
+  ],
+  stats: [
+    { num: '98%', label: 'Satisfação' },
+    { num: '10+', label: 'Anos' },
+    { num: '5★', label: 'Avaliação' },
+  ],
+  pal,
+})}
 
 <div class="trust-strip">
   <div class="container trust-row">
@@ -790,22 +758,7 @@ ${variationCSS ? `<style>${variationCSS}</style>` : ''}
   </div>
 </div>
 
-<section style="padding:80px 0;background:var(--bg)">
-  <div class="container">
-    <div class="sec-hdr centered">
-      <span class="eyebrow" style="color:${pal.primary}">Diferenciais</span>
-      <h2 class="sec-title">Por que escolher a ${name}?</h2>
-    </div>
-    <div class="feats-grid">
-      ${services.map(s => `
-      <div class="feat">
-        <div class="feat-ico">${s.icon}</div>
-        <div class="feat-t">${s.name}</div>
-        <div class="feat-d">${s.description}</div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
+${renderServices(variation ?? 'modern', services, pal, `Por que escolher a ${name}?`)}
 
 <section style="padding:64px 0;background:var(--surface2)">
   <div class="container">
@@ -871,7 +824,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
-function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
+function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🚚', name: 'Entrega Rápida', description: 'Envio ágil para todo o Brasil com rastreamento em tempo real.' },
@@ -970,41 +923,27 @@ footer{background:#111827;color:rgba(255,255,255,.75);padding:48px 0}
 .footer-logo{font-size:1.2rem;font-weight:800;color:#fff}
 .footer-sub{font-size:.85rem}
 </style>
-${variationCSS ? `<style>${variationCSS}</style>` : ''}
+${variation ? `<style>${STYLE_VARIATIONS.find(v => v.id === variation)?.css ?? ''}</style>` : ''}
 </head>
 <body>
 
-<nav>
-  <div class="container nav-inner">
-    <span class="logo">${name}<span class="logo-dot">.</span></span>
-    <ul class="nav-links">
-      ${mods.includes('servicos') ? '<li><a href="#servicos">Produtos</a></li>' : ''}
-      ${mods.includes('galeria') ? '<li><a href="#galeria">Galeria</a></li>' : ''}
-      <li><a href="#contato">Contato</a></li>
-    </ul>
-    <div class="nav-icons">
-      <div class="nav-icon">🔍</div>
-      <div class="nav-icon">🛒</div>
-    </div>
-  </div>
-</nav>
+${renderNav(variation ?? 'modern', name, [
+  ...(mods.includes('servicos') ? [{ label: 'Produtos', href: '#servicos' }] : []),
+  ...(mods.includes('galeria') ? [{ label: 'Galeria', href: '#galeria' }] : []),
+  { label: 'Contato', href: '#contato' },
+], pal)}
 
-<section class="hero">
-  <div class="container hero-split">
-    <div class="hero-content">
-      <div class="hero-tag">🛍️ Loja Online</div>
-      <h1 class="hero-title">${name}</h1>
-      <p class="hero-sub">${ai?.hero_subheadline ?? 'Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.'}</p>
-      <div class="hero-ctas">
-        ${mods.includes('servicos') ? `<a href="#servicos" class="btn-main">Ver Produtos</a>` : ''}
-        ${mods.includes('contato') ? `<a href="${waLink}" target="_blank" class="btn-sec">📱 Pedir pelo WhatsApp</a>` : ''}
-      </div>
-    </div>
-    <div class="product-visual" style="border-radius:24px;overflow:hidden">
-      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
-    </div>
-  </div>
-</section>
+${renderHero({
+  v: variation ?? 'modern',
+  name,
+  subheadline: ai?.hero_subheadline ?? 'Os melhores produtos com qualidade garantida e entrega rápida. Compre com confiança.',
+  badge: '🛍️ Loja Online',
+  ctas: [
+    ...(mods.includes('servicos') ? [{ label: 'Ver Produtos', href: '#servicos', primary: true }] : []),
+    ...(mods.includes('contato') ? [{ label: '📱 Pedir pelo WhatsApp', href: waLink }] : []),
+  ],
+  pal,
+})}
 
 <div class="filter-bar">
   <div class="container filter-row">
@@ -1012,18 +951,7 @@ ${variationCSS ? `<style>${variationCSS}</style>` : ''}
   </div>
 </div>
 
-<section style="padding:64px 0;background:var(--surface2)">
-  <div class="container">
-    <div class="feats-row">
-      ${services.map(s => `
-      <div class="feat-card">
-        <div class="feat-ico">${s.icon}</div>
-        <div class="feat-t">${s.name}</div>
-        <div class="feat-d">${s.description}</div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
+${renderServices(variation ?? 'modern', services, pal, 'Nossos diferenciais')}
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
@@ -1059,7 +987,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
-function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variationCSS?: string): string {
+function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
   const mods = b.selected_modules ?? [];
   const services = ai?.services ?? [
     { icon: '🎯', name: 'Consultoria Estratégica', description: 'Análise completa do seu negócio com recomendações práticas para crescimento.' },
@@ -1178,67 +1106,36 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:48px 0}
 .footer-dot{color:var(--primary)}
 .footer-sub{font-size:.85rem;color:var(--muted)}
 </style>
-${variationCSS ? `<style>${variationCSS}</style>` : ''}
+${variation ? `<style>${STYLE_VARIATIONS.find(v => v.id === variation)?.css ?? ''}</style>` : ''}
 </head>
 <body>
 
-<nav>
-  <div class="container nav-inner">
-    <span class="logo">${name}<span class="logo-dot">.</span></span>
-    <ul class="nav-links">
-      <li><a href="#servicos">Serviços</a></li>
-      ${mods.includes('galeria') ? '<li><a href="#galeria">Portfólio</a></li>' : ''}
-      ${mods.includes('depoimentos') ? '<li><a href="#depoimentos">Depoimentos</a></li>' : ''}
-      <li><a href="#contato">Contato</a></li>
-    </ul>
-  </div>
-</nav>
+${renderNav(variation ?? 'modern', name, [
+  { label: 'Serviços', href: '#servicos' },
+  ...(mods.includes('galeria') ? [{ label: 'Portfólio', href: '#galeria' }] : []),
+  ...(mods.includes('depoimentos') ? [{ label: 'Depoimentos', href: '#depoimentos' }] : []),
+  { label: 'Contato', href: '#contato' },
+], pal)}
 
-<section class="hero">
-  <div class="container hero-split">
-    <div class="hero-content">
-      <div class="hello-tag">👋 Olá, somos a ${name}</div>
-      <h1 class="hero-title">${name}</h1>
-      <p class="hero-role">${ai?.footer_tagline ?? 'Especialistas em soluções para o seu negócio'}</p>
-      <p class="hero-sub">${ai?.hero_subheadline ?? 'Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.'}</p>
-      <div class="hero-ctas">
-        <a href="#contato" class="btn-primary-full">Fale Conosco</a>
-        ${mods.includes('galeria') ? `<a href="#galeria" class="btn-ghost-dark">Ver Portfólio</a>` : ''}
-      </div>
-      <div class="stats-row">
-        <div><div class="stat-n">+50</div><div class="stat-l">Projetos entregues</div></div>
-        <div><div class="stat-n">5★</div><div class="stat-l">Avaliação média</div></div>
-        <div><div class="stat-n">8</div><div class="stat-l">Anos de experiência</div></div>
-        <div><div class="stat-n">100%</div><div class="stat-l">Comprometimento</div></div>
-      </div>
-    </div>
-    <div class="avatar-wrap" style="border-radius:50%;overflow:hidden">
-      <img src="${dataUrl(generateHeroSVG(pal, name))}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block" />
-      <div class="avatar-badge" style="position:absolute;bottom:10px;right:-10px;background:var(--surface);border:2px solid ${pal.primary}44;border-radius:16px;padding:12px 16px">
-        <span class="badge-val" style="font-size:1.2rem;font-weight:800;color:${pal.primary};display:block">+50</span>
-        <span class="badge-lbl" style="font-size:.72rem;color:var(--muted)">Clientes felizes</span>
-      </div>
-    </div>
-  </div>
-</section>
+${renderHero({
+  v: variation ?? 'modern',
+  name,
+  subheadline: ai?.hero_subheadline ?? 'Soluções profissionais com resultados comprovados. Transformamos desafios em oportunidades de crescimento.',
+  badge: `👋 Olá, somos a ${name}`,
+  ctas: [
+    { label: 'Fale Conosco', href: '#contato', primary: true },
+    ...(mods.includes('galeria') ? [{ label: 'Ver Portfólio', href: '#galeria' }] : []),
+  ],
+  stats: [
+    { num: '+50', label: 'Projetos' },
+    { num: '5★', label: 'Avaliação' },
+    { num: '8', label: 'Anos' },
+    { num: '100%', label: 'Entrega' },
+  ],
+  pal,
+})}
 
-<section id="servicos" style="padding:96px 0;background:var(--surface)">
-  <div class="container">
-    <div class="sec-hdr centered">
-      <span class="eyebrow" style="color:${pal.primary}">O que fazemos</span>
-      <h2 class="sec-title">Nossos Serviços</h2>
-      <p class="sec-sub">Soluções completas para o seu negócio crescer com estratégia e propósito.</p>
-    </div>
-    <div class="services-grid">
-      ${services.map(s => `
-      <div class="service-card">
-        <div class="svc-icon">${s.icon}</div>
-        <div class="svc-title">${s.name}</div>
-        <div class="svc-desc">${s.description}</div>
-      </div>`).join('')}
-    </div>
-  </div>
-</section>
+${renderServices(variation ?? 'modern', services, pal, 'Nossos Serviços')}
 
 <section style="padding:80px 0;background:var(--bg)">
   <div class="container">
@@ -1353,13 +1250,10 @@ export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariat
   const waLink = whatsappLink(briefing.whatsapp_number);
   const tpl = briefing.template || 'portfolio';
 
-  // Inject variation CSS into the generated HTML
-  const variationCSS = (variation && STYLE_VARIATIONS.find(v => v.id === variation))?.css ?? '';
-
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
-  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variationCSS);
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variation);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variation);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variation);
+  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variation);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {
