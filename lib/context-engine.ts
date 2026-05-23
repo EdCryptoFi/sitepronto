@@ -214,6 +214,87 @@ export function buildPromptContext(ctx: SiteContext): string {
   return parts.join('\n');
 }
 
+// ─── DYNAMIC INDUSTRY GENERATION (AI fallback for unknown segments) ───────────
+
+export type DynamicIndustry = {
+  label: string;
+  template: string;
+  fallbackServices: { icon: string; name: string; description: string }[];
+  fallbackHeadline: string;
+  fallbackCTA: string;
+  fallbackCTASub: string;
+  fallbackTagline: string;
+  imagePrompt: string;
+};
+
+export async function generateDynamicIndustry(
+  businessName: string,
+  description: string
+): Promise<DynamicIndustry | null> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+
+  const prompt = `Você é especialista em sites para pequenas empresas brasileiras.
+
+Dado o negócio abaixo, gere um contexto completo para o site:
+
+Negócio: "${businessName}"
+Descrição: "${description || 'Não informada'}"
+
+Identifique o segmento/setor do negócio e retorne um JSON com:
+- label: nome do segmento em português (ex: "Barbearia", "Escola de Música")
+- template: um destes valores exatos → "restaurant" | "farmacy" | "store" | "portfolio"
+  (restaurant = negócios visuais/gastro/beleza, farmacy = saúde/serviços limpos, store = comércio/produtos, portfolio = serviços profissionais/criativo)
+- fallbackServices: 3 serviços REAIS e ESPECÍFICOS do negócio, com icon (emoji), name e description (1 frase com benefício)
+- fallbackHeadline: headline atrativa de até 12 palavras, específica para o negócio
+- fallbackCTA: CTA de até 4 palavras (ex: "Agendar Consulta", "Ver Cardápio")
+- fallbackCTASub: frase de apoio de até 10 palavras
+- fallbackTagline: slogan memorável de até 6 palavras
+- imagePrompt: cena fotográfica realista do negócio (máx 10 palavras)
+
+Responda APENAS com JSON válido, sem markdown:
+{
+  "label": "...",
+  "template": "...",
+  "fallbackServices": [
+    {"icon": "emoji", "name": "...", "description": "..."},
+    {"icon": "emoji", "name": "...", "description": "..."},
+    {"icon": "emoji", "name": "...", "description": "..."}
+  ],
+  "fallbackHeadline": "...",
+  "fallbackCTA": "...",
+  "fallbackCTASub": "...",
+  "fallbackTagline": "...",
+  "imagePrompt": "..."
+}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { response_mime_type: 'application/json', temperature: 0.3, maxOutputTokens: 600 },
+        }),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    const json = await res.json();
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return null;
+
+    const parsed = JSON.parse(text) as DynamicIndustry;
+    if (!parsed.label || !Array.isArray(parsed.fallbackServices) || parsed.fallbackServices.length < 3) return null;
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 // ─── FEEDBACK LOOP ────────────────────────────────────────────────────────────
 
 export async function recordSuccessfulGeneration(

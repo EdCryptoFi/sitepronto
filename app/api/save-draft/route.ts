@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getIp } from '@/lib/rate-limit';
 import { generateAICopy } from '@/lib/ai-copy';
 import { detectIndustry } from '@/lib/industry';
+import { generateDynamicIndustry } from '@/lib/context-engine';
 
 const PALETTE_COLORS: Record<string, { primary: string; accent: string }> = {
   'azul-editorial': { primary: '#004ac6', accent: '#2563eb' },
@@ -113,7 +114,12 @@ export async function POST(req: NextRequest) {
     paletteColors: PALETTE_COLORS[palette],
   });
 
-  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy, logoPreview });
+  // For unknown segments, research the industry with Gemini so the site generator has rich context
+  const dynamicIndustry = industry.id === 'generico'
+    ? await generateDynamicIndustry(businessName, description)
+    : null;
+
+  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy, logoPreview, dynamicIndustry });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

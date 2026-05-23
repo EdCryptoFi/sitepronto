@@ -1233,7 +1233,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
 export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariationId): string {
   const pal = PALETTES[briefing.palette] ?? PALETTES['azul-editorial'];
-  const { businessName, description, ai, logoPreview } = parseAICopyFromNotes(briefing.content_notes);
+  const { businessName, description, ai, logoPreview, dynamicIndustry } = parseAICopyFromNotes(briefing.content_notes);
 
   // Industry: briefing.segment (set from detectIndustry at save time) takes priority.
   // Falls back to keyword detection from name+description as a safety net.
@@ -1247,25 +1247,32 @@ export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariat
   // If AI content is missing or mismatched, fall back to industry-specific copy.
   // effectiveAI is NEVER null — templates always receive appropriate content.
   const aiContentValid = ai != null && validateAIContent(ai, industry);
+
+  // For unknown segments: use dynamicIndustry (AI-researched at save time) as rich fallback
+  const fallbackSource = (industry.id === 'generico' && dynamicIndustry) ? dynamicIndustry : industry;
+
   const effectiveAI: AICopy = aiContentValid
     ? ai!
     : {
-        hero_subheadline: industry.fallbackHeadline,
-        cta_main: industry.fallbackCTA,
-        cta_sub: industry.fallbackCTASub,
-        services: industry.fallbackServices,
-        footer_tagline: industry.fallbackTagline,
+        hero_subheadline: fallbackSource.fallbackHeadline,
+        cta_main: fallbackSource.fallbackCTA,
+        cta_sub: fallbackSource.fallbackCTASub,
+        services: fallbackSource.fallbackServices,
+        footer_tagline: fallbackSource.fallbackTagline,
         image_prompts: {
-          hero: industry.imagePrompt,
-          gallery: industry.galleryPrompts,
-          catalog: industry.imagePrompt,
+          hero: fallbackSource.imagePrompt,
+          gallery: (fallbackSource as typeof industry).galleryPrompts ?? [fallbackSource.imagePrompt],
+          catalog: fallbackSource.imagePrompt,
         },
-        seo_keywords: [businessName || '', industry.label],
+        seo_keywords: [businessName || '', fallbackSource.label],
       };
 
   const name = businessName || formatBusinessName(briefing.domain, briefing.segment);
   const waLink = whatsappLink(briefing.whatsapp_number);
-  const tpl = briefing.template || 'portfolio';
+  // For unknown segments, use the AI-researched template if available
+  const tpl = briefing.template && briefing.template !== 'portfolio'
+    ? briefing.template
+    : (industry.id === 'generico' && dynamicIndustry ? dynamicIndustry.template : briefing.template) || 'portfolio';
   const industryId = industry.id;
 
   if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
