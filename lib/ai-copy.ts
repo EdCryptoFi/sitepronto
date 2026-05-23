@@ -1,6 +1,7 @@
 import { detectIndustry } from '@/lib/industry';
 import { TONE_GUIDELINES, FEW_SHOT_EXAMPLES, COPY_FRAMEWORKS } from '@/lib/copy-framework';
 import { detectIndustrySemantic, buildPromptContext, type DynamicIndustry } from '@/lib/context-engine';
+import type { ImageSet } from '@/lib/image-bank';
 
 export type AICopy = {
   hero_subheadline: string;
@@ -204,8 +205,9 @@ export function parseAICopyFromNotes(contentNotes: string | null): {
   ai: AICopy | null;
   logoPreview: string;
   dynamicIndustry: DynamicIndustry | null;
+  images: ImageSet | null;
 } {
-  const empty = { businessName: '', description: '', ai: null, logoPreview: '', dynamicIndustry: null };
+  const empty = { businessName: '', description: '', ai: null, logoPreview: '', dynamicIndustry: null, images: null };
   if (!contentNotes) return empty;
   try {
     const parsed = JSON.parse(contentNotes);
@@ -216,6 +218,7 @@ export function parseAICopyFromNotes(contentNotes: string | null): {
         ai: parsed.ai ?? null,
         logoPreview: String(parsed.logoPreview ?? ''),
         dynamicIndustry: (parsed.dynamicIndustry as DynamicIndustry) ?? null,
+        images: (parsed.images as ImageSet) ?? null,
       };
     }
   } catch {

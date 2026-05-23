@@ -4,6 +4,7 @@ import { checkRateLimit, getIp } from '@/lib/rate-limit';
 import { generateAICopy } from '@/lib/ai-copy';
 import { detectIndustry } from '@/lib/industry';
 import { generateDynamicIndustry } from '@/lib/context-engine';
+import { fetchSegmentImages } from '@/lib/image-bank';
 
 const PALETTE_COLORS: Record<string, { primary: string; accent: string }> = {
   'azul-editorial': { primary: '#004ac6', accent: '#2563eb' },
@@ -119,7 +120,11 @@ export async function POST(req: NextRequest) {
     ? await generateDynamicIndustry(businessName, description)
     : null;
 
-  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy, logoPreview, dynamicIndustry });
+  // Fetch real photos from Unsplash for this segment (non-blocking — falls back to SVGs if no API key)
+  const segmentForImages = dynamicIndustry ? 'generico' : industry.id;
+  const images = await fetchSegmentImages(segmentForImages, businessName);
+
+  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy, logoPreview, dynamicIndustry, images });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

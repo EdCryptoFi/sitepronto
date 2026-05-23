@@ -1,4 +1,5 @@
 import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
+import type { ImageSet } from '@/lib/image-bank';
 import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
 import { detectIndustry, validateAIContent, getIndustryById, type IndustryInfo } from '@/lib/industry';
 import { generateJSONLD, generateOGTags } from '@/lib/copy-framework';
@@ -128,7 +129,7 @@ function hoursSection(hours: string | null, waLink: string, pal: Palette): strin
 </section>`;
 }
 
-function gallerySection(pal: Palette, dark = false, industryId = 'generico'): string {
+function gallerySection(pal: Palette, dark = false, industryId = 'generico', galleryImages?: string[]): string {
   const tags = ['Projeto', 'Trabalho', 'Cliente', 'Case', 'Portfolio', 'Resultado'];
   const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
   return `
@@ -140,14 +141,18 @@ function gallerySection(pal: Palette, dark = false, industryId = 'generico'): st
       <p class="sec-sub">Conheça alguns projetos que realizamos para nossos clientes.</p>
     </div>
     <div class="gallery-grid">
-      ${[0,1,2,3,4,5].map((i) => `
+      ${[0,1,2,3,4,5].map((i) => {
+        const realImg = galleryImages?.[i % (galleryImages.length || 1)];
+        const src = realImg ?? dataUrl(generateGallerySVG(pal, i, industryId));
+        return `
       <div class="gallery-card">
-        <img src="${dataUrl(generateGallerySVG(pal, i, industryId))}" alt="Trabalho ${i + 1}" style="width:100%;height:180px;object-fit:cover;display:block">
+        <img src="${src}" alt="Trabalho ${i + 1}" style="width:100%;height:180px;object-fit:cover;display:block" ${realImg ? 'referrerpolicy="no-referrer"' : ''}>
         <div class="gallery-body">
           <span class="gallery-tag" style="color:${pal.primary}">${tags[i]}</span>
           <p class="gallery-name">Trabalho ${i + 1}</p>
         </div>
-      </div>`).join('')}
+      </div>`;
+      }).join('')}
     </div>
   </div>
 </section>`;
@@ -453,7 +458,7 @@ img{max-width:100%;display:block}
 `;
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
-function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
+function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string, images?: ImageSet): string {
   const mods = b.selected_modules ?? [];
   const industry = getIndustryById(industryId ?? 'generico');
   const services = ai?.services ?? industry?.fallbackServices ?? [
@@ -568,6 +573,7 @@ ${renderNav(variation ?? 'modern', name, [
   ],
   pal,
   industry: industryId,
+  image: images?.hero,
 })}
 
 <div class="tabs-bar">
@@ -581,7 +587,7 @@ ${renderServices(variation ?? 'modern', services, pal, 'Qualidade em cada detalh
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true, industryId) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? gallerySection(pal, true, industryId) : ''}
+${mods.includes('galeria') ? gallerySection(pal, true, industryId, images?.gallery) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
@@ -609,7 +615,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
-function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
+function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string, images?: ImageSet): string {
   const mods = b.selected_modules ?? [];
   const industry = getIndustryById(industryId ?? 'generico');
   const services = ai?.services ?? industry?.fallbackServices ?? [
@@ -754,6 +760,7 @@ ${renderNav(variation ?? 'modern', name, [
   ],
   pal,
   industry: industryId,
+  image: images?.hero,
 })}
 
 <div class="trust-strip">
@@ -800,7 +807,7 @@ ${renderServices(variation ?? 'modern', services, pal, `Por que escolher a ${nam
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? gallerySection(pal, false, industryId) : ''}
+${mods.includes('galeria') ? gallerySection(pal, false, industryId, images?.gallery) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
@@ -828,7 +835,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
-function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
+function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string, images?: ImageSet): string {
   const mods = b.selected_modules ?? [];
   const industry = getIndustryById(industryId ?? 'generico');
   const services = ai?.services ?? industry?.fallbackServices ?? [
@@ -949,6 +956,7 @@ ${renderHero({
   ],
   pal,
   industry: industryId,
+  image: images?.hero,
 })}
 
 <div class="filter-bar">
@@ -962,7 +970,7 @@ ${renderServices(variation ?? 'modern', services, pal, 'Nossos diferenciais')}
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? gallerySection(pal, false, industryId) : ''}
+${mods.includes('galeria') ? gallerySection(pal, false, industryId, images?.gallery) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
@@ -993,7 +1001,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
-function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
+function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string, images?: ImageSet): string {
   const mods = b.selected_modules ?? [];
   const industry = getIndustryById(industryId ?? 'generico');
   const services = ai?.services ?? industry?.fallbackServices ?? [
@@ -1141,6 +1149,7 @@ ${renderHero({
   ],
   pal,
   industry: industryId,
+  image: images?.hero,
 })}
 
 ${renderServices(variation ?? 'modern', services, pal, 'Nossos Serviços')}
@@ -1181,10 +1190,13 @@ ${mods.includes('galeria') ? `
         ['Gestão de Projetos', 'Consultoria', '2023'],
       ].map(([pname, tag, year], i) => {
         const cols = [pal.primary, pal.accent, `${pal.primary}88`, `${pal.accent}88`];
+        const realImg = images?.gallery?.[i % (images.gallery.length || 1)];
         return `
       <div class="project-card">
         <div class="project-thumb" style="background:linear-gradient(135deg,${cols[i%4]}33,${cols[(i+1)%4]}22)">
-          <div style="width:80px;height:80px;border-radius:50%;background:${cols[i%4]}55;display:flex;align-items:center;justify-content:center;font-size:2rem">✦</div>
+          ${realImg
+            ? `<img src="${realImg}" alt="${pname}" style="width:100%;height:100%;object-fit:cover;display:block" referrerpolicy="no-referrer">`
+            : `<div style="width:80px;height:80px;border-radius:50%;background:${cols[i%4]}55;display:flex;align-items:center;justify-content:center;font-size:2rem">✦</div>`}
         </div>
         <div class="project-body">
           <span class="project-tag">${tag}</span>
@@ -1233,7 +1245,7 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
 export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariationId): string {
   const pal = PALETTES[briefing.palette] ?? PALETTES['azul-editorial'];
-  const { businessName, description, ai, logoPreview, dynamicIndustry } = parseAICopyFromNotes(briefing.content_notes);
+  const { businessName, description, ai, logoPreview, dynamicIndustry, images } = parseAICopyFromNotes(briefing.content_notes);
 
   // Industry: briefing.segment (set from detectIndustry at save time) takes priority.
   // Falls back to keyword detection from name+description as a safety net.
@@ -1275,10 +1287,10 @@ export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariat
     : (industry.id === 'generico' && dynamicIndustry ? dynamicIndustry.template : briefing.template) || 'portfolio';
   const industryId = industry.id;
 
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
-  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview, images ?? undefined);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview, images ?? undefined);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview, images ?? undefined);
+  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview, images ?? undefined);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {
