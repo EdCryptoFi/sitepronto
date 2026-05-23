@@ -3,21 +3,39 @@ import { ThemeProvider, ThemeScript } from '@/lib/theme-context';
 import { QuizProvider } from '@/lib/quiz-context';
 import './globals.css';
 
+const SITE_URL = 'https://sitepronto.com.br';
+
 export const metadata: Metadata = {
-  title: 'SitePronto — Crie seu site hoje. Sem mensalidade.',
+  title: 'SitePronto — Site profissional hoje. Sem mensalidade.',
   description:
-    'Site profissional pronto em até 24h. Responda 3 perguntas, escolha o visual e publique — R$ 300 único, sem mensalidade. Garantia de 7 dias.',
+    'Crie seu site profissional em até 24h por apenas R$ 300 — pagamento único, domínio .com.br incluso, sem mensalidade. Responda 3 perguntas e publique hoje.',
+  keywords: [
+    'criar site',
+    'site para empresa',
+    'site profissional',
+    'site sem mensalidade',
+    'site barato',
+    'criar site para restaurante',
+    'criar site para clínica',
+    'criar site para loja',
+    'site pronto',
+    'site em 24 horas',
+  ],
+  authors: [{ name: 'SitePronto' }],
+  robots: { index: true, follow: true },
+  alternates: { canonical: SITE_URL },
   openGraph: {
-    title: 'SitePronto — Crie seu site hoje. Sem mensalidade.',
+    title: 'SitePronto — Site profissional hoje. Sem mensalidade.',
     description:
-      'Site profissional pronto em até 24h. R$ 300 único, sem mensalidade. Garantia de 7 dias.',
+      'Site profissional pronto em até 24h. R$ 300 único, domínio incluso, sem mensalidade. Garantia de 7 dias.',
     type: 'website',
     locale: 'pt_BR',
     siteName: 'SitePronto',
+    url: SITE_URL,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SitePronto — Crie seu site hoje. Sem mensalidade.',
+    title: 'SitePronto — Site profissional hoje. Sem mensalidade.',
     description: 'Site profissional pronto em até 24h. R$ 300 único, sem mensalidade.',
   },
 };
@@ -43,6 +61,67 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body className="min-h-screen bg-surface text-on-surface antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'SitePronto',
+                url: SITE_URL,
+                description: 'Site profissional pronto em até 24h — R$ 300 único, sem mensalidade.',
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  contactType: 'customer support',
+                  availableLanguage: 'Portuguese',
+                },
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Product',
+                name: 'Site Profissional SitePronto',
+                description: 'Site profissional pronto em até 24h com domínio .com.br incluso.',
+                brand: { '@type': 'Brand', name: 'SitePronto' },
+                offers: {
+                  '@type': 'Offer',
+                  price: '300.00',
+                  priceCurrency: 'BRL',
+                  availability: 'https://schema.org/InStock',
+                  url: `${SITE_URL}/quiz`,
+                  priceValidUntil: '2026-12-31',
+                  seller: { '@type': 'Organization', name: 'SitePronto' },
+                },
+                aggregateRating: {
+                  '@type': 'AggregateRating',
+                  ratingValue: '5',
+                  reviewCount: '300',
+                },
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                mainEntity: [
+                  {
+                    '@type': 'Question',
+                    name: 'Quanto custa um site no SitePronto?',
+                    acceptedAnswer: { '@type': 'Answer', text: 'R$ 300 à vista (único, sem mensalidade) ou 3× R$ 125 no cartão. Domínio .com.br incluso.' },
+                  },
+                  {
+                    '@type': 'Question',
+                    name: 'Em quanto tempo meu site fica no ar?',
+                    acceptedAnswer: { '@type': 'Answer', text: 'Em até 24h após a confirmação do pagamento. Em horário comercial, costumamos publicar em poucas horas.' },
+                  },
+                  {
+                    '@type': 'Question',
+                    name: 'Preciso de hospedagem separada?',
+                    acceptedAnswer: { '@type': 'Answer', text: 'Não. A hospedagem está inclusa no valor único de R$ 300.' },
+                  },
+                ],
+              },
+            ]),
+          }}
+        />
         <QuizProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </QuizProvider>

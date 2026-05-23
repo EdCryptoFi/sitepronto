@@ -91,13 +91,24 @@ export default function Home() {
                 publicado em até 24h.
               </p>
 
-              <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                <a href="/quiz" className="btn-primary text-base">
-                  Criar meu site agora <ArrowRight size={18} />
-                </a>
-                <div className="flex items-center gap-2 text-label-md text-on-surface-variant">
-                  <ShieldCheck size={16} className="text-primary" />
-                  Garantia de 7 dias ou dinheiro de volta
+              <div className="mt-10 flex flex-col items-start gap-3">
+                <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                  <a href="/quiz" className="btn-primary text-base">
+                    Criar meu site agora <ArrowRight size={18} />
+                  </a>
+                  <a href="#precos" className="text-label-md font-semibold text-on-surface hover:text-primary transition-colors">
+                    Ver preços ↓
+                  </a>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-label-md text-on-surface-variant">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck size={15} className="text-primary" />
+                    Garantia de 7 dias
+                  </span>
+                  <span className="text-outline-variant">·</span>
+                  <span className="font-semibold text-on-surface">R$ 300 único</span>
+                  <span className="text-outline-variant">·</span>
+                  <span>Sem mensalidade</span>
                 </div>
               </div>
 
@@ -212,10 +223,12 @@ export default function Home() {
           <div className="grid gap-6 md:grid-cols-3">
             <ExampleCard
               label="Restaurante & Estética"
-              name="Pizzaria do Mario"
+              name="Pizzaria do Mário"
               tag="restaurante"
               color="#7f1d1d"
               desc="Cardápio com fotos, link do WhatsApp e horário de funcionamento."
+              domain="pizzariamario.com.br"
+              mini={<RestauranteMini />}
             />
             <ExampleCard
               label="Clínica & Saúde"
@@ -223,6 +236,8 @@ export default function Home() {
               tag="clínica"
               color="#0f766e"
               desc="Agendamento, serviços, especialidades e localização no mapa."
+              domain="clinicavida.com.br"
+              mini={<ClinicaMini />}
             />
             <ExampleCard
               label="Loja & Comércio"
@@ -230,6 +245,8 @@ export default function Home() {
               tag="loja"
               color="#004ac6"
               desc="Catálogo de produtos, preços, WhatsApp e política de entrega."
+              domain="modaexpress.com.br"
+              mini={<LojaMini />}
             />
           </div>
         </div>
@@ -426,39 +443,98 @@ function HeroMockup() {
         aria-hidden
       />
       <div
-        className="relative rounded-3xl p-5 shadow-architectural-lg"
+        className="relative overflow-hidden rounded-3xl shadow-architectural-lg"
         style={{ backgroundColor: 'var(--surface-container-lowest)' }}
       >
-        <div className="flex items-center gap-1.5 pb-4">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--outline-variant)' }} />
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--outline-variant)' }} />
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--outline-variant)' }} />
-          <span className="ml-3 flex items-center gap-1 text-label-sm text-on-surface-variant">
-            <Lock size={10} className="text-primary" /> seudominio.com.br
-          </span>
+        {/* Browser chrome */}
+        <div
+          className="flex items-center gap-1.5 px-4 py-3"
+          style={{ backgroundColor: 'var(--surface-container)' }}
+        >
+          <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+          <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
+          <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
+          <div
+            className="ml-2 flex flex-1 items-center gap-1.5 rounded-full px-3 py-1 text-[11px] text-on-surface-variant"
+            style={{ backgroundColor: 'var(--surface-container-lowest)' }}
+          >
+            <Lock size={9} className="text-green-500" />
+            clinicavida.com.br
+          </div>
         </div>
 
-        <div className="rounded-2xl p-6" style={{ backgroundColor: 'var(--surface-container-low)' }}>
-          <div className="text-label-sm uppercase tracking-wide text-primary">Clínica Vida</div>
-          <div className="mt-2 text-title-lg font-bold tracking-tight">
-            Consultas online em 3 cliques.
-          </div>
-          <div className="mt-1 text-label-md text-on-surface-variant">
-            Agendamento direto pelo WhatsApp.
-          </div>
-          <button className="btn-primary mt-5 w-full !py-3 text-sm">Agendar consulta</button>
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {['Sobre', 'Serviços', 'Contato'].map((t) => (
-            <div
-              key={t}
-              className="rounded-xl p-3 text-center text-label-sm"
-              style={{ backgroundColor: 'var(--surface-container)' }}
-            >
-              {t}
+        {/* Scaled mini-site preview */}
+        <div style={{ position: 'relative', overflow: 'hidden', height: 290 }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: 820,
+              height: 580,
+              transform: 'scale(0.5)',
+              transformOrigin: 'top left',
+              fontFamily: "Inter, 'Helvetica Neue', Arial, sans-serif",
+              background: '#fff',
+            }}
+          >
+            {/* Nav */}
+            <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '16px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 18 }}>+</div>
+                <span style={{ color: '#0f766e', fontWeight: 800, fontSize: 18 }}>Clínica Vida</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+                {['Serviços', 'Equipe', 'Convênios'].map(l => (
+                  <span key={l} style={{ color: '#555', fontSize: 14, fontWeight: 500 }}>{l}</span>
+                ))}
+                <div style={{ background: '#0f766e', color: '#fff', fontSize: 14, fontWeight: 700, padding: '10px 22px', borderRadius: 9 }}>Agendar</div>
+              </div>
             </div>
-          ))}
+            {/* Hero */}
+            <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', padding: '48px 28px', display: 'flex', alignItems: 'center', gap: 40 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: '#0f766e', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14 }}>Saúde & Bem-estar</div>
+                <div style={{ fontSize: 36, fontWeight: 900, lineHeight: 1.1, color: '#111', marginBottom: 12 }}>Sua saúde em<br/>boas mãos</div>
+                <div style={{ color: '#555', fontSize: 15, marginBottom: 24, lineHeight: 1.6 }}>Consultas, exames e tratamentos<br/>com especialistas experientes.</div>
+                <div style={{ background: '#0f766e', color: '#fff', fontWeight: 700, fontSize: 15, padding: '14px 32px', borderRadius: 10, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  📅 Agendar consulta
+                </div>
+              </div>
+              <div style={{ width: 240, height: 180, borderRadius: 20, background: '#0f766e1a', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72 }}>
+                🏥
+              </div>
+            </div>
+            {/* Services */}
+            <div style={{ background: '#fff', padding: '28px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                {[
+                  { emoji: '🩺', name: 'Consultas', desc: 'Clínico geral e especialistas' },
+                  { emoji: '🔬', name: 'Exames', desc: 'Lab e imagem no mesmo dia' },
+                  { emoji: '💊', name: 'Prescrições', desc: 'Receitas digitais' },
+                ].map(s => (
+                  <div key={s.name} style={{ background: '#f0fdf4', borderRadius: 14, padding: 20 }}>
+                    <div style={{ fontSize: 28 }}>{s.emoji}</div>
+                    <div style={{ fontWeight: 700, fontSize: 15, marginTop: 10, color: '#111' }}>{s.name}</div>
+                    <div style={{ fontSize: 12, color: '#666', marginTop: 5 }}>{s.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Published status bar */}
+        <div
+          className="flex items-center gap-3 border-t px-4 py-3"
+          style={{ borderColor: 'var(--outline-variant)' }}
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+          </span>
+          <span className="text-label-sm text-on-surface-variant">Site publicado com sucesso</span>
+          <span className="ml-auto rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">Online</span>
         </div>
       </div>
 
@@ -473,6 +549,240 @@ function HeroMockup() {
         <button className="btn-accent !px-4 !py-2 text-xs">Publicar</button>
       </div>
     </div>
+  );
+}
+
+/* ================================================================
+   MINI SITE COMPONENTS — mockups realistas para ExampleCard
+   ================================================================ */
+
+const MINI_FONT = "Inter, 'Helvetica Neue', Arial, sans-serif";
+
+function MiniSiteWrapper({
+  children,
+  domain,
+  height = 192,
+}: {
+  children: React.ReactNode;
+  domain: string;
+  height?: number;
+}) {
+  // Render at 900px native, scale 0.4 → displayed ~360px wide
+  const NATIVE_W = 900;
+  const scale = 0.4;
+  const NATIVE_H = Math.round(height / scale);
+  return (
+    <div style={{ position: 'relative', width: '100%', height, overflow: 'hidden' }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: NATIVE_W,
+          height: NATIVE_H,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          fontFamily: MINI_FONT,
+          background: '#fff',
+          overflowX: 'hidden',
+        }}
+      >
+        {/* Browser chrome */}
+        <div
+          style={{
+            background: '#f0f0f0',
+            borderBottom: '1px solid #ddd',
+            padding: '13px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span style={{ width: 13, height: 13, borderRadius: '50%', background: '#ff5f57', display: 'inline-block', flexShrink: 0 }} />
+          <span style={{ width: 13, height: 13, borderRadius: '50%', background: '#febc2e', display: 'inline-block', flexShrink: 0 }} />
+          <span style={{ width: 13, height: 13, borderRadius: '50%', background: '#28c840', display: 'inline-block', flexShrink: 0 }} />
+          <div
+            style={{
+              flex: 1,
+              background: '#fff',
+              borderRadius: 10,
+              padding: '5px 14px',
+              marginLeft: 10,
+              fontSize: 13,
+              color: '#888',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <span style={{ color: '#22c55e', fontSize: 11 }}>🔒</span>
+            {domain}
+          </div>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function RestauranteMini() {
+  const primary = '#7f1d1d';
+  return (
+    <>
+      {/* Nav */}
+      <div style={{ background: primary, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ color: '#fff', fontWeight: 800, fontSize: 20 }}>🍕 Pizzaria do Mário</span>
+        <div style={{ display: 'flex', gap: 28 }}>
+          {['Cardápio', 'Localização', 'WhatsApp'].map(l => (
+            <span key={l} style={{ color: 'rgba(255,255,255,0.82)', fontSize: 14, fontWeight: 500 }}>{l}</span>
+          ))}
+        </div>
+      </div>
+      {/* Hero */}
+      <div style={{ background: `linear-gradient(135deg, ${primary} 0%, #991b1b 100%)`, padding: '36px 28px', display: 'flex', alignItems: 'center', gap: 32 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ background: 'rgba(255,255,255,0.18)', display: 'inline-block', borderRadius: 6, padding: '5px 14px', fontSize: 13, color: '#fca5a5', fontWeight: 600, marginBottom: 14 }}>
+            ⭐ Aberto agora — delivery 40 min
+          </div>
+          <div style={{ color: '#fff', fontSize: 32, fontWeight: 900, lineHeight: 1.1, marginBottom: 10 }}>
+            As melhores<br/>pizzas da cidade
+          </div>
+          <div style={{ color: 'rgba(255,255,255,0.72)', fontSize: 15, marginBottom: 22 }}>
+            Delivery em até 40 min • São Paulo, SP
+          </div>
+          <div style={{ background: '#fff', color: primary, fontWeight: 700, fontSize: 15, padding: '13px 28px', borderRadius: 10, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            📱 Peça pelo WhatsApp
+          </div>
+        </div>
+        <div style={{ width: 200, height: 160, borderRadius: 18, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72, flexShrink: 0 }}>
+          🍕
+        </div>
+      </div>
+      {/* Menu preview */}
+      <div style={{ background: '#fff', padding: '22px 24px' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Cardápio</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          {[
+            { emoji: '🍕', name: 'Calabresa', price: 'R$ 45' },
+            { emoji: '🧀', name: 'Margherita', price: 'R$ 42' },
+            { emoji: '🍗', name: 'Frango c/ catupiry', price: 'R$ 48' },
+          ].map(item => (
+            <div key={item.name} style={{ border: `1px solid ${primary}22`, borderRadius: 14, padding: 18, textAlign: 'center' }}>
+              <div style={{ fontSize: 32 }}>{item.emoji}</div>
+              <div style={{ fontWeight: 700, fontSize: 14, marginTop: 10 }}>{item.name}</div>
+              <div style={{ color: primary, fontWeight: 700, fontSize: 15, marginTop: 5 }}>{item.price}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ClinicaMini() {
+  const primary = '#0f766e';
+  return (
+    <>
+      {/* Nav */}
+      <div style={{ background: '#fff', borderBottom: `2px solid ${primary}20`, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 20 }}>+</div>
+          <span style={{ color: primary, fontWeight: 800, fontSize: 18 }}>Clínica Vida</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          {['Serviços', 'Equipe', 'Convênios'].map(l => (
+            <span key={l} style={{ color: '#555', fontSize: 14, fontWeight: 500 }}>{l}</span>
+          ))}
+          <div style={{ background: primary, color: '#fff', fontSize: 14, fontWeight: 700, padding: '10px 22px', borderRadius: 9 }}>Agendar</div>
+        </div>
+      </div>
+      {/* Hero */}
+      <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', padding: '44px 28px', display: 'flex', alignItems: 'center', gap: 40 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ color: primary, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14 }}>Saúde & Bem-estar</div>
+          <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.1, color: '#111', marginBottom: 12 }}>Sua saúde em<br/>boas mãos</div>
+          <div style={{ color: '#555', fontSize: 15, marginBottom: 24, lineHeight: 1.6 }}>Consultas, exames e tratamentos<br/>com especialistas experientes.</div>
+          <div style={{ background: primary, color: '#fff', fontWeight: 700, fontSize: 15, padding: '13px 32px', borderRadius: 10, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            📅 Agendar consulta
+          </div>
+        </div>
+        <div style={{ width: 220, height: 160, borderRadius: 20, background: `${primary}18`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72 }}>
+          🏥
+        </div>
+      </div>
+      {/* Services */}
+      <div style={{ background: '#fff', padding: '20px 24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          {[
+            { emoji: '🩺', name: 'Consultas', desc: 'Clínico geral e especialistas' },
+            { emoji: '🔬', name: 'Exames', desc: 'Lab e imagem no mesmo dia' },
+            { emoji: '💊', name: 'Prescrições', desc: 'Receitas digitais' },
+          ].map(s => (
+            <div key={s.name} style={{ background: `${primary}0d`, borderRadius: 14, padding: 18 }}>
+              <div style={{ fontSize: 28 }}>{s.emoji}</div>
+              <div style={{ fontWeight: 700, fontSize: 14, marginTop: 10, color: '#111' }}>{s.name}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 5 }}>{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function LojaMini() {
+  const primary = '#004ac6';
+  return (
+    <>
+      {/* Nav */}
+      <div style={{ background: primary, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ color: '#fff', fontWeight: 900, fontSize: 20, letterSpacing: '-0.02em' }}>Moda Express</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+          {['Roupas', 'Calçados', 'Promoções'].map(l => (
+            <span key={l} style={{ color: 'rgba(255,255,255,0.82)', fontSize: 14 }}>{l}</span>
+          ))}
+          <span style={{ color: '#fff', fontSize: 20 }}>🛒</span>
+        </div>
+      </div>
+      {/* Hero banner */}
+      <div style={{ background: `linear-gradient(135deg, ${primary} 0%, #1d4ed8 100%)`, padding: '32px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ background: '#fbbf24', color: '#000', fontSize: 12, fontWeight: 800, padding: '5px 14px', borderRadius: 20, display: 'inline-block', marginBottom: 14 }}>
+            🏷️ ATÉ 50% OFF
+          </div>
+          <div style={{ color: '#fff', fontSize: 30, fontWeight: 900, lineHeight: 1.1, marginBottom: 10 }}>
+            Moda para<br/>todos os estilos
+          </div>
+          <div style={{ color: 'rgba(255,255,255,0.72)', fontSize: 14, marginBottom: 20 }}>Frete grátis acima de R$ 150</div>
+          <div style={{ background: '#fff', color: primary, fontWeight: 700, fontSize: 14, padding: '11px 26px', borderRadius: 9, display: 'inline-block' }}>
+            Ver coleção →
+          </div>
+        </div>
+        <div style={{ fontSize: 88, opacity: 0.9, lineHeight: 1 }}>👗</div>
+      </div>
+      {/* Product grid */}
+      <div style={{ background: '#f8fafc', padding: '20px 24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+          {[
+            { emoji: '👗', name: 'Vestido', price: 'R$ 89', badge: '-30%' },
+            { emoji: '👖', name: 'Calça Jeans', price: 'R$ 75', badge: null },
+            { emoji: '👟', name: 'Tênis Sport', price: 'R$ 159', badge: '-20%' },
+            { emoji: '👜', name: 'Bolsa', price: 'R$ 119', badge: null },
+          ].map(p => (
+            <div key={p.name} style={{ background: '#fff', borderRadius: 12, padding: 14, position: 'relative', boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
+              {p.badge && (
+                <div style={{ position: 'absolute', top: 8, right: 8, background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 4 }}>
+                  {p.badge}
+                </div>
+              )}
+              <div style={{ fontSize: 30, textAlign: 'center' }}>{p.emoji}</div>
+              <div style={{ fontWeight: 600, fontSize: 12, marginTop: 8, color: '#333' }}>{p.name}</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: primary, marginTop: 3 }}>{p.price}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -569,46 +879,42 @@ function TestimonialCard({
 }
 
 function ExampleCard({
-  label, name, tag, color, desc,
-}: { label: string; name: string; tag: string; color: string; desc: string }) {
+  label, name, tag, color, desc, domain, mini,
+}: {
+  label: string;
+  name: string;
+  tag: string;
+  color: string;
+  desc: string;
+  domain: string;
+  mini: React.ReactNode;
+}) {
   return (
-    <article className="card group overflow-hidden">
-      {/* Mini site mockup */}
-      <div
-        className="mb-4 flex h-32 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: `${color}18` }}
-      >
-        <div className="text-center">
-          <div
-            className="mx-auto mb-1 h-6 w-24 rounded-md"
-            style={{ backgroundColor: `${color}44` }}
-          />
-          <div
-            className="mx-auto h-3 w-16 rounded-md"
-            style={{ backgroundColor: `${color}33` }}
-          />
-          <div
-            className="mx-auto mt-3 h-8 w-24 rounded-xl"
-            style={{ backgroundColor: color, opacity: 0.9 }}
-          />
-        </div>
-      </div>
+    <article className="card group overflow-hidden" style={{ padding: 0 }}>
+      {/* Real browser mockup — edge-to-edge */}
+      <MiniSiteWrapper domain={domain} height={192}>
+        {mini}
+      </MiniSiteWrapper>
 
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-label-sm text-on-surface-variant">{label}</p>
-          <p className="mt-0.5 text-title-md font-bold">{name}</p>
-          <p className="mt-1 text-body-sm text-on-surface-variant">{desc}</p>
-        </div>
-      </div>
+      <div className="p-6">
+        <p className="text-label-sm text-on-surface-variant">{label}</p>
+        <p className="mt-0.5 text-title-md font-bold">{name}</p>
+        <p className="mt-1 text-body-sm text-on-surface-variant">{desc}</p>
 
-      <div className="mt-4 flex items-center gap-2">
-        <span
-          className="rounded-full px-2.5 py-0.5 text-label-sm font-semibold"
-          style={{ backgroundColor: `${color}18`, color }}
-        >
-          {tag}
-        </span>
+        <div className="mt-4 flex items-center gap-2">
+          <span
+            className="rounded-full px-2.5 py-0.5 text-label-sm font-semibold"
+            style={{ backgroundColor: `${color}18`, color }}
+          >
+            {tag}
+          </span>
+          <a
+            href="/quiz"
+            className="ml-auto text-label-sm font-semibold text-primary hover:underline"
+          >
+            Criar site assim →
+          </a>
+        </div>
       </div>
     </article>
   );
