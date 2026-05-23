@@ -92,10 +92,12 @@ export async function POST(req: NextRequest) {
   const businessHours = truncate(b.businessHours, 500);
   const domain = truncate(b.domain, 100);
   const logoName = truncate(b.logoName, 200);
+  const logoPreview = truncate(b.logoPreview, 600000); // base64 — max ~450 KB
   const whatsappNumber = truncate(b.whatsappNumber, 20);
 
-  // Auto-suggest better template based on detected industry
+  // Detect industry from business name + description (primary source of truth for segment)
   const industry = detectIndustry(businessName, description);
+  // Override template only if user didn't pick one explicitly (or picked the default)
   if (!template || template === 'portfolio') {
     template = industry.template;
   }
@@ -111,7 +113,7 @@ export async function POST(req: NextRequest) {
     paletteColors: PALETTE_COLORS[palette],
   });
 
-  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy });
+  const contentNotes = JSON.stringify({ businessName, description, ai: aiCopy, logoPreview });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -120,10 +122,15 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createClient(url, key);
+  // Segment: prefer industry detected from name/description; fall back to objective mapping
+  const detectedSegment = industry.id !== 'generico'
+    ? industry.id
+    : (OBJECTIVE_TO_SEGMENT[objective] ?? 'outro');
+
   const { data, error } = await supabase
     .from('briefings')
     .insert({
-      segment: OBJECTIVE_TO_SEGMENT[objective],
+      segment: detectedSegment,
       goal: OBJECTIVE_TO_GOAL[objective],
       palette,
       template,

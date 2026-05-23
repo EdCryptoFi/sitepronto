@@ -1,5 +1,6 @@
 import { detectIndustry } from '@/lib/industry';
 import { TONE_GUIDELINES, FEW_SHOT_EXAMPLES, COPY_FRAMEWORKS } from '@/lib/copy-framework';
+import { detectIndustrySemantic, buildPromptContext } from '@/lib/context-engine';
 
 export type AICopy = {
   hero_subheadline: string;
@@ -52,7 +53,9 @@ export async function generateAICopy(input: {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
 
-  const industry = detectIndustry(input.businessName, input.description);
+  // Use context engine for semantic detection + richer context
+  const detection = await detectIndustrySemantic(input.businessName, input.description);
+  const industry = detection.industry;
   const objLabel = OBJECTIVE_LABELS[input.objective] ?? input.objective;
   const modulesLabel = input.modules.map(m => MODULE_LABELS[m] ?? m).join(', ') || 'padrão';
   const templateDesc = TEMPLATE_DESCRIPTIONS[input.template] ?? 'layout profissional responsivo';
@@ -60,9 +63,7 @@ export async function generateAICopy(input: {
   const hasDescription = (input.description ?? '').trim().length > 5;
   const hasName = (input.businessName ?? '').trim().length > 1;
 
-  const industryRefs = industry.fallbackServices.map(s =>
-    `- ${s.icon} ${s.name}: ${s.description}`
-  ).join('\n');
+  const contextEngineHint = buildPromptContext(industry);
 
   let contextHint: string;
   let extractionInstructions: string;
@@ -70,14 +71,9 @@ export async function generateAICopy(input: {
   if (hasDescription) {
     contextHint = `O cliente forneceu a seguinte descrição do negócio: "${input.description}"
 
-📌 REFERÊNCIAS DO SEGMENTO (${industry.label}):
-Use como contexto para enriquecer a descrição do cliente, NÃO para substituí-la.
-${industryRefs}
+${contextEngineHint}
 
-🔹 Headline de referência: "${industry.fallbackHeadline}"
-🔹 CTA típico do segmento: "${industry.fallbackCTA}" — "${industry.fallbackCTASub}"
-🔹 Slogan de referência: "${industry.fallbackTagline}"
-🔹 Cena típica para imagem principal: ${industry.imagePrompt}`;
+⚠️ A descrição do cliente tem PRIORIDADE sobre as referências. Use-as para ENRIQUECER, não substituir.`;
     extractionInstructions = `A descrição do cliente é sua fonte PRINCIPAL e OBRIGATÓRIA para os services.
 REGRAS:
 - Extraia os 3 services EXATAMENTE da descrição do cliente (ex: "escapamento, pneus, alinhamento")
@@ -87,15 +83,8 @@ REGRAS:
 - NUNCA use: "Consultoria Estratégica", "Análise e Resultados", "Execução e Entrega"`;
   } else if (hasName) {
     contextHint = `O cliente informou apenas o nome "${input.businessName}".
-O segmento detectado é ${industry.label}.
 
-📌 REFERÊNCIAS DO SEGMENTO (use como fonte principal):
-${industryRefs}
-
-🔹 Headline de referência: "${industry.fallbackHeadline}"
-🔹 CTA típico: "${industry.fallbackCTA}" — "${industry.fallbackCTASub}"
-🔹 Slogan de referência: "${industry.fallbackTagline}"
-🔹 Cena típica para imagem principal: ${industry.imagePrompt}`;
+${contextEngineHint}`;
     extractionInstructions = `Use as referências do segmento para gerar services REALISTAS e ESPECÍFICOS para ${industry.label}.
 - Adapte os nomes e descrições para o negócio específico "${input.businessName}"
 - NUNCA use serviços genéricos como "Consultoria Estratégica" ou "Análise de Resultados"
@@ -106,33 +95,6 @@ ${industryRefs}
 Evite termos vagos. Prefira serviços concretos e específicos.`;
   }
 
-  let industryImageHints = '';
-  if (industry && industry.id !== 'generico') {
-    industryImageHints = `\n📸 SUGESTÕES DE IMAGEM PARA GALERIA:
-${industry.galleryPrompts.map((g, i) => `${i + 1}. ${g}`).join('\n')}
-
-🔑 SEO keywords de referência: ${industry.label}, ${industry.label.toLowerCase()}, ${industry.fallbackServices.map(s => s.name.toLowerCase()).join(', ')}`;
-  }
-
-  const paletteHint = input.palette && input.paletteColors
-    ? `Paleta: primária ${input.paletteColors.primary}, destaque ${input.paletteColors.accent}.`
-    : '';
-
-  // ── COPY FRAMEWORK & TONE ──────────────────────────────────────────────
-  const tone = TONE_GUIDELINES[industry.id];
-  const framework = COPY_FRAMEWORKS[0]; // AIDA — best default for small biz
-  const toneSection = tone ? `
-🎯 TOM DE VOZ:
-• ${tone.voice}
-• Vocabulário: ${tone.vocabulary.join(', ')}
-• Evite: ${tone.avoid.join(', ')}
-• CTA style: ${tone.ctaStyle}
-• Exemplo de prova social: ${tone.socialProof}
-• Framework de copy: ${framework.promptInstruction}
-` : '';
-
-  const fewShot = FEW_SHOT_EXAMPLES[input.template] ?? FEW_SHOT_EXAMPLES.portfolio;
-
   // ── SEO GUIDELINES ─────────────────────────────────────────────────────
   const seoGuide = `
 📈 DIRETRIZES DE SEO:
@@ -142,6 +104,8 @@ ${industry.galleryPrompts.map((g, i) => `${i + 1}. ${g}`).join('\n')}
 • seo_keywords: 5-8 termos que clientes reais pesquisariam no Google
 • image_prompts: descreva cenas REALISTAS que seriam fotografadas no negócio`;
 
+  const fewShot = FEW_SHOT_EXAMPLES[input.template] ?? FEW_SHOT_EXAMPLES.portfolio;
+
   // ── FULL PROMPT ────────────────────────────────────────────────────────
   const prompt = `Você é copywriter especialista em sites para pequenas empresas brasileiras.
 Você domina copywriting persuasivo e escreve como um profissional de agência premium.
@@ -150,10 +114,7 @@ Você domina copywriting persuasivo e escreve como um profissional de agência p
 **Tipo:** ${objLabel}
 **Template:** ${input.template} — ${templateDesc}
 **Seções:** ${modulesLabel}
-${paletteHint}
 ${contextHint}
-${industryImageHints}
-${toneSection}
 ${seoGuide}
 
 ${extractionInstructions}
@@ -237,8 +198,14 @@ Responda APENAS com este JSON (sem markdown):
   }
 }
 
-export function parseAICopyFromNotes(contentNotes: string | null): { businessName: string; description: string; ai: AICopy | null } {
-  if (!contentNotes) return { businessName: '', description: '', ai: null };
+export function parseAICopyFromNotes(contentNotes: string | null): {
+  businessName: string;
+  description: string;
+  ai: AICopy | null;
+  logoPreview: string;
+} {
+  const empty = { businessName: '', description: '', ai: null, logoPreview: '' };
+  if (!contentNotes) return empty;
   try {
     const parsed = JSON.parse(contentNotes);
     if (parsed && typeof parsed === 'object' && 'description' in parsed) {
@@ -246,10 +213,11 @@ export function parseAICopyFromNotes(contentNotes: string | null): { businessNam
         businessName: String(parsed.businessName ?? ''),
         description: String(parsed.description ?? ''),
         ai: parsed.ai ?? null,
+        logoPreview: String(parsed.logoPreview ?? ''),
       };
     }
   } catch {
     // not JSON — treat as plain description (legacy)
   }
-  return { businessName: '', description: contentNotes, ai: null };
+  return { ...empty, description: contentNotes };
 }

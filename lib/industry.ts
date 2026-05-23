@@ -244,3 +244,37 @@ export function getIndustryKeywords(id: string): string[] {
   const industry = getIndustryById(id);
   return industry?.keywords ?? [];
 }
+
+export function validateAIContent(ai: { services: { name: string; description: string }[] }, industry: IndustryInfo): boolean {
+  if (!ai?.services || ai.services.length === 0) return false;
+
+  const industryKeywordsLower = industry.keywords.map(k => k.toLowerCase());
+
+  const allServiceText = ai.services.map(s =>
+    `${s.name} ${s.description}`.toLowerCase()
+  ).join(' ');
+
+  const matchCount = industryKeywordsLower.filter(kw =>
+    allServiceText.includes(kw) || industry.fallbackServices.some(fs =>
+      fs.name.toLowerCase().includes(kw)
+    )
+  ).length;
+
+  // At least 2 keyword matches from the industry
+  const threshold = 2;
+  const matches = matchCount >= threshold;
+
+  if (!matches) return false;
+
+  // Also check that services are NOT from a clearly different industry
+  const otherIndustries = INDUSTRIES.filter(i => i.id !== industry.id && i.id !== 'generico');
+  let otherMatchCount = 0;
+  for (const other of otherIndustries) {
+    const otherKeywords = other.keywords.map(k => k.toLowerCase());
+    const hits = otherKeywords.filter(kw => allServiceText.includes(kw)).length;
+    if (hits > otherMatchCount) otherMatchCount = hits;
+  }
+
+  // If another industry has MORE keyword matches than ours, reject
+  return matchCount > otherMatchCount;
+}

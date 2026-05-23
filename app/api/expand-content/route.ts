@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { detectIndustry } from '@/lib/industry';
-import { TONE_GUIDELINES } from '@/lib/copy-framework';
+import { detectIndustrySemantic, buildPromptContext } from '@/lib/context-engine';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,18 +13,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'IA não disponível' }, { status: 503 });
     }
 
-    const industry = detectIndustry(businessName || '', text);
-    const tone = TONE_GUIDELINES[industry.id];
-    const toneGuide = tone ? `Tom: ${tone.voice}\nVocabulário: ${tone.vocabulary.join(', ')}` : '';
+    const detection = await detectIndustrySemantic(businessName || '', text);
+    const contextPack = buildPromptContext(detection.industry);
 
     const prompt = `Você é copywriter especialista em pequenas empresas brasileiras.
 
+Contexto do segmento:
+${contextPack}
+
 Um cliente descreveu um serviço/produto assim: "${text}"
 
-${toneGuide}
-
 Expanda este texto em 2-3 frases persuasivas para um site.
-Mantenha o tom do segmento. Seja específico, não genérico.
+Mantenha o tom e vocabulário do segmento. Seja específico, não genérico.
 Use benefícios concretos. Adicione um diferencial competitivo.
 Responda APENAS com o texto expandido, sem aspas ou markdown.`;
 

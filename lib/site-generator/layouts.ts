@@ -14,15 +14,19 @@ export function renderNav(
   v: StyleVariationId,
   name: string,
   links: { label: string; href: string }[],
-  pal: Palette
+  pal: Palette,
+  logoPreview?: string
 ): string {
+  const logoInner = logoPreview
+    ? `<img src="${logoPreview}" alt="${name}" style="height:36px;max-width:160px;object-fit:contain;display:block">`
+    : name;
   const linkHTML = links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('');
 
   if (v === 'classic') {
     return `
 <nav style="background:var(--surface);border-bottom:2px solid ${pal.primary}22">
   <div class="container" style="display:flex;flex-direction:column;align-items:center;padding:16px 24px;gap:12px">
-    <span class="logo" style="font-size:1.4rem;font-weight:800;color:var(--accent)">${name}</span>
+    <span class="logo" style="font-size:1.4rem;font-weight:800;color:var(--accent)">${logoInner}</span>
     <ul style="display:flex;gap:24px;list-style:none;padding:0;margin:0;font-size:.85rem;font-weight:500">
       ${linkHTML}
     </ul>
@@ -34,7 +38,7 @@ export function renderNav(
     return `
 <nav style="position:sticky;top:0;z-index:100;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)">
   <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px">
-    <span class="logo" style="font-size:1.2rem;font-weight:900;color:var(--accent);letter-spacing:-.02em">${name}</span>
+    <span class="logo" style="font-size:1.2rem;font-weight:900;color:var(--accent);letter-spacing:-.02em">${logoInner}</span>
     <button style="background:${pal.primary};color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer" onclick="document.querySelector('#contato')?.scrollIntoView({behavior:'smooth'})">
       Fale Conosco
     </button>
@@ -46,7 +50,7 @@ export function renderNav(
   return `
 <nav style="position:sticky;top:0;z-index:100;background:var(--surface);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.06)">
   <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:64px">
-    <span class="logo" style="font-size:1.3rem;font-weight:800;color:var(--accent)">${name}</span>
+    <span class="logo" style="font-size:1.3rem;font-weight:800;color:var(--accent)">${logoInner}</span>
     <ul class="nav-links" style="display:flex;gap:28px;list-style:none;margin:0;padding:0">
       ${linkHTML}
     </ul>
@@ -64,13 +68,14 @@ type HeroInput = {
   ctas: { label: string; href: string; primary?: boolean }[];
   stats?: { num: string; label: string }[];
   pal: Palette;
+  industry?: string;
   imagePrompt?: string;
   image?: string;
 };
 
 export function renderHero(input: HeroInput): string {
-  const { v, name, subheadline, badge, ctas, stats, pal } = input;
-  const img = input.image || dataUrl(generateHeroSVG(pal, name));
+  const { v, name, subheadline, badge, ctas, stats, pal, industry } = input;
+  const img = input.image || dataUrl(generateHeroSVG(pal, name, industry ?? 'generico'));
 
   const ctasHTML = ctas.map(c =>
     c.primary

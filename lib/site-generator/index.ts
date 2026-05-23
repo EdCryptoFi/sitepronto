@@ -1,6 +1,6 @@
 import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
 import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
-import { detectIndustry } from '@/lib/industry';
+import { detectIndustry, validateAIContent, getIndustryById, type IndustryInfo } from '@/lib/industry';
 import { generateJSONLD, generateOGTags } from '@/lib/copy-framework';
 import { renderNav, renderHero, renderServices } from '@/lib/site-generator/layouts';
 
@@ -65,8 +65,8 @@ function waFloat(waLink: string): string {
 
 // ─── SHARED SECTION HELPERS ──────────────────────────────────────────────────
 
-function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette, dark = false): string {
-  const prodImg = dataUrl(generateProductSVG(pal));
+function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette, dark = false, industryId = 'generico'): string {
+  const prodImg = dataUrl(generateProductSVG(pal, industryId));
   const items = (products && products.length > 0)
     ? products.map((p, i) => {
         const img = p.imagePreview
@@ -128,7 +128,7 @@ function hoursSection(hours: string | null, waLink: string, pal: Palette): strin
 </section>`;
 }
 
-function gallerySection(pal: Palette, dark = false): string {
+function gallerySection(pal: Palette, dark = false, industryId = 'generico'): string {
   const tags = ['Projeto', 'Trabalho', 'Cliente', 'Case', 'Portfolio', 'Resultado'];
   const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
   return `
@@ -142,7 +142,7 @@ function gallerySection(pal: Palette, dark = false): string {
     <div class="gallery-grid">
       ${[0,1,2,3,4,5].map((i) => `
       <div class="gallery-card">
-        <img src="${dataUrl(generateGallerySVG(pal, i))}" alt="Trabalho ${i + 1}" style="width:100%;height:180px;object-fit:cover;display:block">
+        <img src="${dataUrl(generateGallerySVG(pal, i, industryId))}" alt="Trabalho ${i + 1}" style="width:100%;height:180px;object-fit:cover;display:block">
         <div class="gallery-body">
           <span class="gallery-tag" style="color:${pal.primary}">${tags[i]}</span>
           <p class="gallery-name">Trabalho ${i + 1}</p>
@@ -453,9 +453,10 @@ img{max-width:100%;display:block}
 `;
 
 // ─── RESTAURANT TEMPLATE ──────────────────────────────────────────────────────
-function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
+function generateRestaurant(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
   const mods = b.selected_modules ?? [];
-  const services = ai?.services ?? [
+  const industry = getIndustryById(industryId ?? 'generico');
+  const services = ai?.services ?? industry?.fallbackServices ?? [
     { icon: '🌟', name: 'Ingredientes Frescos', description: 'Selecionamos os melhores ingredientes para cada prato, garantindo sabor e qualidade.' },
     { icon: '🚀', name: 'Atendimento Rápido', description: 'Pedidos ágeis pelo WhatsApp, sem espera e com entrega no prazo combinado.' },
     { icon: '❤️', name: 'Receitas Exclusivas', description: 'Pratos únicos preparados com carinho e técnica artesanal para você.' },
@@ -554,9 +555,9 @@ ${renderNav(variation ?? 'modern', name, [
   ...(mods.includes('galeria') ? [{ label: 'Galeria', href: '#galeria' }] : []),
   ...(mods.includes('depoimentos') ? [{ label: 'Avaliações', href: '#depoimentos' }] : []),
   { label: 'Contato', href: '#contato' },
-], pal)}
+], pal, logoPreview)}
 
-${renderHero({
+  ${renderHero({
   v: variation ?? 'modern',
   name,
   subheadline: ai?.hero_subheadline ?? 'Sabor autêntico e qualidade que você vai amar. Venha nos visitar ou peça pelo WhatsApp.',
@@ -566,6 +567,7 @@ ${renderHero({
     ...(mods.includes('contato') ? [{ label: '📱 Pedir pelo WhatsApp', href: waLink }] : []),
   ],
   pal,
+  industry: industryId,
 })}
 
 <div class="tabs-bar">
@@ -577,9 +579,9 @@ ${renderHero({
 ${renderServices(variation ?? 'modern', services, pal, 'Qualidade em cada detalhe')}
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true, industryId) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? gallerySection(pal, true) : ''}
+${mods.includes('galeria') ? gallerySection(pal, true, industryId) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
@@ -607,9 +609,10 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── FARMACY / CLINIC TEMPLATE ────────────────────────────────────────────────
-function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
+function generateFarmacy(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
   const mods = b.selected_modules ?? [];
-  const services = ai?.services ?? [
+  const industry = getIndustryById(industryId ?? 'generico');
+  const services = ai?.services ?? industry?.fallbackServices ?? [
     { icon: '🩺', name: 'Equipe Especializada', description: 'Profissionais qualificados e atualizados com as melhores práticas do mercado.' },
     { icon: '📅', name: 'Agendamento Online', description: 'Marque sua consulta ou atendimento diretamente pelo WhatsApp, sem complicação.' },
     { icon: '💚', name: 'Atendimento Humano', description: 'Cada cliente é único. Atendimento personalizado com atenção e cuidado individual.' },
@@ -733,9 +736,9 @@ ${renderNav(variation ?? 'modern', name, [
   ...(mods.includes('galeria') ? [{ label: 'Galeria', href: '#galeria' }] : []),
   ...(mods.includes('depoimentos') ? [{ label: 'Depoimentos', href: '#depoimentos' }] : []),
   { label: 'Contato', href: '#contato' },
-], pal)}
+], pal, logoPreview)}
 
-${renderHero({
+  ${renderHero({
   v: variation ?? 'modern',
   name,
   subheadline: ai?.hero_subheadline ?? 'Cuidado especializado e atendimento humanizado. Sua saúde em boas mãos.',
@@ -750,6 +753,7 @@ ${renderHero({
     { num: '5★', label: 'Avaliação' },
   ],
   pal,
+  industry: industryId,
 })}
 
 <div class="trust-strip">
@@ -794,9 +798,9 @@ ${renderServices(variation ?? 'modern', services, pal, `Por que escolher a ${nam
 </section>
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? gallerySection(pal, false) : ''}
+${mods.includes('galeria') ? gallerySection(pal, false, industryId) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
@@ -824,9 +828,10 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── STORE TEMPLATE ───────────────────────────────────────────────────────────
-function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
+function generateStore(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
   const mods = b.selected_modules ?? [];
-  const services = ai?.services ?? [
+  const industry = getIndustryById(industryId ?? 'generico');
+  const services = ai?.services ?? industry?.fallbackServices ?? [
     { icon: '🚚', name: 'Entrega Rápida', description: 'Envio ágil para todo o Brasil com rastreamento em tempo real.' },
     { icon: '✅', name: 'Qualidade Garantida', description: 'Produtos selecionados com procedência e qualidade comprovada.' },
     { icon: '💬', name: 'Suporte Direto', description: 'Atendimento pelo WhatsApp para dúvidas e pedidos especiais.' },
@@ -931,7 +936,7 @@ ${renderNav(variation ?? 'modern', name, [
   ...(mods.includes('servicos') ? [{ label: 'Produtos', href: '#servicos' }] : []),
   ...(mods.includes('galeria') ? [{ label: 'Galeria', href: '#galeria' }] : []),
   { label: 'Contato', href: '#contato' },
-], pal)}
+], pal, logoPreview)}
 
 ${renderHero({
   v: variation ?? 'modern',
@@ -943,6 +948,7 @@ ${renderHero({
     ...(mods.includes('contato') ? [{ label: '📱 Pedir pelo WhatsApp', href: waLink }] : []),
   ],
   pal,
+  industry: industryId,
 })}
 
 <div class="filter-bar">
@@ -954,9 +960,9 @@ ${renderHero({
 ${renderServices(variation ?? 'modern', services, pal, 'Nossos diferenciais')}
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('galeria') ? gallerySection(pal, false) : ''}
+${mods.includes('galeria') ? gallerySection(pal, false, industryId) : ''}
 ${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
@@ -987,9 +993,10 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 }
 
 // ─── PORTFOLIO TEMPLATE ───────────────────────────────────────────────────────
-function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId): string {
+function generatePortfolio(b: SiteBriefing, pal: Palette, name: string, waLink: string, description: string, ai?: AICopy | null, variation?: StyleVariationId, industryId?: string, logoPreview?: string): string {
   const mods = b.selected_modules ?? [];
-  const services = ai?.services ?? [
+  const industry = getIndustryById(industryId ?? 'generico');
+  const services = ai?.services ?? industry?.fallbackServices ?? [
     { icon: '🎯', name: 'Consultoria Estratégica', description: 'Análise completa do seu negócio com recomendações práticas para crescimento.' },
     { icon: '📊', name: 'Análise e Resultados', description: 'Métricas e relatórios detalhados para decisões baseadas em dados reais.' },
     { icon: '🚀', name: 'Execução e Entrega', description: 'Implementação ágil com foco em resultado e prazo definido.' },
@@ -1115,7 +1122,7 @@ ${renderNav(variation ?? 'modern', name, [
   ...(mods.includes('galeria') ? [{ label: 'Portfólio', href: '#galeria' }] : []),
   ...(mods.includes('depoimentos') ? [{ label: 'Depoimentos', href: '#depoimentos' }] : []),
   { label: 'Contato', href: '#contato' },
-], pal)}
+], pal, logoPreview)}
 
 ${renderHero({
   v: variation ?? 'modern',
@@ -1133,6 +1140,7 @@ ${renderHero({
     { num: '100%', label: 'Entrega' },
   ],
   pal,
+  industry: industryId,
 })}
 
 ${renderServices(variation ?? 'modern', services, pal, 'Nossos Serviços')}
@@ -1225,35 +1233,45 @@ ${mods.includes('contato') ? waFloat(waLink) : ''}
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
 export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariationId): string {
   const pal = PALETTES[briefing.palette] ?? PALETTES['azul-editorial'];
-  const { businessName, description, ai } = parseAICopyFromNotes(briefing.content_notes);
+  const { businessName, description, ai, logoPreview } = parseAICopyFromNotes(briefing.content_notes);
 
-  // Detect industry and get fallback content
-  const industry = detectIndustry(businessName || '', description || '');
-  const industryFallback = ai ? null : industry.fallbackServices;
+  // Industry: briefing.segment (set from detectIndustry at save time) takes priority.
+  // Falls back to keyword detection from name+description as a safety net.
+  const segmentIndustry = getIndustryById(briefing.segment);
+  const keywordIndustry = detectIndustry(businessName || '', description || '');
+  const industry = (segmentIndustry && segmentIndustry.id !== 'generico')
+    ? segmentIndustry
+    : keywordIndustry;
 
-  // If AI failed, inject industry fallbacks into the AICopy
-  const effectiveAI: AICopy | null = ai ?? (industryFallback ? {
-    hero_subheadline: industry.fallbackHeadline,
-    cta_main: industry.fallbackCTA,
-    cta_sub: industry.fallbackCTASub,
-    services: industryFallback,
-    footer_tagline: industry.fallbackTagline,
-    image_prompts: {
-      hero: industry.imagePrompt,
-      gallery: industry.galleryPrompts,
-      catalog: industry.imagePrompt,
-    },
-    seo_keywords: [businessName || '', industry.label],
-  } : null);
+  // Validate AI content against the detected industry.
+  // If AI content is missing or mismatched, fall back to industry-specific copy.
+  // effectiveAI is NEVER null — templates always receive appropriate content.
+  const aiContentValid = ai != null && validateAIContent(ai, industry);
+  const effectiveAI: AICopy = aiContentValid
+    ? ai!
+    : {
+        hero_subheadline: industry.fallbackHeadline,
+        cta_main: industry.fallbackCTA,
+        cta_sub: industry.fallbackCTASub,
+        services: industry.fallbackServices,
+        footer_tagline: industry.fallbackTagline,
+        image_prompts: {
+          hero: industry.imagePrompt,
+          gallery: industry.galleryPrompts,
+          catalog: industry.imagePrompt,
+        },
+        seo_keywords: [businessName || '', industry.label],
+      };
 
   const name = businessName || formatBusinessName(briefing.domain, briefing.segment);
   const waLink = whatsappLink(briefing.whatsapp_number);
   const tpl = briefing.template || 'portfolio';
+  const industryId = industry.id;
 
-  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variation);
-  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variation);
-  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variation);
-  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variation);
+  if (tpl === 'restaurant') return generateRestaurant(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
+  if (tpl === 'farmacy')    return generateFarmacy(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
+  if (tpl === 'store')      return generateStore(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
+  return generatePortfolio(briefing, pal, name, waLink, description, effectiveAI, variation, industryId, logoPreview);
 }
 
 export function generateReadme(briefing: SiteBriefing): string {

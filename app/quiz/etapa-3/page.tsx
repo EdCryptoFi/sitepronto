@@ -52,6 +52,7 @@ export default function QuizEtapa3() {
           businessName: state.businessName,
           objective: state.objective,
           logoName: state.logoName,
+          logoPreview: state.logoPreview,
           palette: state.palette,
           template: state.template,
           selectedModules: state.selectedModules,
