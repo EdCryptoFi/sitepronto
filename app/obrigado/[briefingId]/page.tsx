@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CheckCircle2, ExternalLink, Sparkles, Share2, MessageCircle } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Sparkles, Share2, MessageCircle, Download } from 'lucide-react';
 import { getBriefingById } from '@/lib/supabase/client';
 import ThemeToggle from '@/components/ThemeToggle';
 import Countdown from './Countdown';
@@ -10,6 +10,7 @@ export default async function ObrigadoPage({ params }: { params: Promise<{ brief
 
   const briefing = await getBriefingById(briefingId);
 
+  const isApproved = briefing?.payment_status === 'approved';
   const deliveryTarget = briefing?.created_at
     ? new Date(new Date(briefing.created_at).getTime() + 24 * 3600 * 1000).toISOString()
     : new Date(Date.now() + 24 * 3600 * 1000).toISOString();
@@ -85,16 +86,26 @@ export default async function ObrigadoPage({ params }: { params: Promise<{ brief
           ))}
         </div>
 
-        {/* CTA prévia */}
+        {/* CTA entrega */}
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          {isApproved ? (
+            <a
+              href={`/api/download-site/${briefingId}`}
+              className="btn-primary text-base"
+            >
+              <Download size={18} /> Baixar meu site (.zip)
+            </a>
+          ) : (
+            <div className="flex items-center gap-2 rounded-2xl border border-outline-variant px-6 py-3 text-body-md text-on-surface-variant">
+              <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-primary" />
+              Aguardando confirmação do pagamento…
+            </div>
+          )}
           <Link
             href={`/preview/${briefingId}`}
-            className="btn-accent"
+            className="btn-ghost"
           >
-            Ver prévia do meu site <ExternalLink size={16} />
-          </Link>
-          <Link href="/" className="btn-ghost">
-            Voltar ao início
+            Ver prévia <ExternalLink size={16} />
           </Link>
         </div>
 
