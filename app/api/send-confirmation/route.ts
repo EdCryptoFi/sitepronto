@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const downloadUrl = `${baseUrl}/api/download-site/${briefingId}`;
 
     await resend.emails.send({
-      from: 'SitePronto <noreply@sitepronto.com.br>',
+      from: 'SitePronto <noreply@siteprontobr.xyz>',
       to: email,
       subject: '✅ Site pronto para download — SitePronto',
       html: `<!DOCTYPE html>
