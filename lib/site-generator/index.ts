@@ -1,8 +1,7 @@
 import { parseAICopyFromNotes, type AICopy } from '@/lib/ai-copy';
 import type { ImageSet } from '@/lib/image-bank';
-import { dataUrl, generateHeroSVG, generateProductSVG, generateGallerySVG, generateAvatarSVG, generateBgPattern } from '@/lib/image-service';
-import { detectIndustry, validateAIContent, getIndustryById, type IndustryInfo } from '@/lib/industry';
-import { generateJSONLD, generateOGTags } from '@/lib/copy-framework';
+import { dataUrl, generateProductSVG, generateGallerySVG, generateAvatarSVG } from '@/lib/image-service';
+import { detectIndustry, validateAIContent, getIndustryById } from '@/lib/industry';
 import { renderNav, renderHero, renderServices } from '@/lib/site-generator/layouts';
 
 export type SiteBriefing = {
@@ -73,7 +72,7 @@ function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette
     return `<a href="${waLink}${msg}" target="_blank" class="item-btn" style="background:${pal.primary};display:block;text-align:center;text-decoration:none;color:#fff">Saiba mais</a>`;
   };
   const items = (products && products.length > 0)
-    ? products.map((p, i) => {
+    ? products.map((p) => {
         const img = p.imagePreview
           ? `<img src="${p.imagePreview}" alt="${p.name}" style="width:100%;height:180px;object-fit:cover">`
           : `<img src="${prodImg}" alt="${p.name || 'Item'}" style="width:100%;height:180px;object-fit:cover">`;
@@ -237,15 +236,16 @@ const SEGMENT_TESTIMONIALS: Record<string, { names: string[]; roles: string[]; t
   },
 };
 
-function testimonialsSection(pal: Palette, dark = false, industryId = 'generico'): string {
+function testimonialsSection(pal: Palette, dark = false, industryId = 'generico', ai?: AICopy | null): string {
+  const aiTestimonials = ai?.testimonials && ai.testimonials.length >= 3 ? ai.testimonials : null;
   const seg = SEGMENT_TESTIMONIALS[industryId] ?? null;
-  const names = seg?.names ?? ['Ana Silva', 'Carlos Mendes', 'Fernanda Lima'];
-  const roles = seg?.roles ?? ['Cliente fiel', 'Parceiro', 'Cliente satisfeita'];
-  const texts = seg?.texts ?? [
+  const names  = aiTestimonials ? aiTestimonials.map(t => t.name)  : (seg?.names  ?? ['Ana Silva', 'Carlos Mendes', 'Fernanda Lima']);
+  const roles  = aiTestimonials ? aiTestimonials.map(t => t.role)  : (seg?.roles  ?? ['Cliente fiel', 'Parceiro', 'Cliente satisfeita']);
+  const texts  = aiTestimonials ? aiTestimonials.map(t => t.text)  : (seg?.texts  ?? [
     'Atendimento impecável e resultado acima das expectativas. Recomendo a todos!',
     'Profissionalismo e qualidade em cada detalhe. Voltarei com certeza.',
     'Equipe atenciosa, pontual e comprometida com o cliente. Nota 10!',
-  ];
+  ]);
   const bg = dark ? 'var(--surface2,#0f172a)' : 'var(--bg,#ffffff)';
   return `
 <section id="depoimentos" class="section-animate" style="padding:80px 0;background:${bg}">
@@ -672,7 +672,7 @@ ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true, industryId, waLink) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, true, industryId, images?.gallery) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, true, industryId) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, true, industryId, ai) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
@@ -892,7 +892,7 @@ ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId, waLink) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, false, industryId, images?.gallery) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, false, industryId) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, false, industryId, ai) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
@@ -1055,7 +1055,7 @@ ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
 ${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId, waLink) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, false, industryId, images?.gallery) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, false, industryId) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, false, industryId, ai) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
@@ -1290,7 +1290,7 @@ ${mods.includes('galeria') ? `
 </section>` : ''}
 
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, true, industryId) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, true, industryId, ai) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-section">

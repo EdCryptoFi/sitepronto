@@ -1,5 +1,4 @@
-import { detectIndustry } from '@/lib/industry';
-import { TONE_GUIDELINES, FEW_SHOT_EXAMPLES, COPY_FRAMEWORKS } from '@/lib/copy-framework';
+import { FEW_SHOT_EXAMPLES } from '@/lib/copy-framework';
 import { detectIndustrySemantic, buildPromptContext, type DynamicIndustry } from '@/lib/context-engine';
 import type { ImageSet } from '@/lib/image-bank';
 
@@ -11,6 +10,7 @@ export type AICopy = {
   footer_tagline: string;
   faq?: { q: string; a: string }[];
   about_text?: string;
+  testimonials?: { name: string; role: string; text: string }[];
   image_prompts?: {
     hero: string;
     gallery: string[];
@@ -128,6 +128,7 @@ ${extractionInstructions}
 5. image_prompts.hero deve seguir a sugestão acima (📸 cena típica)
 6. Emoji dos services deve combinar com o serviço (🔧 para mecânica, 🍕 para pizza, 💇 para cabeleireiro)
 7. Cada service.description deve seguir: [benefício concreto] + [prova ou diferencial]. Ex: "Troca rápida com óleos de alta qualidade e filtros originais."
+8. testimonials: use nomes brasileiros comuns e reais (Maria, João, Fernanda, Carlos, Ana…). O texto deve soar como pessoa real falando, não copy de marketing. Mencione algo específico do negócio (ex: "o João me atendeu super bem").
 
 📋 EXEMPLO DE SAÍDA IDEAL (copie a ESTRUTURA, não o conteúdo):
 ${fewShot}
@@ -154,6 +155,11 @@ Responda APENAS com este JSON (sem markdown):
     {"q": "pergunta frequente 3", "a": "resposta direta e útil"}
   ],
   "about_text": "parágrafo sobre a história/diferencial do negócio (máx 30 palavras)",
+  "testimonials": [
+    {"name": "Nome Brasileiro Comum", "role": "cliente desde 2023", "text": "depoimento específico mencionando algo do negócio, 1-2 frases naturais"},
+    {"name": "Outro Nome Real", "role": "cliente frequente", "text": "depoimento diferente, tom natural de cliente real"},
+    {"name": "Terceiro Nome", "role": "indicado por amigo", "text": "depoimento focado num resultado ou benefício específico"}
+  ],
   "seo_keywords": ["5-8 palavras-chave pesquisadas no Google"]
 }`;
 
@@ -194,6 +200,57 @@ Responda APENAS com este JSON (sem markdown):
     }
 
     return parsed as AICopy;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateHeadlineVariants(input: {
+  businessName: string;
+  objective: string;
+  description: string;
+  industry: string;
+}): Promise<{ aida: string; pas: string; fab: string } | null> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+
+  const prompt = `Você é copywriter especialista em sites para pequenos negócios brasileiros.
+
+Gere 3 variações de subheadline (slogan/subtítulo) para este negócio, cada uma usando um framework diferente.
+Máx 15 palavras cada. Em português do Brasil. Específicas ao negócio, nunca genéricas.
+
+Negócio: "${input.businessName}"
+Segmento: "${input.industry}"
+Objetivo: "${input.objective}"
+Descrição: "${input.description || 'Não informada'}"
+
+Retorne APENAS JSON válido:
+{
+  "aida": "headline estilo AIDA — abre com gancho forte, termina gerando desejo de agir",
+  "pas": "headline estilo PAS — menciona a dor do cliente e oferece a solução do negócio",
+  "fab": "headline estilo FAB — destaca uma característica única e o benefício real para o cliente"
+}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { response_mime_type: 'application/json', temperature: 0.7, maxOutputTokens: 200 },
+        }),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return null;
+    const parsed = JSON.parse(text);
+    if (!parsed.aida || !parsed.pas || !parsed.fab) return null;
+    return parsed as { aida: string; pas: string; fab: string };
   } catch {
     return null;
   }

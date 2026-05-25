@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, type ChangeEvent, type DragEvent } from 'react';
-import { ArrowRight, ArrowLeft, Sparkles, CheckCircle2, UploadCloud, X } from 'lucide-react';
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { ArrowRight, ArrowLeft, Sparkles, CheckCircle2, UploadCloud, X, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useQuiz } from '@/lib/quiz-context';
@@ -13,18 +13,61 @@ export default function QuizEtapa2() {
   const { state, dispatch } = useQuiz();
   const { objective, logoName, logoPreview, palette, template, selectedModules } = state;
 
+  const [analyzingLogo, setAnalyzingLogo] = useState(false);
+  const [suggestedPalette, setSuggestedPalette] = useState<string | null>(null);
+  const [logoAnalysisReason, setLogoAnalysisReason] = useState<string>('');
+  const analyzeDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!objective) router.replace('/quiz');
   }, [objective, router]);
 
+  // Quando o logo é removido, limpa a sugestão
+  useEffect(() => {
+    if (!logoPreview) {
+      setSuggestedPalette(null);
+      setLogoAnalysisReason('');
+    }
+  }, [logoPreview]);
+
   const canAdvance = selectedModules.length > 0 && Boolean(palette) && Boolean(template);
+
+  const analyzeLogoColors = async (base64: string) => {
+    setAnalyzingLogo(true);
+    try {
+      const res = await fetch('/api/analyze-logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64 }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.suggested_palette) {
+        setSuggestedPalette(data.suggested_palette);
+        setLogoAnalysisReason(data.reason ?? '');
+        // Pré-seleciona a paleta apenas se o usuário ainda não escolheu uma
+        if (!palette) {
+          dispatch({ type: 'SET_PALETTE', payload: data.suggested_palette });
+        }
+      }
+    } catch {
+      // silencioso — análise é não-crítica
+    } finally {
+      setAnalyzingLogo(false);
+    }
+  };
 
   const handleLogoFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
     if (file.size > 5 * 1024 * 1024) return;
     const reader = new FileReader();
-    reader.onload = () =>
-      dispatch({ type: 'SET_LOGO', payload: { name: file.name, preview: String(reader.result ?? '') } });
+    reader.onload = () => {
+      const preview = String(reader.result ?? '');
+      dispatch({ type: 'SET_LOGO', payload: { name: file.name, preview } });
+      // Debounce para não disparar múltiplas análises durante drag
+      if (analyzeDebounce.current) clearTimeout(analyzeDebounce.current);
+      analyzeDebounce.current = setTimeout(() => analyzeLogoColors(preview), 300);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -122,10 +165,27 @@ export default function QuizEtapa2() {
 
             {/* Color Palettes */}
             <div>
-              <p className="mb-3 text-label-md font-semibold">Paleta de cores</p>
+              <div className="mb-3 flex items-center gap-2">
+                <p className="text-label-md font-semibold">Paleta de cores</p>
+                {analyzingLogo && (
+                  <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                    <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeOpacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/></svg>
+                    Analisando logo…
+                  </span>
+                )}
+                {suggestedPalette && !analyzingLogo && (
+                  <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                    <Wand2 size={10} /> Paleta detectada
+                  </span>
+                )}
+              </div>
+              {suggestedPalette && logoAnalysisReason && !analyzingLogo && (
+                <p className="mb-3 text-[11px] text-on-surface-variant">{logoAnalysisReason}</p>
+              )}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {palettes.map((item) => {
                   const active = palette === item.id;
+                  const isSuggested = suggestedPalette === item.id;
                   return (
                     <button
                       key={item.id}
@@ -133,12 +193,17 @@ export default function QuizEtapa2() {
                       onClick={() => dispatch({ type: 'SET_PALETTE', payload: item.id })}
                       className={`relative flex flex-col items-start gap-2 rounded-2xl p-3 text-left transition-all ${
                         active ? 'ring-2 ring-primary' : 'hover:bg-surface-low'
-                      }`}
+                      } ${isSuggested && !active ? 'ring-1 ring-primary/40' : ''}`}
                       style={{ backgroundColor: 'var(--surface-container-low)' }}
                     >
                       {active && (
                         <span className="absolute right-2 top-2">
                           <CheckCircle2 size={14} className="text-primary" />
+                        </span>
+                      )}
+                      {isSuggested && !active && (
+                        <span className="absolute right-2 top-2">
+                          <Wand2 size={12} className="text-primary/60" />
                         </span>
                       )}
                       <div className="flex gap-1.5">
@@ -148,7 +213,9 @@ export default function QuizEtapa2() {
                       </div>
                       <div>
                         <p className="text-label-sm font-bold">{item.name}</p>
-                        <p className="text-[10px] text-on-surface-variant">{item.helper}</p>
+                        <p className="text-[10px] text-on-surface-variant">
+                          {isSuggested ? '✦ Combina com seu logo' : item.helper}
+                        </p>
                       </div>
                     </button>
                   );

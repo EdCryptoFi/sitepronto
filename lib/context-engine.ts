@@ -227,47 +227,8 @@ export type DynamicIndustry = {
   imagePrompt: string;
 };
 
-export async function generateDynamicIndustry(
-  businessName: string,
-  description: string
-): Promise<DynamicIndustry | null> {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return null;
-
-  const prompt = `Você é especialista em sites para pequenas empresas brasileiras.
-
-Dado o negócio abaixo, gere um contexto completo para o site:
-
-Negócio: "${businessName}"
-Descrição: "${description || 'Não informada'}"
-
-Identifique o segmento/setor do negócio e retorne um JSON com:
-- label: nome do segmento em português (ex: "Barbearia", "Escola de Música")
-- template: um destes valores exatos → "restaurant" | "farmacy" | "store" | "portfolio"
-  (restaurant = negócios visuais/gastro/beleza, farmacy = saúde/serviços limpos, store = comércio/produtos, portfolio = serviços profissionais/criativo)
-- fallbackServices: 3 serviços REAIS e ESPECÍFICOS do negócio, com icon (emoji), name e description (1 frase com benefício)
-- fallbackHeadline: headline atrativa de até 12 palavras, específica para o negócio
-- fallbackCTA: CTA de até 4 palavras (ex: "Agendar Consulta", "Ver Cardápio")
-- fallbackCTASub: frase de apoio de até 10 palavras
-- fallbackTagline: slogan memorável de até 6 palavras
-- imagePrompt: cena fotográfica realista do negócio (máx 10 palavras)
-
-Responda APENAS com JSON válido, sem markdown:
-{
-  "label": "...",
-  "template": "...",
-  "fallbackServices": [
-    {"icon": "emoji", "name": "...", "description": "..."},
-    {"icon": "emoji", "name": "...", "description": "..."},
-    {"icon": "emoji", "name": "...", "description": "..."}
-  ],
-  "fallbackHeadline": "...",
-  "fallbackCTA": "...",
-  "fallbackCTASub": "...",
-  "fallbackTagline": "...",
-  "imagePrompt": "..."
-}`;
-
+// Faz uma chamada Gemini genérica e retorna o texto da resposta
+async function geminiCall(key: string, prompt: string, maxTokens: number, temp: number): Promise<string | null> {
   try {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
@@ -276,17 +237,92 @@ Responda APENAS com JSON válido, sem markdown:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { response_mime_type: 'application/json', temperature: 0.3, maxOutputTokens: 600 },
+          generationConfig: { response_mime_type: 'application/json', temperature: temp, maxOutputTokens: maxTokens },
         }),
         signal: AbortSignal.timeout(10000),
       }
     );
-
+    if (!res.ok) return null;
     const json = await res.json();
-    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return null;
+    return json.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+  } catch {
+    return null;
+  }
+}
 
-    const parsed = JSON.parse(text) as DynamicIndustry;
+export async function generateDynamicIndustry(
+  businessName: string,
+  description: string,
+  embeddingScore = 100,
+): Promise<DynamicIndustry | null> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return null;
+
+  // ── PASSO 1: entender o negócio e suas dores (só quando score de embedding é baixo)
+  let businessContext = '';
+  if (embeddingScore < 50) {
+    const step1Prompt = `Você é especialista em marketing para pequenas empresas brasileiras.
+
+Dado este negócio:
+Nome: "${businessName}"
+Descrição: "${description || 'Não informada'}"
+
+Responda APENAS com JSON:
+{
+  "segment": "nome do segmento em português (ex: Barbearia, Escola de Dança)",
+  "top_pains": ["dor 1 do cliente", "dor 2 do cliente", "dor 3 do cliente"],
+  "key_differentials": ["diferencial 1", "diferencial 2"],
+  "cta_style": "como esse tipo de negócio costuma chamar para ação (ex: Agendar, Ver Cardápio, Solicitar Orçamento)"
+}`;
+
+    const step1Raw = await geminiCall(key, step1Prompt, 300, 0.2);
+    if (step1Raw) {
+      try {
+        const step1 = JSON.parse(step1Raw);
+        businessContext = `
+Segmento identificado: ${step1.segment ?? ''}
+Principais dores dos clientes: ${(step1.top_pains ?? []).join(', ')}
+Diferenciais do negócio: ${(step1.key_differentials ?? []).join(', ')}
+Estilo de CTA: ${step1.cta_style ?? ''}`;
+      } catch { /* usa contexto vazio */ }
+    }
+  }
+
+  // ── PASSO 2: gerar o conteúdo completo com o contexto enriquecido
+  const step2Prompt = `Você é especialista em sites para pequenas empresas brasileiras.
+
+Dado o negócio abaixo, gere um contexto completo para o site:
+
+Negócio: "${businessName}"
+Descrição: "${description || 'Não informada'}"${businessContext ? `\n${businessContext}` : ''}
+
+Retorne APENAS JSON válido, sem markdown:
+{
+  "label": "nome do segmento em português (ex: Barbearia, Escola de Música)",
+  "template": "restaurant | farmacy | store | portfolio",
+  "fallbackServices": [
+    {"icon": "emoji", "name": "serviço específico", "description": "1 frase com benefício concreto"},
+    {"icon": "emoji", "name": "serviço específico", "description": "1 frase com benefício concreto"},
+    {"icon": "emoji", "name": "serviço específico", "description": "1 frase com benefício concreto"}
+  ],
+  "fallbackHeadline": "headline atrativa de até 12 palavras, específica para o negócio",
+  "fallbackCTA": "CTA de até 4 palavras",
+  "fallbackCTASub": "frase de apoio até 10 palavras",
+  "fallbackTagline": "slogan memorável até 6 palavras",
+  "imagePrompt": "cena fotográfica realista do negócio (máx 10 palavras)"
+}
+
+Regra do template:
+- restaurant: gastro/alimentação/beleza/bar
+- farmacy: saúde/clínica/serviços clean
+- store: comércio/produtos/e-commerce
+- portfolio: serviços profissionais/criativo/consultoria`;
+
+  try {
+    const raw = await geminiCall(key, step2Prompt, 600, 0.3);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as DynamicIndustry;
     if (!parsed.label || !Array.isArray(parsed.fallbackServices) || parsed.fallbackServices.length < 3) return null;
 
     return parsed;

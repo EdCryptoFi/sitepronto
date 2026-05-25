@@ -4,6 +4,37 @@ import { getBriefingById } from '@/lib/supabase/client';
 import ThemeToggle from '@/components/ThemeToggle';
 import Countdown from './Countdown';
 import EmailSender from './EmailSender';
+import WATemplates from './WATemplates';
+
+const SEGMENT_LABELS: Record<string, string> = {
+  restaurante: 'Restaurante', loja: 'Loja', clinica: 'Clínica',
+  servicos: 'Prestação de Serviços', educacao: 'Portfólio / Educação',
+  veterinaria: 'Clínica Veterinária', petshop: 'Pet Shop',
+  academia: 'Academia / Fitness', imobiliaria: 'Imobiliária',
+  contabilidade: 'Contabilidade', tecnologia: 'Tecnologia',
+  farmacia: 'Farmácia', turismo: 'Turismo / Pousada',
+  transporte: 'Transporte / Logística', fotografia: 'Fotografia',
+  outro: 'Negócio',
+};
+
+const PALETTE_LABELS: Record<string, string> = {
+  'azul-editorial': 'Azul Editorial', 'verde-servico': 'Verde Serviço',
+  'vinho-premium': 'Vinho Premium', minimal: 'Minimalista',
+  vibrant: 'Vibrante', corporate: 'Corporativo', nature: 'Nature',
+  tech: 'Tech Dark', elegant: 'Elegante',
+};
+
+const TEMPLATE_LABELS: Record<string, string> = {
+  modern: 'Moderno', classic: 'Clássico', bold: 'Arrojado',
+};
+
+const MODULE_LABELS: Record<string, string> = {
+  galeria: 'Galeria de fotos', faq: 'Perguntas frequentes',
+  sobre: 'Seção Sobre', depoimentos: 'Depoimentos',
+  contato: 'Formulário de contato', catalogo: 'Catálogo de produtos',
+  agendamento: 'Agendamento online', whatsapp: 'Botão WhatsApp',
+  servicos: 'Lista de serviços', portfolio: 'Portfólio', blog: 'Blog',
+};
 
 const SEGMENT_LABELS: Record<string, string> = {
   restaurante: 'Restaurante', loja: 'Loja', clinica: 'Clínica',
@@ -178,6 +209,13 @@ export default async function ObrigadoPage({ params }: { params: Promise<{ brief
             <Share2 size={16} /> Compartilhar no WhatsApp
           </a>
         </div>
+
+        {/* WhatsApp message templates */}
+        <WATemplates
+          businessName={briefing?.domain ?? ''}
+          segment={briefing?.segment ?? ''}
+          objective={briefing?.goal ?? ''}
+        />
 
         <p className="mt-8 text-label-sm text-on-surface-variant">
           Pedido #{briefingId.slice(0, 8).toUpperCase()} · Confirmação enviada por e-mail.

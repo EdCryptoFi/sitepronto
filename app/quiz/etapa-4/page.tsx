@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Sparkles, Monitor, Smartphone, Loader2, ArrowLeft } from 'lucide-react';
+import { Sparkles, Monitor, Smartphone, Loader2, ArrowLeft, Wand2, Copy, Check, X } from 'lucide-react';
 import { useQuiz } from '@/lib/quiz-context';
 import { Suspense } from 'react';
 
@@ -13,6 +13,10 @@ function PreviewSandboxInner() {
   const [viewport, setViewport] = useState<'desktop' | 'mobile'>('desktop');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+  const [variantsOpen, setVariantsOpen] = useState(false);
+  const [variantsLoading, setVariantsLoading] = useState(false);
+  const [variants, setVariants] = useState<{ aida: string; pas: string; fab: string } | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
 
   const briefingId = searchParams.get('id') ?? state.briefingId ?? '';
 
@@ -47,6 +51,33 @@ function PreviewSandboxInner() {
       setCheckoutError('Falha de conexão. Tente novamente.');
       setCheckoutLoading(false);
     }
+  };
+
+  const handleFetchVariants = async () => {
+    setVariantsOpen(true);
+    if (variants) return;
+    setVariantsLoading(true);
+    try {
+      const res = await fetch('/api/headline-variants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: state.businessName,
+          objective: state.objective,
+          description: state.description,
+          industry: state.template,
+        }),
+      });
+      if (res.ok) setVariants(await res.json());
+    } catch { /* silencioso */ } finally {
+      setVariantsLoading(false);
+    }
+  };
+
+  const handleCopy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopied(key);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   const businessName = state.businessName || 'Meu Site';
@@ -90,6 +121,15 @@ function PreviewSandboxInner() {
             <Smartphone size={14} /> <span className="hidden sm:inline">Mobile</span>
           </button>
         </div>
+
+        {/* Headline variants button */}
+        <button
+          type="button"
+          onClick={handleFetchVariants}
+          className="hidden items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors sm:flex"
+        >
+          <Wand2 size={13} /> Outras headlines
+        </button>
 
         {/* Back */}
         <button
@@ -214,6 +254,62 @@ function PreviewSandboxInner() {
           </div>
         )}
       </div>
+
+      {/* Headline variants panel */}
+      {variantsOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" onClick={() => setVariantsOpen(false)}>
+          <div
+            className="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-[#1a1d27] p-6 shadow-2xl ring-1 ring-white/10 m-0 sm:m-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Wand2 size={16} className="text-primary" />
+                <h3 className="text-sm font-bold text-white">Outras opções de headline</h3>
+              </div>
+              <button type="button" onClick={() => setVariantsOpen(false)} className="text-white/40 hover:text-white">
+                <X size={16} />
+              </button>
+            </div>
+            <p className="mb-4 text-xs text-white/50">3 abordagens diferentes geradas pela IA. Copie a que mais combina com o seu negócio.</p>
+
+            {variantsLoading && (
+              <div className="flex items-center justify-center py-8 gap-2 text-white/50 text-sm">
+                <Loader2 size={16} className="animate-spin" /> Gerando variantes…
+              </div>
+            )}
+
+            {!variantsLoading && variants && (
+              <div className="space-y-3">
+                {([
+                  { key: 'aida', label: 'AIDA', desc: 'Atenção → Desejo → Ação', text: variants.aida },
+                  { key: 'pas',  label: 'PAS',  desc: 'Problema → Solução',      text: variants.pas },
+                  { key: 'fab',  label: 'FAB',  desc: 'Característica → Benefício', text: variants.fab },
+                ] as const).map(({ key, label, desc, text }) => (
+                  <div key={key} className="rounded-2xl bg-white/5 p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="rounded-md bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold text-primary">{label}</span>
+                      <span className="text-[10px] text-white/40">{desc}</span>
+                    </div>
+                    <p className="text-sm text-white/90 leading-relaxed mb-3">&ldquo;{text}&rdquo;</p>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(text, key)}
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-white/50 hover:text-white transition-colors"
+                    >
+                      {copied === key ? <><Check size={11} className="text-green-400" /> Copiado!</> : <><Copy size={11} /> Copiar</>}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!variantsLoading && !variants && (
+              <p className="text-center text-sm text-white/40 py-4">Não foi possível gerar variantes. Tente novamente.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

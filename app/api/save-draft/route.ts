@@ -118,9 +118,10 @@ export async function POST(req: NextRequest) {
     paletteColors: PALETTE_COLORS[palette],
   });
 
-  // For unknown segments, research the industry with Gemini so the site generator has rich context
+  // For unknown segments, research the industry with Gemini so the site generator has rich context.
+  // Score 0 forces the 2-pass generation (understand → generate) for best quality.
   const dynamicIndustry = industry.id === 'generico'
-    ? await generateDynamicIndustry(businessName, description)
+    ? await generateDynamicIndustry(businessName, description, 0)
     : null;
 
   // Fetch real photos from Unsplash for this segment (non-blocking — falls back to SVGs if no API key)

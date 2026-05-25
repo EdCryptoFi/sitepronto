@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight, ArrowLeft, Sparkles, Plus, X, Clock, Globe2,
   Mail, ShieldCheck, Loader2, FileText, Image as ImageIcon, Phone,
+  Wand2, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useQuiz } from '@/lib/quiz-context';
+import type { CoachFeedback } from '@/lib/description-coach';
 
 const DAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 
@@ -22,11 +24,36 @@ export default function QuizEtapa3() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [coach, setCoach] = useState<CoachFeedback | null>(null);
+  const [coachLoading, setCoachLoading] = useState(false);
+  const [showImproved, setShowImproved] = useState(false);
+  const coachTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAnalyzed = useRef('');
 
   useEffect(() => {
     if (!objective) router.replace('/quiz');
     else if (!selectedModules.length) router.replace('/quiz/etapa-2');
   }, [objective, selectedModules, router]);
+
+  const triggerCoach = (text: string) => {
+    if (coachTimer.current) clearTimeout(coachTimer.current);
+    if (text.trim().length < 15) { setCoach(null); return; }
+    coachTimer.current = setTimeout(async () => {
+      if (text === lastAnalyzed.current) return;
+      lastAnalyzed.current = text;
+      setCoachLoading(true);
+      try {
+        const res = await fetch('/api/coach-description', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, businessName: state.businessName, objective: state.objective }),
+        });
+        if (res.ok) setCoach(await res.json());
+      } catch { /* silencioso */ } finally {
+        setCoachLoading(false);
+      }
+    }, 2500);
+  };
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const domainOk = domainChoice === 'later' || domain.trim().length >= 3;
@@ -130,7 +157,10 @@ export default function QuizEtapa3() {
           </div>
           <textarea
             value={description}
-            onChange={(e) => dispatch({ type: 'SET_DESCRIPTION', payload: e.target.value })}
+            onChange={(e) => {
+              dispatch({ type: 'SET_DESCRIPTION', payload: e.target.value });
+              triggerCoach(e.target.value);
+            }}
             className="field min-h-32 resize-y"
             placeholder="Descreva seu negócio, ramo de atuação, diferenciais... Se já tiver um site ou apresentação, cole o link aqui também."
             maxLength={2000}
@@ -138,6 +168,83 @@ export default function QuizEtapa3() {
           <p className="mt-2 text-label-sm text-on-surface-variant">
             Quanto mais detalhes, melhor o resultado. Este texto aparecerá no seu site.
           </p>
+
+          {/* Description Coach */}
+          {coachLoading && (
+            <div className="mt-3 flex items-center gap-2 text-label-sm text-on-surface-variant">
+              <Loader2 size={13} className="animate-spin" /> Analisando descrição…
+            </div>
+          )}
+          {coach && !coachLoading && (
+            <div className="mt-3 rounded-2xl border p-4 space-y-3" style={{
+              borderColor: coach.score === 'ótima' ? 'var(--primary)' : coach.score === 'boa' ? '#d97706' : 'var(--error, #be123c)',
+              backgroundColor: coach.score === 'ótima' ? 'rgba(0,74,198,0.05)' : coach.score === 'boa' ? 'rgba(217,119,6,0.05)' : 'rgba(190,18,60,0.05)',
+            }}>
+              {/* Score bar */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Wand2 size={14} style={{ color: coach.score === 'ótima' ? 'var(--primary)' : coach.score === 'boa' ? '#d97706' : '#be123c' }} />
+                  <span className="text-label-sm font-semibold" style={{ color: coach.score === 'ótima' ? 'var(--primary)' : coach.score === 'boa' ? '#d97706' : '#be123c' }}>
+                    Descrição {coach.score} — {coach.score_value}/100
+                  </span>
+                </div>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-on-surface/10">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${coach.score_value}%`,
+                    backgroundColor: coach.score === 'ótima' ? 'var(--primary)' : coach.score === 'boa' ? '#d97706' : '#be123c',
+                  }}
+                />
+              </div>
+
+              {/* Tip */}
+              <p className="text-label-sm text-on-surface-variant">{coach.tip}</p>
+
+              {/* Missing items */}
+              {coach.missing.length > 0 && coach.score !== 'ótima' && (
+                <div className="flex flex-wrap gap-1.5">
+                  {coach.missing.map((m) => (
+                    <span key={m} className="rounded-full bg-on-surface/8 px-2 py-0.5 text-[10px] font-medium text-on-surface-variant">
+                      + {m}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Improved version */}
+              {coach.improved && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowImproved((v) => !v)}
+                    className="flex items-center gap-1 text-label-sm font-semibold"
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    {showImproved ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    {showImproved ? 'Ocultar sugestão' : 'Ver versão melhorada'}
+                  </button>
+                  {showImproved && (
+                    <div className="mt-2 rounded-xl bg-on-surface/5 p-3">
+                      <p className="text-label-sm text-on-surface-variant italic">&ldquo;{coach.improved}&rdquo;</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          dispatch({ type: 'SET_DESCRIPTION', payload: coach.improved! });
+                          setShowImproved(false);
+                        }}
+                        className="mt-2 text-[11px] font-semibold"
+                        style={{ color: 'var(--primary)' }}
+                      >
+                        Usar esta versão
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Domain */}
