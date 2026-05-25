@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Sparkles, Clock, ArrowLeft, Download } from 'lucide-react';
+import { Sparkles, Clock, ArrowLeft } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 import { PALETTE_STYLES } from '@/lib/palette-styles';
 
@@ -42,7 +42,6 @@ export default async function PreviewPage({ params }: { params: Promise<{ briefi
     ? briefing.domain.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
     : segmentLabel;
   const isPending = briefing.payment_status !== 'approved';
-  const isApproved = briefing.payment_status === 'approved';
 
   return (
     <div className="flex h-screen flex-col overflow-hidden" style={{ background: '#0f1117' }}>
@@ -64,14 +63,6 @@ export default async function PreviewPage({ params }: { params: Promise<{ briefi
           <span className="text-sm font-medium opacity-80">{businessName}</span>
         </div>
         <div className="flex items-center gap-2">
-          {isApproved && (
-            <a
-              href={`/api/download-site/${briefingId}`}
-              className="flex items-center gap-1.5 rounded-xl bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-400 transition-colors"
-            >
-              <Download size={12} /> Baixar site
-            </a>
-          )}
           <Link
             href="/"
             className="flex items-center gap-1 rounded-xl bg-white/20 px-3 py-1.5 text-xs font-semibold hover:bg-white/30"

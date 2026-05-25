@@ -63,6 +63,7 @@ export default function QuizEtapa3() {
           businessHours: state.businessHours,
           whatsappNumber: state.whatsappNumber,
           email: state.email.trim(),
+          referralCode: localStorage.getItem('sitepronto-ref') ?? undefined,
         }),
       });
       const data = await res.json();
@@ -146,38 +147,68 @@ export default function QuizEtapa3() {
             <span className="text-label-md font-semibold">Nome do site</span>
           </div>
           <div className="space-y-3">
+            {/* Option: want a new .com.br */}
             <label className={`flex cursor-pointer items-center gap-3 rounded-2xl p-3 transition-all ${domainChoice === 'new' ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-surface-low'}`}
               style={{ backgroundColor: domainChoice === 'new' ? undefined : 'var(--surface-container-low)' }}>
               <input type="radio" name="domain-choice" value="new" checked={domainChoice === 'new'}
                 onChange={() => dispatch({ type: 'SET_DOMAIN_CHOICE', payload: 'new' })} className="sr-only" />
               <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${domainChoice === 'new' ? 'border-primary bg-primary' : 'border-on-surface-variant/40'}`} />
               <div className="flex-1">
-                <p className="text-label-md font-semibold">Quero um endereço .com.br</p>
-                <p className="text-label-sm text-on-surface-variant">Digite o nome ideal — verificamos a disponibilidade.</p>
+                <p className="text-label-md font-semibold">Quero um endereço .com.br novo</p>
+                <p className="text-label-sm text-on-surface-variant">Digite o nome desejado — verificamos a disponibilidade no Registro.br. O domínio é pago separadamente.</p>
               </div>
             </label>
 
             {domainChoice === 'new' && (
-              <div className="flex items-center gap-2 pl-2">
-                <input
-                  value={domain}
-                  onChange={(e) => dispatch({ type: 'SET_DOMAIN', payload: e.target.value.replace(/[^a-z0-9-]/gi, '').toLowerCase() })}
-                  className="field flex-1"
-                  placeholder="nomedoseunegocio"
-                  maxLength={20}
-                />
-                <span className="shrink-0 rounded-xl bg-surface-med px-3 py-3 text-label-md font-semibold">.com.br</span>
+              <div className="space-y-2 pl-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    value={domain}
+                    onChange={(e) => dispatch({ type: 'SET_DOMAIN', payload: e.target.value.replace(/[^a-z0-9-]/gi, '').toLowerCase() })}
+                    className="field flex-1"
+                    placeholder="nomedoseunegocio"
+                    maxLength={20}
+                  />
+                  <span className="shrink-0 rounded-xl bg-surface-med px-3 py-3 text-label-md font-semibold">.com.br</span>
+                </div>
+                <p className="text-label-xs text-on-surface-variant">
+                  ℹ️ O domínio não está incluso no valor do site. O registro .com.br custa aproximadamente <strong>R$ 40/ano</strong> e é pago diretamente no Registro.br (ou registrador de sua preferência). Confirmamos a disponibilidade antes da publicação.
+                </p>
               </div>
             )}
 
-            <label className={`flex cursor-pointer items-center gap-3 rounded-2xl p-3 transition-all ${domainChoice === 'later' ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-surface-low'}`}
-              style={{ backgroundColor: domainChoice === 'later' ? undefined : 'var(--surface-container-low)' }}>
-              <input type="radio" name="domain-choice" value="later" checked={domainChoice === 'later'}
-                onChange={() => dispatch({ type: 'SET_DOMAIN_CHOICE', payload: 'later' })} className="sr-only" />
-              <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${domainChoice === 'later' ? 'border-primary bg-primary' : 'border-on-surface-variant/40'}`} />
+            {/* Option: already have a domain */}
+            <label className={`flex cursor-pointer items-center gap-3 rounded-2xl p-3 transition-all ${domainChoice === 'later' && domain.includes('.') ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-surface-low'}`}
+              style={{ backgroundColor: (domainChoice === 'later' && domain.includes('.')) ? undefined : 'var(--surface-container-low)' }}>
+              <input type="radio" name="domain-choice" value="later" checked={domainChoice === 'later' && domain.includes('.')}
+                onChange={() => { dispatch({ type: 'SET_DOMAIN_CHOICE', payload: 'later' }); dispatch({ type: 'SET_DOMAIN', payload: 'existente' }); }} className="sr-only" />
+              <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${domainChoice === 'later' && domain.includes('.') ? 'border-primary bg-primary' : 'border-on-surface-variant/40'}`} />
               <div className="flex-1">
-                <p className="text-label-md font-semibold">Decidir o nome depois</p>
-                <p className="text-label-sm text-on-surface-variant">O briefing fica salvo. Você escolhe o domínio na próxima fase.</p>
+                <p className="text-label-md font-semibold">Já tenho um domínio</p>
+                <p className="text-label-sm text-on-surface-variant">Informe o endereço atual e apontamos o site para ele sem custo adicional.</p>
+              </div>
+            </label>
+
+            {domainChoice === 'later' && domain.includes('.') && (
+              <div className="flex items-center gap-2 pl-2">
+                <input
+                  value={domain === 'existente' ? '' : domain}
+                  onChange={(e) => dispatch({ type: 'SET_DOMAIN', payload: e.target.value.toLowerCase().trim() || 'existente' })}
+                  className="field flex-1"
+                  placeholder="meusite.com.br"
+                />
+              </div>
+            )}
+
+            {/* Option: decide later */}
+            <label className={`flex cursor-pointer items-center gap-3 rounded-2xl p-3 transition-all ${domainChoice === 'later' && !domain.includes('.') ? 'ring-2 ring-primary bg-primary/5' : 'hover:bg-surface-low'}`}
+              style={{ backgroundColor: (domainChoice === 'later' && !domain.includes('.')) ? undefined : 'var(--surface-container-low)' }}>
+              <input type="radio" name="domain-choice" value="later" checked={domainChoice === 'later' && !domain.includes('.')}
+                onChange={() => { dispatch({ type: 'SET_DOMAIN_CHOICE', payload: 'later' }); dispatch({ type: 'SET_DOMAIN', payload: '' }); }} className="sr-only" />
+              <div className={`h-4 w-4 shrink-0 rounded-full border-2 ${domainChoice === 'later' && !domain.includes('.') ? 'border-primary bg-primary' : 'border-on-surface-variant/40'}`} />
+              <div className="flex-1">
+                <p className="text-label-md font-semibold">Decidir depois</p>
+                <p className="text-label-sm text-on-surface-variant">Nossa equipe entra em contato para definir o domínio antes da publicação.</p>
               </div>
             </label>
           </div>

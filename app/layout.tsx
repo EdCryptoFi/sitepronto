@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ThemeProvider, ThemeScript } from '@/lib/theme-context';
 import { QuizProvider } from '@/lib/quiz-context';
+import ReferralTracker from '@/components/ReferralTracker';
 import './globals.css';
 
 const SITE_URL = 'https://sitepronto.com.br';
@@ -8,7 +9,7 @@ const SITE_URL = 'https://sitepronto.com.br';
 export const metadata: Metadata = {
   title: 'SitePronto — Site profissional hoje. Sem mensalidade.',
   description:
-    'Crie seu site profissional em até 24h por apenas R$ 300 — pagamento único, domínio .com.br incluso, sem mensalidade. Responda 3 perguntas e publique hoje.',
+    'Crie seu site profissional em até 24h por apenas R$ 300 — pagamento único, hospedagem 12 meses inclusa, sem mensalidade. Responda 3 perguntas e publique hoje.',
   keywords: [
     'criar site',
     'site para empresa',
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'SitePronto — Site profissional hoje. Sem mensalidade.',
     description:
-      'Site profissional pronto em até 24h. R$ 300 único, domínio incluso, sem mensalidade. Garantia de 7 dias.',
+      'Site profissional pronto em até 24h. R$ 300 único, hospedagem 12 meses inclusa, sem mensalidade. Garantia de 7 dias.',
     type: 'website',
     locale: 'pt_BR',
     siteName: 'SitePronto',
@@ -81,7 +82,7 @@ export default function RootLayout({
                 '@context': 'https://schema.org',
                 '@type': 'Product',
                 name: 'Site Profissional SitePronto',
-                description: 'Site profissional pronto em até 24h com domínio .com.br incluso.',
+                description: 'Site profissional pronto em até 24h com hospedagem inclusa por 12 meses.',
                 brand: { '@type': 'Brand', name: 'SitePronto' },
                 offers: {
                   '@type': 'Offer',
@@ -105,7 +106,7 @@ export default function RootLayout({
                   {
                     '@type': 'Question',
                     name: 'Quanto custa um site no SitePronto?',
-                    acceptedAnswer: { '@type': 'Answer', text: 'R$ 300 à vista (único, sem mensalidade) ou 3× R$ 125 no cartão. Domínio .com.br incluso.' },
+                    acceptedAnswer: { '@type': 'Answer', text: 'R$ 300 à vista (único, sem mensalidade) ou 3× R$ 125 no cartão. Hospedagem inclusa por 12 meses. Domínio adquirido separadamente pelo cliente.' },
                   },
                   {
                     '@type': 'Question',
@@ -115,13 +116,14 @@ export default function RootLayout({
                   {
                     '@type': 'Question',
                     name: 'Preciso de hospedagem separada?',
-                    acceptedAnswer: { '@type': 'Answer', text: 'Não. A hospedagem está inclusa no valor único de R$ 300.' },
+                    acceptedAnswer: { '@type': 'Answer', text: 'Não. A hospedagem está inclusa nos R$ 300 por 12 meses. Após esse período, a renovação é de R$ 300/ano. O domínio é adquirido e pago separadamente pelo cliente.' },
                   },
                 ],
               },
             ]),
           }}
         />
+        <ReferralTracker />
         <QuizProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </QuizProvider>

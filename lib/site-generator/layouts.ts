@@ -21,13 +21,17 @@ export function renderNav(
     ? `<img src="${logoPreview}" alt="${name}" style="height:36px;max-width:160px;object-fit:contain;display:block">`
     : name;
   const linkHTML = links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('');
+  const burgerOnClick = `onclick="var m=document.getElementById('navMenu');m.classList.toggle('open');this.textContent=m.classList.contains('open')?'✕':'☰'"`;
 
   if (v === 'classic') {
     return `
-<nav style="background:var(--surface);border-bottom:2px solid ${pal.primary}22">
-  <div class="container" style="display:flex;flex-direction:column;align-items:center;padding:16px 24px;gap:12px">
-    <span class="logo" style="font-size:1.4rem;font-weight:800;color:var(--accent)">${logoInner}</span>
-    <ul style="display:flex;gap:24px;list-style:none;padding:0;margin:0;font-size:.85rem;font-weight:500">
+<nav style="background:var(--surface);border-bottom:2px solid ${pal.primary}22;position:relative">
+  <div class="container" style="padding:16px 24px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span class="logo" style="font-size:1.4rem;font-weight:800;color:var(--accent)">${logoInner}</span>
+      <button class="nav-burger" ${burgerOnClick} aria-label="Menu">☰</button>
+    </div>
+    <ul id="navMenu" class="nav-links" style="display:flex;justify-content:center;gap:24px;list-style:none;padding:12px 0 0;margin:0;font-size:.85rem;font-weight:500">
       ${linkHTML}
     </ul>
   </div>
@@ -37,11 +41,17 @@ export function renderNav(
   if (v === 'bold') {
     return `
 <nav style="position:sticky;top:0;z-index:100;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)">
-  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px;position:relative">
     <span class="logo" style="font-size:1.2rem;font-weight:900;color:var(--accent);letter-spacing:-.02em">${logoInner}</span>
-    <button style="background:${pal.primary};color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer" onclick="document.querySelector('#contato')?.scrollIntoView({behavior:'smooth'})">
-      Fale Conosco
-    </button>
+    <ul id="navMenu" class="nav-links" style="display:flex;gap:20px;list-style:none;margin:0;padding:0">
+      ${linkHTML}
+    </ul>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button style="background:${pal.primary};color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer" onclick="document.querySelector('#contato')?.scrollIntoView({behavior:'smooth'})">
+        Fale Conosco
+      </button>
+      <button class="nav-burger" ${burgerOnClick} aria-label="Menu" style="color:#fff">☰</button>
+    </div>
   </div>
 </nav>`;
   }
@@ -49,11 +59,12 @@ export function renderNav(
   // Modern (default) — inline horizontal
   return `
 <nav style="position:sticky;top:0;z-index:100;background:var(--surface);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.06)">
-  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:64px">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:64px;position:relative">
     <span class="logo" style="font-size:1.3rem;font-weight:800;color:var(--accent)">${logoInner}</span>
-    <ul class="nav-links" style="display:flex;gap:28px;list-style:none;margin:0;padding:0">
+    <ul id="navMenu" class="nav-links" style="display:flex;gap:28px;list-style:none;margin:0;padding:0">
       ${linkHTML}
     </ul>
+    <button class="nav-burger" ${burgerOnClick} aria-label="Menu">☰</button>
   </div>
 </nav>`;
 }

@@ -276,7 +276,7 @@ export default function Home() {
               cta="Pagar com Pix e publicar hoje"
               features={[
                 'Site publicado em até 24h',
-                'Domínio .com.br incluso',
+                'Hospedagem inclusa por 12 meses',
                 'HTTPS (cadeado de segurança)',
                 'Funciona no celular e no Google',
                 'Suporte prioritário por 30 dias',
@@ -293,7 +293,7 @@ export default function Home() {
               cta="Parcelar em 3× sem juros"
               features={[
                 'Site publicado em até 24h',
-                'Domínio .com.br incluso',
+                'Hospedagem inclusa por 12 meses',
                 'HTTPS (cadeado de segurança)',
                 'Funciona no celular e no Google',
               ]}
@@ -332,16 +332,16 @@ export default function Home() {
               answer="Sim. Após a publicação, você pode nos solicitar ajustes de texto e imagens pelo suporte. Alterações de layout ou módulos adicionais podem ter custo extra."
             />
             <FaqItem
-              question="O domínio fica comigo?"
-              answer="Sim, o domínio .com.br é registrado no seu nome (CPF ou CNPJ). Ele é seu e permanece seu mesmo que você deixe de usar o SitePronto."
+              question="O domínio está incluso no preço?"
+              answer="Não. O domínio .com.br custa R$ 40/ano e é registrado e pago diretamente por você no Registro.br (ou registrador de sua preferência). Confirmamos a disponibilidade e ajudamos na configuração sem custo adicional."
             />
             <FaqItem
               question="Preciso de hospedagem separada?"
-              answer="Não. A hospedagem está inclusa no valor único de R$ 300. Não há custo mensal de servidor — apenas a renovação anual do domínio (em torno de R$ 40/ano), que fica por sua conta após o primeiro ano."
+              answer="Não. A hospedagem está inclusa nos R$ 300 por 12 meses a partir da publicação do seu site. Após esse período, a renovação do serviço é de R$ 300/ano — você recebe aviso com 30 dias de antecedência."
             />
             <FaqItem
               question="E se eu já tiver um domínio?"
-              answer="Sem problema. No passo 3 do quiz você pode informar que já tem um domínio e apontaremos seu site existente para ele, sem custo adicional."
+              answer="Sem problema. No passo 3 do quiz selecione 'Já tenho um domínio', informe o endereço e apontaremos o site para ele sem custo adicional."
             />
             <FaqItem
               question="Em quanto tempo meu site fica no ar?"

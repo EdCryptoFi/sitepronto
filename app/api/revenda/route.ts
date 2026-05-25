@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    console.error('Revenda insert error:', error.message);
     return NextResponse.json({ error: 'Erro ao salvar cadastro.' }, { status: 500 });
   }
 

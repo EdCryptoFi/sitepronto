@@ -96,6 +96,9 @@ export async function POST(req: NextRequest) {
   const logoName = truncate(b.logoName, 200);
   const logoPreview = truncate(b.logoPreview, 600000); // base64 — max ~450 KB
   const whatsappNumber = truncate(b.whatsappNumber, 20);
+  const referralCode = typeof b.referralCode === 'string' && /^[A-Z0-9_-]{3,30}$/.test(b.referralCode.toUpperCase())
+    ? b.referralCode.toUpperCase()
+    : null;
 
   // Detect industry from business name + description (primary source of truth for segment)
   const industry = detectIndustry(businessName, description);
@@ -154,6 +157,7 @@ export async function POST(req: NextRequest) {
       logo_name: logoName || null,
       catalog_products: portfolioItems,
       payment_status: 'pending',
+      referral_code: referralCode,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })

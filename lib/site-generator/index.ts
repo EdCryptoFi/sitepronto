@@ -66,8 +66,12 @@ function waFloat(waLink: string): string {
 
 // ─── SHARED SECTION HELPERS ──────────────────────────────────────────────────
 
-function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette, dark = false, industryId = 'generico'): string {
+function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette, dark = false, industryId = 'generico', waLink = ''): string {
   const prodImg = dataUrl(generateProductSVG(pal, industryId));
+  const waBtn = (name: string) => {
+    const msg = name ? `?text=Olá!%20Tenho%20interesse%20em%3A%20${encodeURIComponent(name)}` : '';
+    return `<a href="${waLink}${msg}" target="_blank" class="item-btn" style="background:${pal.primary};display:block;text-align:center;text-decoration:none;color:#fff">Saiba mais</a>`;
+  };
   const items = (products && products.length > 0)
     ? products.map((p, i) => {
         const img = p.imagePreview
@@ -79,7 +83,7 @@ function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette
         <div class="item-body">
           <span class="item-name">${p.name || 'Item'}</span>
           ${p.price ? `<span class="item-price" style="color:${pal.accent}">${p.price}</span>` : ''}
-          <button class="item-btn" style="background:${pal.primary}">Saiba mais</button>
+          ${waBtn(p.name || '')}
         </div>
       </div>`;
       }).join('')
@@ -88,7 +92,7 @@ function catalogSection(products: SiteBriefing['catalog_products'], pal: Palette
         <img src="${prodImg}" alt="Item ${i}" style="width:100%;height:180px;object-fit:cover">
         <div class="item-body">
           <span class="item-name">Item ${i}</span>
-          <button class="item-btn" style="background:${pal.primary}">Saiba mais</button>
+          ${waBtn(`Item ${i}`)}
         </div>
       </div>`).join('');
   const bg = dark ? 'var(--surface)' : 'var(--surface2,#f8fafc)';
@@ -158,10 +162,86 @@ function gallerySection(pal: Palette, dark = false, industryId = 'generico', gal
 </section>`;
 }
 
-function testimonialsSection(pal: Palette, dark = false): string {
-  const names = ['Ana Silva', 'Carlos Mendes', 'Fernanda Lima'];
-  const roles = ['Cliente fiel', 'Parceiro', 'Cliente satisfeita'];
-  const texts = [
+const SEGMENT_TESTIMONIALS: Record<string, { names: string[]; roles: string[]; texts: string[] }> = {
+  restaurante: {
+    names: ['Mariana Costa', 'Roberto Alves', 'Camila Ferreira'],
+    roles: ['Cliente fiel', 'Vem toda semana', 'Frequentadora'],
+    texts: [
+      'Os pratos são incríveis e o atendimento acolhedor. Venho toda semana com a família!',
+      'Melhor restaurante da região. Comida saborosa e preço muito justo. Super recomendo!',
+      'Ambiente gostoso e sabor incrível. Meu lugar favorito para levar os amigos.',
+    ],
+  },
+  clinica: {
+    names: ['Fernanda Lima', 'Carlos Mendes', 'Patrícia Souza'],
+    roles: ['Paciente', 'Cliente satisfeito', 'Paciente há 3 anos'],
+    texts: [
+      'Atendimento humanizado e profissional. Me senti acolhida desde a primeira consulta.',
+      'Equipe muito competente e atenciosa. Tirou todas as minhas dúvidas com paciência.',
+      'Confio 100% nessa equipe. Tratamento eficaz e acompanhamento exemplar.',
+    ],
+  },
+  farmacia: {
+    names: ['Luciana Martins', 'André Santos', 'Beatriz Oliveira'],
+    roles: ['Cliente frequente', 'Morador do bairro', 'Cliente satisfeita'],
+    texts: [
+      'Atendimento excelente e sempre encontro tudo que preciso. Melhor farmácia!',
+      'Preços justos e equipe que realmente ajuda. Não troco por nenhuma outra.',
+      'Rapidez no atendimento e produtos de qualidade. Recomendo a todos!',
+    ],
+  },
+  loja: {
+    names: ['Juliana Ramos', 'Thiago Pereira', 'Amanda Costa'],
+    roles: ['Compradora fiel', 'Cliente satisfeito', 'Seguidora assídua'],
+    texts: [
+      'Produtos de qualidade e entrega super rápida. Compro sempre aqui!',
+      'Atendimento incrível pelo WhatsApp. Produto chegou perfeito, no prazo.',
+      'Variedade incrível e preços ótimos. Minha loja preferida sem dúvida!',
+    ],
+  },
+  beleza: {
+    names: ['Isabela Rocha', 'Carla Nunes', 'Patrícia Lima'],
+    roles: ['Cliente VIP', 'Fã dos serviços', 'Mensalista'],
+    texts: [
+      'Saio sempre renovada daqui! Profissionais incríveis e resultado impecável.',
+      'Ambiente lindo e atendimento personalizado. Vale cada centavo!',
+      'Minha autoestima agradece. Profissionais que realmente entendem do que fazem.',
+    ],
+  },
+  advocacia: {
+    names: ['Marcos Vieira', 'Sandra Torres', 'Paulo Henrique'],
+    roles: ['Cliente', 'Empresária', 'Cliente da casa'],
+    texts: [
+      'Profissional competente e transparente. Resolveu meu caso com eficiência total.',
+      'Atendimento ágil e consultoria precisa. Minha empresa está em boas mãos.',
+      'Explicou tudo com clareza e me passou segurança. Recomendo muito!',
+    ],
+  },
+  academia: {
+    names: ['Rafael Sousa', 'Gabriela Reis', 'Lucas Almeida'],
+    roles: ['Aluno há 2 anos', 'Transformação real', 'Personal training'],
+    texts: [
+      'Equipe motivada e equipamentos de primeira. Meus resultados surpreenderam!',
+      'Ambiente acolhedor e instrutores dedicados. Mudou minha qualidade de vida.',
+      'Metodologia eficiente e acompanhamento próximo. Indico para todo mundo!',
+    ],
+  },
+  educacao: {
+    names: ['Vitória Santos', 'Eduardo Lima', 'Clara Mendes'],
+    roles: ['Ex-aluna', 'Pai de aluno', 'Estudante'],
+    texts: [
+      'Metodologia de ensino excelente. Aprendi mais aqui do que em anos de estudo sozinha!',
+      'Meu filho evoluiu muito. Professores atenciosos e suporte incrível.',
+      'Conteúdo didático e professores que realmente se importam com seu progresso.',
+    ],
+  },
+};
+
+function testimonialsSection(pal: Palette, dark = false, industryId = 'generico'): string {
+  const seg = SEGMENT_TESTIMONIALS[industryId] ?? null;
+  const names = seg?.names ?? ['Ana Silva', 'Carlos Mendes', 'Fernanda Lima'];
+  const roles = seg?.roles ?? ['Cliente fiel', 'Parceiro', 'Cliente satisfeita'];
+  const texts = seg?.texts ?? [
     'Atendimento impecável e resultado acima das expectativas. Recomendo a todos!',
     'Profissionalismo e qualidade em cada detalhe. Voltarei com certeza.',
     'Equipe atenciosa, pontual e comprometida com o cliente. Nota 10!',
@@ -382,9 +462,13 @@ img{max-width:100%;display:block}
 /* wa float */
 .wa-float{position:fixed;bottom:24px;right:24px;z-index:999;width:56px;height:56px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(22,163,74,.55);transition:transform .2s;color:#fff}
 .wa-float:hover{transform:scale(1.1)}
+/* hamburger */
+.nav-burger{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:inherit;padding:4px 8px;line-height:1;flex-shrink:0}
 @media(max-width:768px){
   .container{padding:0 16px}
-  .nav-links{display:none!important}
+  .nav-burger{display:flex!important;align-items:center}
+  .nav-links:not(.open){display:none!important}
+  .nav-links{position:absolute!important;top:100%!important;left:0!important;right:0!important;flex-direction:column!important;background:var(--surface,#fff)!important;padding:16px 24px!important;gap:8px!important;z-index:200!important;border-bottom:1px solid rgba(0,0,0,.1)!important;box-shadow:0 8px 24px rgba(0,0,0,.12)!important}
   .nav-icons{margin-left:auto!important}
   .logo{font-size:1.1rem!important}
   .hero-split{flex-direction:column!important}
@@ -578,17 +662,17 @@ ${renderNav(variation ?? 'modern', name, [
 
 <div class="tabs-bar">
   <div class="container tabs-inner">
-    ${['Todos', 'Pratos', 'Bebidas', 'Sobremesas', 'Combos'].map((t, i) => `<span class="tab-pill${i === 0 ? ' active' : ''}">${t}</span>`).join('')}
+    ${['Todos', 'Pratos', 'Bebidas', 'Sobremesas', 'Combos'].map((t, i) => `<span class="tab-pill${i === 0 ? ' active' : ''}" onclick="document.querySelectorAll('.tab-pill').forEach(function(p){p.classList.remove('active')});this.classList.add('active')">${t}</span>`).join('')}
   </div>
 </div>
 
 ${renderServices(variation ?? 'modern', services, pal, 'Qualidade em cada detalhe')}
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true, industryId) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, true, industryId, waLink) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, true, industryId, images?.gallery) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, true, industryId) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
@@ -609,7 +693,7 @@ ${mods.includes('faq') ? faqSection(pal, ai) : ''}
   </div>
 </footer>
 
-${mods.includes('contato') ? waFloat(waLink) : ''}
+${b.whatsapp_number ? waFloat(waLink) : ''}
 </body>
 </html>`;
 }
@@ -805,10 +889,10 @@ ${renderServices(variation ?? 'modern', services, pal, `Por que escolher a ${nam
 </section>
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId, waLink) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, false, industryId, images?.gallery) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, false, industryId) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
@@ -829,7 +913,7 @@ ${mods.includes('faq') ? faqSection(pal, ai) : ''}
   </div>
 </footer>
 
-${mods.includes('contato') ? waFloat(waLink) : ''}
+${b.whatsapp_number ? waFloat(waLink) : ''}
 </body>
 </html>`;
 }
@@ -961,17 +1045,17 @@ ${renderHero({
 
 <div class="filter-bar">
   <div class="container filter-row">
-    ${filters.map((f, i) => `<span class="filter-pill${i === 0 ? ' active' : ''}">${f}</span>`).join('')}
+    ${filters.map((f, i) => `<span class="filter-pill${i === 0 ? ' active' : ''}" onclick="document.querySelectorAll('.filter-pill').forEach(function(p){p.classList.remove('active')});this.classList.add('active')">${f}</span>`).join('')}
   </div>
 </div>
 
 ${renderServices(variation ?? 'modern', services, pal, 'Nossos diferenciais')}
 
 ${mods.includes('sobre') ? aboutSection(description, pal, ai) : ''}
-${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId) : ''}
+${mods.includes('servicos') ? catalogSection(b.catalog_products, pal, false, industryId, waLink) : ''}
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
 ${mods.includes('galeria') ? gallerySection(pal, false, industryId, images?.gallery) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, false) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, false, industryId) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-band">
@@ -981,10 +1065,6 @@ ${mods.includes('faq') ? faqSection(pal, ai) : ''}
     <a href="${waLink}" target="_blank" class="btn-wa-inline" style="margin:0 auto">
       ${WA_SVG} Falar pelo WhatsApp
     </a>
-    <div class="newsletter">
-      <input type="email" placeholder="Seu melhor e-mail" />
-      <button>Assinar</button>
-    </div>
   </div>
 </section>
 
@@ -995,7 +1075,7 @@ ${mods.includes('faq') ? faqSection(pal, ai) : ''}
   </div>
 </footer>
 
-${mods.includes('contato') ? waFloat(waLink) : ''}
+${b.whatsapp_number ? waFloat(waLink) : ''}
 </body>
 </html>`;
 }
@@ -1210,7 +1290,7 @@ ${mods.includes('galeria') ? `
 </section>` : ''}
 
 ${mods.includes('contato') ? hoursSection(b.business_hours, waLink, pal) : ''}
-${mods.includes('depoimentos') ? testimonialsSection(pal, true) : ''}
+${mods.includes('depoimentos') ? testimonialsSection(pal, true, industryId) : ''}
 ${mods.includes('faq') ? faqSection(pal, ai) : ''}
 
 <section id="contato" class="cta-section">
@@ -1237,7 +1317,7 @@ ${mods.includes('faq') ? faqSection(pal, ai) : ''}
   </div>
 </footer>
 
-${mods.includes('contato') ? waFloat(waLink) : ''}
+${b.whatsapp_number ? waFloat(waLink) : ''}
 </body>
 </html>`;
 }
@@ -1279,7 +1359,7 @@ export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariat
         seo_keywords: [businessName || '', fallbackSource.label],
       };
 
-  const name = businessName || formatBusinessName(briefing.domain, briefing.segment);
+  const name = briefing.logo_name || businessName || formatBusinessName(briefing.domain, briefing.segment);
   const waLink = whatsappLink(briefing.whatsapp_number);
   // For unknown segments, use the AI-researched template if available
   const tpl = briefing.template && briefing.template !== 'portfolio'
@@ -1294,7 +1374,7 @@ export function generateSiteHTML(briefing: SiteBriefing, variation?: StyleVariat
 }
 
 export function generateReadme(briefing: SiteBriefing): string {
-  const name = formatBusinessName(briefing.domain, briefing.segment);
+  const name = briefing.logo_name || formatBusinessName(briefing.domain, briefing.segment);
   const domain = briefing.domain ? `${briefing.domain}.com.br` : 'seu-dominio.com.br';
   return `SitePronto — ${name}
 ${'='.repeat(50)}

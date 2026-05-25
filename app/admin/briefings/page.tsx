@@ -44,7 +44,7 @@ async function getBriefings() {
   const supabase = createClient(url, key);
   const { data, error } = await supabase
     .from('briefings')
-    .select('id, segment, goal, template, palette, payment_status, created_at, domain')
+    .select('id, segment, goal, template, palette, payment_status, deployed_at, referral_code, created_at, domain')
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -131,7 +131,8 @@ export default async function AdminBriefingsPage() {
                 <th className="px-5 py-3 font-semibold">Segmento</th>
                 <th className="px-5 py-3 font-semibold">Template</th>
                 <th className="px-5 py-3 font-semibold">Domínio</th>
-                <th className="px-5 py-3 font-semibold">Status</th>
+                <th className="px-5 py-3 font-semibold">Pgto</th>
+                <th className="px-5 py-3 font-semibold">Deploy</th>
                 <th className="px-5 py-3 font-semibold">Data</th>
                 <th className="px-5 py-3 font-semibold"></th>
               </tr>
@@ -159,9 +160,18 @@ export default async function AdminBriefingsPage() {
                   <td className="px-5 py-3">
                     <StatusBadge status={b.payment_status} />
                   </td>
+                  <td className="px-5 py-3">
+                    {(b as Record<string, unknown>).deployed_at ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-label-sm font-semibold text-green-700">
+                        <CheckCircle2 size={11} /> {formatDate(String((b as Record<string, unknown>).deployed_at))}
+                      </span>
+                    ) : (
+                      <span className="text-label-sm text-on-surface-variant italic">Pendente</span>
+                    )}
+                  </td>
                   <td className="px-5 py-3 text-on-surface-variant">{formatDate(b.created_at)}</td>
                   <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Link
                         href={`/admin/preview/${b.id}`}
                         className="inline-flex items-center gap-1.5 rounded-xl bg-surface-med px-3 py-1.5 text-label-sm font-semibold text-on-surface transition hover:bg-surface-high"
@@ -182,6 +192,15 @@ export default async function AdminBriefingsPage() {
                       >
                         <Download size={13} /> ZIP
                       </a>
+                      {!(b as Record<string, unknown>).deployed_at && b.payment_status === 'approved' && (
+                        <a
+                          href={`/api/admin/mark-deployed/${b.id}`}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-green-600 px-3 py-1.5 text-label-sm font-semibold text-white transition hover:bg-green-500"
+                          title="Marcar como publicado"
+                        >
+                          <CheckCircle2 size={13} /> Publicado
+                        </a>
+                      )}
                     </div>
                   </td>
                 </tr>

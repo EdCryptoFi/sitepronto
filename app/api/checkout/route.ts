@@ -4,11 +4,33 @@ import { insertBriefing } from '@/lib/supabase/client';
 import { checkRateLimit, getIp } from '@/lib/rate-limit';
 import { createClient } from '@supabase/supabase-js';
 
-const ALLOWED_SEGMENTS = ['restaurante', 'clinica', 'advocacia', 'loja', 'beleza', 'educacao', 'servicos', 'outro'];
+async function getSitePrice(): Promise<number> {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return 300;
+    const supabase = createClient(url, key);
+    const { data } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'site_price')
+      .single();
+    const parsed = parseInt(data?.value ?? '300', 10);
+    return isNaN(parsed) || parsed < 1 ? 300 : parsed;
+  } catch {
+    return 300;
+  }
+}
+
+const ALLOWED_SEGMENTS = [
+  'restaurante', 'clinica', 'advocacia', 'loja', 'beleza', 'educacao', 'servicos',
+  'veterinaria', 'petshop', 'academia', 'imobiliaria', 'contabilidade',
+  'tecnologia', 'farmacia', 'turismo', 'transporte', 'fotografia', 'outro',
+];
 const ALLOWED_GOALS = ['whatsapp', 'vender', 'agendar', 'portfolio'];
 const ALLOWED_MATERIALS = ['complete', 'partial', 'none'];
 const ALLOWED_PALETTES = ['azul-editorial', 'verde-servico', 'vinho-premium', 'minimal', 'vibrant', 'corporate', 'nature', 'tech', 'elegant'];
-const ALLOWED_TEMPLATES = ['restaurant', 'farmacy', 'store', 'portfolio'];
+const ALLOWED_TEMPLATES = ['modern', 'classic', 'bold', 'restaurant', 'farmacy', 'store', 'portfolio'];
 const ALLOWED_MODULES = ['whatsapp', 'catalogo', 'agendamento', 'portfolio', 'blog', 'servicos', 'sobre', 'contato', 'galeria', 'depoimentos', 'faq'];
 const ALLOWED_DOMAIN_CHOICES = ['new', 'later'];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -29,6 +51,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    const sitePrice = await getSitePrice();
 
     // Fast-path: existing draft briefingId — just create MP preference
     if (body.briefingId && typeof body.briefingId === 'string' && UUID_RE.test(body.briefingId)) {
@@ -46,7 +69,7 @@ export async function POST(request: NextRequest) {
           const paymentTitle = existing.domain ? `Site Pronto - ${existing.domain}.com.br` : 'Site Pronto';
           const paymentPreference = await createPaymentPreference({
             title: paymentTitle,
-            price: 300,
+            price: sitePrice,
             quantity: 1,
             payer_email: typeof body.payerEmail === 'string' ? body.payerEmail.slice(0, 254) : undefined,
             briefingId: existing.id,
@@ -116,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     const paymentPreference = await createPaymentPreference({
       title: paymentTitle,
-      price: 300,
+      price: sitePrice,
       quantity: 1,
       payer_email: typeof body.payerEmail === 'string' ? truncate(body.payerEmail, 254) : undefined,
       briefingId: briefing.id,
