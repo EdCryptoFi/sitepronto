@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ThemeProvider, ThemeScript } from '@/lib/theme-context';
 import { QuizProvider } from '@/lib/quiz-context';
 import ReferralTracker from '@/components/ReferralTracker';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import './globals.css';
 
 const SITE_URL = 'https://sitepronto.com.br';
@@ -123,6 +124,7 @@ export default function RootLayout({
             ]),
           }}
         />
+        <GoogleAnalytics />
         <ReferralTracker />
         <QuizProvider>
           <ThemeProvider>{children}</ThemeProvider>

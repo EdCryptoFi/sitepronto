@@ -78,27 +78,27 @@ export default function Home() {
               </span>
 
               <h1 className="text-5xl font-extrabold tracking-[-0.02em] text-on-surface md:text-display-md">
-                Seu site pronto hoje.{' '}
+                A IA cria seu site em{' '}
                 <span className="bg-gradient-primary bg-clip-text text-transparent">
-                  Sem mensalidade.
+                  60 segundos.
                 </span>{' '}
-                Sem complicação.
+                Sem mensalidade.
               </h1>
 
               <p className="mt-6 max-w-xl text-body-lg text-on-surface-variant">
-                Responda 3 perguntas e a gente monta a estrutura ideal do seu site — do layout ao{' '}
-                <span className="font-semibold text-on-surface">cadeado de segurança</span>,{' '}
-                publicado em até 24h.
+                Digite o nome do seu negocio e a IA gera textos, imagens e layout completo — do{' '}
+                <span className="font-semibold text-on-surface">cadeado de seguranca</span>{' '}
+                ao design responsivo, publicado em ate 24h.
               </p>
 
               <div className="mt-10 flex flex-col items-start gap-3">
                 <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                   <a href="/quiz" className="btn-primary text-base">
-                    Criar meu site agora <ArrowRight size={18} />
+                    Criar meu site gratis <ArrowRight size={18} />
                   </a>
-                  <a href="#precos" className="text-label-md font-semibold text-on-surface hover:text-primary transition-colors">
-                    Ver preços ↓
-                  </a>
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-label-md font-bold text-green-700 dark:bg-green-900/40 dark:text-green-400">
+                    R$ 225 no Pix (-25%)
+                  </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-label-md text-on-surface-variant">
                   <span className="flex items-center gap-1.5">
@@ -106,7 +106,10 @@ export default function Home() {
                     Garantia de 7 dias
                   </span>
                   <span className="text-outline-variant">·</span>
-                  <span className="font-semibold text-on-surface">R$ 300 único</span>
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-primary" />
+                    Preview gratis antes de pagar
+                  </span>
                   <span className="text-outline-variant">·</span>
                   <span>Sem mensalidade</span>
                 </div>
@@ -171,14 +174,14 @@ export default function Home() {
       <section id="como-funciona" className="section-tint rounded-t-[48px] px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 max-w-2xl">
-            <span className="eyebrow mb-4">Três passos</span>
+            <span className="eyebrow mb-4">Dois passos</span>
             <h2 className="text-headline-lg font-bold tracking-[-0.015em]">
               Do zero ao{' '}
               <em className="not-italic text-primary">Publicar</em>{' '}
-              em poucos minutos.
+              em 60 segundos.
             </h2>
             <p className="mt-4 text-body-md text-on-surface-variant">
-              A gente monta a estrutura ideal do seu site — você só escolhe o visual e confirma.
+              A IA detecta seu segmento, gera textos, busca imagens e monta o layout — voce so confere e publica.
             </p>
           </div>
 
@@ -186,20 +189,20 @@ export default function Home() {
             <StepCard
               index="01"
               icon={<LayoutTemplate size={22} />}
-              title="Segmento · Objetivo · Materiais"
-              body="Três perguntas objetivas. A estrutura ideal do seu site aparece na hora — sem planilha, sem termo técnico."
+              title="Digite o nome do seu negocio"
+              body="Um campo. A IA detecta automaticamente o segmento, escolhe cores, template e escreve textos persuasivos."
             />
             <StepCard
               index="02"
               icon={<Sparkles size={22} />}
-              title="Escolha o visual e ajuste"
-              body="Selecione cores, template e módulos. Veja o resultado em tempo real antes de pagar qualquer coisa."
+              title="Confira o preview completo"
+              body="Veja seu site pronto com textos, imagens e layout profissional. Personalize cores e template se quiser."
             />
             <StepCard
               index="03"
               icon={<Rocket size={22} />}
-              title="Publique e apareça no Google"
-              body="Pagamento seguro, seu site no ar em até 24h e já otimizado para aparecer nas buscas."
+              title="Pague com Pix e publique"
+              body="QR Code Pix direto na tela, sem redirecionamento. Site publicado automaticamente em instantes."
             />
           </div>
         </div>
@@ -269,20 +272,21 @@ export default function Home() {
 
           <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
             <PriceCard
-              badge="À vista"
-              price="R$ 300"
-              unit="único"
-              helper="Pagamento pelo Pix ou cartão"
+              badge="Pix (25% OFF)"
+              price="R$ 225"
+              unit="unico"
+              helper="De R$ 300 — economize R$ 75 no Pix"
               cta="Pagar com Pix e publicar hoje"
               features={[
-                'Site publicado em até 24h',
+                'Preview gratis gerado por IA antes de pagar',
+                'Site publicado automaticamente apos pagamento',
                 'Hospedagem inclusa por 12 meses',
-                'HTTPS (cadeado de segurança)',
+                'HTTPS (cadeado de seguranca)',
                 'Funciona no celular e no Google',
-                'Suporte prioritário por 30 dias',
+                'Suporte prioritario por 30 dias',
                 'Garantia de 7 dias ou dinheiro de volta',
               ]}
-              savings="Economize R$ 75 no Pix"
+              savings="Melhor preco"
               highlighted
             />
             <PriceCard

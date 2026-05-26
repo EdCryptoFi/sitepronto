@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
   const logoName = truncate(b.logoName, 200);
   const logoPreview = truncate(b.logoPreview, 600000); // base64 — max ~450 KB
   const whatsappNumber = truncate(b.whatsappNumber, 20);
+  const emailAddr = typeof b.email === 'string' ? b.email.trim().slice(0, 254) : '';
   const referralCode = typeof b.referralCode === 'string' && /^[A-Z0-9_-]{3,30}$/.test(b.referralCode.toUpperCase())
     ? b.referralCode.toUpperCase()
     : null;
@@ -156,6 +157,7 @@ export async function POST(req: NextRequest) {
       content_notes: contentNotes,
       business_hours: businessHours || null,
       logo_name: logoName || null,
+      email: emailAddr || null,
       catalog_products: portfolioItems,
       payment_status: 'pending',
       referral_code: referralCode,

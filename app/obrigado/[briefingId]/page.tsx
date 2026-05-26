@@ -36,36 +36,6 @@ const MODULE_LABELS: Record<string, string> = {
   servicos: 'Lista de serviços', portfolio: 'Portfólio', blog: 'Blog',
 };
 
-const SEGMENT_LABELS: Record<string, string> = {
-  restaurante: 'Restaurante', loja: 'Loja', clinica: 'Clínica',
-  servicos: 'Prestação de Serviços', educacao: 'Portfólio / Educação',
-  veterinaria: 'Clínica Veterinária', petshop: 'Pet Shop',
-  academia: 'Academia / Fitness', imobiliaria: 'Imobiliária',
-  contabilidade: 'Contabilidade', tecnologia: 'Tecnologia',
-  farmacia: 'Farmácia', turismo: 'Turismo / Pousada',
-  transporte: 'Transporte / Logística', fotografia: 'Fotografia',
-  outro: 'Negócio',
-};
-
-const PALETTE_LABELS: Record<string, string> = {
-  'azul-editorial': 'Azul Editorial', 'verde-servico': 'Verde Serviço',
-  'vinho-premium': 'Vinho Premium', minimal: 'Minimalista',
-  vibrant: 'Vibrante', corporate: 'Corporativo', nature: 'Nature',
-  tech: 'Tech Dark', elegant: 'Elegante',
-};
-
-const TEMPLATE_LABELS: Record<string, string> = {
-  modern: 'Moderno', classic: 'Clássico', bold: 'Arrojado',
-};
-
-const MODULE_LABELS: Record<string, string> = {
-  galeria: 'Galeria de fotos', faq: 'Perguntas frequentes',
-  sobre: 'Seção Sobre', depoimentos: 'Depoimentos',
-  contato: 'Formulário de contato', catalogo: 'Catálogo de produtos',
-  agendamento: 'Agendamento online', whatsapp: 'Botão WhatsApp',
-  servicos: 'Lista de serviços', portfolio: 'Portfólio', blog: 'Blog',
-};
-
 export default async function ObrigadoPage({ params }: { params: Promise<{ briefingId: string }> }) {
   const { briefingId } = await params;
 

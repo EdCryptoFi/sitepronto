@@ -27,12 +27,12 @@ function FailureContent() {
       });
       const data = await res.json();
       if (!res.ok || !data.payment_preference?.init_point) {
-        router.push(`/quiz/etapa-4?id=${briefingId}`);
+        router.push(`/quiz/preview?id=${briefingId}`);
         return;
       }
       window.location.href = data.payment_preference.init_point;
     } catch {
-      router.push(`/quiz/etapa-4?id=${briefingId}`);
+      router.push(`/quiz/preview?id=${briefingId}`);
     }
   };
 
@@ -81,7 +81,7 @@ function FailureContent() {
               Tentar pagar novamente <ArrowLeft size={16} className="ml-2 rotate-180" />
             </button>
           ) : (
-            <a href={`/quiz/etapa-4?id=${briefingId}`} className="btn-primary">
+            <a href={`/quiz/preview?id=${briefingId}`} className="btn-primary">
               Ir para o preview do site <ArrowLeft size={16} className="ml-2 rotate-180" />
             </a>
           )}

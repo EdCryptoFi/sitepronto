@@ -174,8 +174,8 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (!state.businessName && !state.objective) return;
-    const { logoPreview, briefingId, paymentStatus, email, termsAccepted, ...toSave } = state;
+    if (!state.businessName && !state.objective && !state.email) return;
+    const { logoPreview, briefingId, paymentStatus, termsAccepted, ...toSave } = state;
     localStorage.setItem('sitepronto-quiz-v2', JSON.stringify(toSave));
   }, [
     state.businessName, state.objective, state.logoName,
@@ -183,6 +183,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({ children
     state.description, state.domain, state.domainChoice,
     state.portfolioItems, state.businessHours,
     state.whatsappNumber, state.catalogProducts,
+    state.email,
   ]);
 
   return (
